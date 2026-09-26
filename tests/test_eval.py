@@ -50,3 +50,12 @@ def test_passes_finds_the_car_crossing_the_crash_site() -> None:
     # car 2 starts 100 m ahead at 50 m/s: it reaches 500 m of its lap at t = 8 + 20 k s
     assert [p["t"] for p in two] == [68.0] and two[0]["driver"] == "TWO"
     assert two[0]["pct_of_own_normal"] == 100.0
+
+
+def test_numbers_md_builds_from_the_committed_charts() -> None:
+    from src.eval.numbers import build
+    text = build()
+    assert "replay of historical FastF1 data" in text
+    for section in ("## Detection, headline", "## Latency from crash onset", "## Risk model", "## Case studies",
+                    "## Holdout"):
+        assert section in text

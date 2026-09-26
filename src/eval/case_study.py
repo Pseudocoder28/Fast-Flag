@@ -187,6 +187,8 @@ def crashes(rid: str) -> tuple[list[dict], str]:
         if recs is not None:
             our_esc = next((r for r in recs if r["flag"] in ESCALATIONS and r["t"] >= onset["t"] - ALERT_BEFORE_S
                             and (not r.get("msector") or match(r["msector"]))), None)
+        no_esc = (rec_source if recs is None
+                  else "none: our race control engine made no VSC, SC or red recommendation for this crash")
         a_t = alert["t"] if alert else None
         common = (frame, cars, crash_dist, length, names)
         out.append({
@@ -197,7 +199,7 @@ def crashes(rid: str) -> tuple[list[dict], str]:
                 "our_first_alert": {"t": a_t, "type": alert["type"], "evidence": alert["evidence"]} if alert else None,
                 "official_yellow": yellow,
                 "our_escalation_recommendation": ({"t": our_esc["t"], "flag": our_esc["flag"]} if our_esc
-                                                  else (rec_source if recs is None else None)),
+                                                  else no_esc),
                 "official_escalation": {"t": first_esc["t"], "flag": first_esc["flag"]},
                 "all_official_messages": [{"t": m["t"], "flag": m["flag"], "message": m["message"]}
                                           for m in inc.messages],
@@ -207,7 +209,7 @@ def crashes(rid: str) -> tuple[list[dict], str]:
                 window("W2 our first alert -> official yellow", a_t, yellow, *common),
                 window("W3 our escalation recommendation -> official escalation (headline)",
                        our_esc["t"] if our_esc else None, first_esc["t"], *common,
-                       note="" if our_esc else rec_source),
+                       note="" if our_esc else no_esc),
                 window("context: official yellow -> official escalation (not a counterfactual)",
                        yellow, first_esc["t"], *common),
             ],
@@ -235,17 +237,18 @@ def plot(c: dict, path: Path) -> None:
     ax.set_facecolor(SURFACE)
     washes = {"W1": (WASH, 1.0), "W2": (ORANGE, 0.12), "W3": (BLUE, 0.12), "context:": ("#f6f5f2", 1.0)}
     narrow_count = 0                                   # narrow windows get their labels stacked, left of the window
-    for w in c["windows"]:
+    # context first, underneath; the counterfactual windows W1 to W3 are drawn on top of it
+    for w in sorted(c["windows"], key=lambda w: not w["name"].startswith("context")):
         if not w["seconds"] or w["seconds"] <= 0:
             continue
         key = w["name"].split()[0]
         color, alpha = washes[key]
         a, b = rel(w["start"]), rel(w["end"])
-        ax.axvspan(a, b, color=color, alpha=alpha, lw=0, zorder=0)
+        ax.axvspan(a, b, color=color, alpha=alpha, lw=0, zorder=0 if key == "context:" else 0.5)
         label = f"after the yellow: {w['cars_passing']} cars" if key == "context:" else f"{key}: {w['cars_passing']} cars"
         narrow = b - a < 0.08 * (x_max + 5)
-        y = 123 - 9 * narrow_count if narrow else 123
-        narrow_count += narrow
+        y = 113 if key == "context:" else (123 - 9 * narrow_count if narrow else 123)
+        narrow_count += narrow and key != "context:"
         ax.text(a - 0.4 if narrow else (a + b) / 2, y, label, ha="right" if narrow else "center", va="bottom",
                 fontsize=8.5, color=INK2)
     ax.axhline(100, color=GRID, lw=1, zorder=1)
@@ -292,7 +295,12 @@ def plot(c: dict, path: Path) -> None:
     ax.tick_params(length=0, labelsize=8, colors=INK2)
     fig.text(0.01, 0.985, f"{c['race'].replace('_', ' ')}: {c['driver']} (car {c['car']}) crash, who drove past "
              "before the flags", fontsize=12.5, weight="bold", color=INK, va="top")
-    pending = "" if isinstance(rec, dict) else " Our escalation recommendation and W3 are pending the race control engine."
+    if isinstance(rec, dict):
+        pending = ""
+    elif str(rec).startswith("pending"):
+        pending = " Our escalation recommendation and W3 are pending the race control engine."
+    else:
+        pending = " Our race control engine made no VSC, SC or red recommendation for this crash, so W3 is empty."
     fig.text(0.01, 0.945, "Replay of historical FastF1 data. Each dot is a car passing the spot where the crashed car "
              "came to rest: blue and named inside W1 to W3, grey after the official yellow." + pending,
              fontsize=8.5, color=INK2, va="top", wrap=True)

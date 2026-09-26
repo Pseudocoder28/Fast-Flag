@@ -5,7 +5,7 @@
   "races": {
     "2021_Azerbaijan": {
       "out_of_sample": "Out of sample twice: our models never saw this race, and 2021 cars ran under different technical rules from our 2023 to 2026 training data.",
-      "recommendation_source": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main",
+      "recommendation_source": "src.racecontrol.engine.RaceControl",
       "crashes": [
         {
           "race": "2021_Azerbaijan",
@@ -24,7 +24,10 @@
               "evidence": "lost 216 km/h in 1 s (271 to 0 km/h), harder than braking"
             },
             "official_yellow": 5277.99,
-            "our_escalation_recommendation": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main",
+            "our_escalation_recommendation": {
+              "t": 5279.25,
+              "flag": "SC"
+            },
             "official_escalation": {
               "t": 5311.99,
               "flag": "SC"
@@ -68,12 +71,69 @@
             },
             {
               "name": "W3 our escalation recommendation -> official escalation (headline)",
-              "start": null,
+              "start": 5279.25,
               "end": 5311.99,
-              "seconds": null,
-              "cars_passing": null,
-              "passes": [],
-              "note": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main"
+              "seconds": 32.74,
+              "cars_passing": 7,
+              "passes": [
+                {
+                  "car": "16",
+                  "driver": "LEC",
+                  "t": 5280.19,
+                  "speed_kmh": 317.0,
+                  "own_normal_kmh": 314.0,
+                  "pct_of_own_normal": 101.0
+                },
+                {
+                  "car": "5",
+                  "driver": "VET",
+                  "t": 5281.52,
+                  "speed_kmh": 311.4,
+                  "own_normal_kmh": 321.2,
+                  "pct_of_own_normal": 96.9
+                },
+                {
+                  "car": "22",
+                  "driver": "TSU",
+                  "t": 5285.75,
+                  "speed_kmh": 305.8,
+                  "own_normal_kmh": 312.4,
+                  "pct_of_own_normal": 97.9
+                },
+                {
+                  "car": "4",
+                  "driver": "NOR",
+                  "t": 5287.86,
+                  "speed_kmh": 283.3,
+                  "own_normal_kmh": 313.6,
+                  "pct_of_own_normal": 90.3
+                },
+                {
+                  "car": "77",
+                  "driver": "BOT",
+                  "t": 5289.7,
+                  "speed_kmh": 274.8,
+                  "own_normal_kmh": 313.0,
+                  "pct_of_own_normal": 87.8
+                },
+                {
+                  "car": "3",
+                  "driver": "RIC",
+                  "t": 5297.3,
+                  "speed_kmh": 302.2,
+                  "own_normal_kmh": 312.0,
+                  "pct_of_own_normal": 96.9
+                },
+                {
+                  "car": "55",
+                  "driver": "SAI",
+                  "t": 5308.91,
+                  "speed_kmh": 135.8,
+                  "own_normal_kmh": 309.6,
+                  "pct_of_own_normal": 43.9
+                }
+              ],
+              "note": ""
             },
             {
               "name": "context: official yellow -> official escalation (not a counterfactual)",
@@ -168,7 +228,7 @@
               "evidence": "lost 169 km/h in 1 s (267 to 0 km/h), with brakes on"
             },
             "official_yellow": 7297.99,
-            "our_escalation_recommendation": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main",
+            "our_escalation_recommendation": "none: our race control engine made no VSC, SC or red recommendation for this crash",
             "official_escalation": {
               "t": 7366.99,
               "flag": "SC"
@@ -271,7 +331,7 @@
               "seconds": null,
               "cars_passing": null,
               "passes": [],
-              "note": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main"
+              "note": "none: our race control engine made no VSC, SC or red recommendation for this crash"
             },
             {
               "name": "context: official yellow -> official escalation (not a counterfactual)",
