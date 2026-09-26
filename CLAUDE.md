@@ -6,7 +6,7 @@ Short rules and contracts. `PROJECT_BRIEF.md` is the single source of truth for 
 
 - **A = Naman.** Claude Max account, Mac, main builder. Owns `src/ingest/`, `src/replay/` (including the FastAPI server and mock server), `src/detect/`, `src/predict/`, `src/eval/`, `fixtures/`, `docs/charts/` and `requirements-a.txt`. Starts with `docs/KICKOFF.md`, then follows `docs/session_a.md`.
 - **B = Ishaan.** Claude Pro account. Owns `src/racecontrol/`, `src/bridge/`, `dashboard/`, `firmware/`, `requirements-b.txt`, the pitch slides and the demo script. Follows `docs/session_ishaan.md`.
-- **Shared, changed only by agreement:** `CLAUDE.md`, `PROJECT_BRIEF.md`, `docs/` (except `docs/charts/`), `requirements.txt`, `tests/test_contracts.py`, `.gitignore`, `README.md`.
+- **Shared, changed only by agreement:** `CLAUDE.md`, `PROJECT_BRIEF.md`, `docs/` (except `docs/charts/`), `requirements.txt`, `tests/test_contracts.py`, `pytest.ini`, `.gitignore`, `README.md`.
 
 ## Hard rules
 
