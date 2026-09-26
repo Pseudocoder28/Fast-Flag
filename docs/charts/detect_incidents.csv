@@ -1,4 +1,10 @@
 race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
+2023_Australian,anomaly_advisory,3764.18,SC,[5],False,False,,,
+2023_Australian,anomaly_advisory,4390.18,RED,[9],False,False,,,
+2023_Australian,anomaly_advisory,6454.18,VSC,[],False,False,,,
+2023_Australian,anomaly_advisory,9389.18,SC,[4],False,False,,,
+2023_Australian,anomaly_advisory,9605.18,RED,[],False,False,,,
+2023_Australian,anomaly_advisory,10752.18,RED,"[2, 4]",False,False,,,
 2023_Australian,detectors,3764.18,SC,[5],True,False,2.43,IMPACT,"lost 95 km/h in 1 s (95 to 0 km/h), with brakes on"
 2023_Australian,detectors,4390.18,RED,[9],True,False,2.43,IMPACT,"lost 145 km/h in 1 s (180 to 33 km/h), with brakes on"
 2023_Australian,detectors,6454.18,VSC,[],True,False,22.43,STOPPED,"speed 75 km/h vs ref 303 km/h, on the racing line"
@@ -11,6 +17,12 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2023_Australian,baseline,9389.18,SC,[4],False,False,,,
 2023_Australian,baseline,9605.18,RED,[],True,False,40.18,STOPPED,speed 38 km/h < 50 km/h
 2023_Australian,baseline,10752.18,RED,"[2, 4]",True,False,-2.82,STOPPED,speed 35 km/h < 50 km/h
+2023_Mexico_City,anomaly_advisory,3755.92,DOUBLE_YELLOW,[3],False,False,,,
+2023_Mexico_City,anomaly_advisory,4084.92,VSC,[],False,False,,,
+2023_Mexico_City,anomaly_advisory,4382.92,YELLOW,[3],False,False,,,
+2023_Mexico_City,anomaly_advisory,6483.92,RED,"[9, 10]",False,False,,,
+2023_Mexico_City,anomaly_advisory,9233.92,DOUBLE_YELLOW,[3],False,False,,,
+2023_Mexico_City,anomaly_advisory,10735.92,YELLOW,"[13, 14]",False,False,,,
 2023_Mexico_City,detectors,3755.92,DOUBLE_YELLOW,[3],True,False,-2.83,IMPACT,"lost 80 km/h in 1 s (95 to 24 km/h), with brakes on"
 2023_Mexico_City,detectors,4084.92,VSC,[],False,False,,,
 2023_Mexico_City,detectors,4382.92,YELLOW,[3],False,False,,,
@@ -23,6 +35,19 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2023_Mexico_City,baseline,6483.92,RED,"[9, 10]",True,False,3.17,STOPPED,speed 9 km/h < 50 km/h
 2023_Mexico_City,baseline,9233.92,DOUBLE_YELLOW,[3],True,False,-1.83,STOPPED,speed 24 km/h < 50 km/h
 2023_Mexico_City,baseline,10735.92,YELLOW,"[13, 14]",True,False,3.67,STOPPED,speed 20 km/h < 50 km/h
+2023_Monaco,anomaly_advisory,3761.02,YELLOW,[7],False,False,,,
+2023_Monaco,anomaly_advisory,4613.02,YELLOW,[3],False,False,,,
+2023_Monaco,anomaly_advisory,4809.02,DOUBLE_YELLOW,[3],False,False,,,
+2023_Monaco,anomaly_advisory,8024.02,YELLOW,[7],False,False,,,
+2023_Monaco,anomaly_advisory,8032.02,DOUBLE_YELLOW,[7],False,False,,,
+2023_Monaco,anomaly_advisory,8074.02,DOUBLE_YELLOW,"[8, 9]",False,False,,,
+2023_Monaco,anomaly_advisory,8150.02,DOUBLE_YELLOW,[8],False,False,,,
+2023_Monaco,anomaly_advisory,8348.02,YELLOW,[17],False,False,,,
+2023_Monaco,anomaly_advisory,8409.02,YELLOW,[8],False,False,,,
+2023_Monaco,anomaly_advisory,8410.02,YELLOW,[15],False,False,,,
+2023_Monaco,anomaly_advisory,8531.02,DOUBLE_YELLOW,[2],False,False,,,
+2023_Monaco,anomaly_advisory,8671.02,DOUBLE_YELLOW,[7],False,False,,,
+2023_Monaco,anomaly_advisory,9421.02,DOUBLE_YELLOW,"[6, 7]",False,False,,,
 2023_Monaco,detectors,3761.02,YELLOW,[7],False,False,,,
 2023_Monaco,detectors,4613.02,YELLOW,[3],False,False,,,
 2023_Monaco,detectors,4809.02,DOUBLE_YELLOW,[3],False,False,,,
@@ -49,6 +74,15 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2023_Monaco,baseline,8531.02,DOUBLE_YELLOW,[2],True,False,-0.23,STOPPED,speed 30 km/h < 50 km/h
 2023_Monaco,baseline,8671.02,DOUBLE_YELLOW,[7],True,False,44.77,STOPPED,speed 42 km/h < 50 km/h
 2023_Monaco,baseline,9421.02,DOUBLE_YELLOW,"[6, 7]",True,False,53.02,STOPPED,speed 36 km/h < 50 km/h
+2024_Canadian,anomaly_advisory,270.0,YELLOW,[2],False,False,,,
+2024_Canadian,anomaly_advisory,800.0,YELLOW,[6],False,False,,,
+2024_Canadian,anomaly_advisory,2435.0,SC,"[3, 4]",False,False,,,
+2024_Canadian,anomaly_advisory,3005.0,YELLOW,[15],False,False,,,
+2024_Canadian,anomaly_advisory,4052.0,YELLOW,[2],False,False,,,
+2024_Canadian,anomaly_advisory,4718.0,YELLOW,[6],False,False,,,
+2024_Canadian,anomaly_advisory,4985.0,YELLOW,[6],False,False,,,
+2024_Canadian,anomaly_advisory,5064.0,SC,"[5, 6]",False,False,,,
+2024_Canadian,anomaly_advisory,6280.0,DOUBLE_YELLOW,"[8, 9]",False,False,,,
 2024_Canadian,detectors,270.0,YELLOW,[2],False,False,,,
 2024_Canadian,detectors,800.0,YELLOW,[6],True,False,2.5,IMPACT,"lost 89 km/h in 1 s (89 to 0 km/h), with brakes on"
 2024_Canadian,detectors,2435.0,SC,"[3, 4]",True,False,3.0,IMPACT,"lost 83 km/h in 1 s (117 to 0 km/h), with brakes on"
@@ -67,12 +101,20 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2024_Canadian,baseline,4985.0,YELLOW,[6],True,False,0.0,STOPPED,speed 0 km/h < 50 km/h
 2024_Canadian,baseline,5064.0,SC,"[5, 6]",True,False,0.5,STOPPED,speed 46 km/h < 50 km/h
 2024_Canadian,baseline,6280.0,DOUBLE_YELLOW,"[8, 9]",True,False,2.25,STOPPED,speed 9 km/h < 50 km/h
+2024_Mexico_City,anomaly_advisory,3380.85,SC,"[3, 4]",False,False,,,
 2024_Mexico_City,detectors,3380.85,SC,"[3, 4]",True,False,0.85,IMPACT,"lost 104 km/h in 1 s (115 to 0 km/h), with brakes on"
 2024_Mexico_City,baseline,3380.85,SC,"[3, 4]",True,False,1.1,STOPPED,speed 3 km/h < 50 km/h
+2024_Qatar,anomaly_advisory,3306.81,SC,[3],False,False,,,
+2024_Qatar,anomaly_advisory,3852.81,DOUBLE_YELLOW,[3],False,False,,,
+2024_Qatar,anomaly_advisory,5974.81,DOUBLE_YELLOW,[2],False,False,,,
+2024_Qatar,anomaly_advisory,6468.81,SC,[],True,False,32.31,ANOMALY,anomaly score 0.76 (threshold 0.75)
+2024_Qatar,anomaly_advisory,7155.81,YELLOW,[18],False,False,,,
+2024_Qatar,anomaly_advisory,7166.81,DOUBLE_YELLOW,[18],False,False,,,
+2024_Qatar,anomaly_advisory,7179.81,SC,[12],False,False,,,
 2024_Qatar,detectors,3306.81,SC,[3],True,False,-2.44,STOPPED,"speed 0 km/h vs ref 172 km/h, on the racing line"
 2024_Qatar,detectors,3852.81,DOUBLE_YELLOW,[3],True,False,1.81,IMPACT,"lost 104 km/h in 1 s (117 to 0 km/h), with brakes on"
 2024_Qatar,detectors,5974.81,DOUBLE_YELLOW,[2],False,False,,,
-2024_Qatar,detectors,6468.81,SC,[],True,False,32.31,ANOMALY,anomaly score 0.76 (threshold 0.75)
+2024_Qatar,detectors,6468.81,SC,[],False,False,,,
 2024_Qatar,detectors,7155.81,YELLOW,[18],False,False,,,
 2024_Qatar,detectors,7166.81,DOUBLE_YELLOW,[18],False,False,,,
 2024_Qatar,detectors,7179.81,SC,[12],True,False,1.56,IMPACT,"lost 166 km/h in 1 s (222 to 67 km/h), with brakes on"
@@ -83,6 +125,19 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2024_Qatar,baseline,7155.81,YELLOW,[18],False,False,,,
 2024_Qatar,baseline,7166.81,DOUBLE_YELLOW,[18],False,False,,,
 2024_Qatar,baseline,7179.81,SC,[12],True,False,-1.19,STOPPED,speed 5 km/h < 50 km/h
+2024_São_Paulo,anomaly_advisory,4390.25,YELLOW,[11],False,False,,,
+2024_São_Paulo,anomaly_advisory,4645.25,DOUBLE_YELLOW,[10],False,False,,,
+2024_São_Paulo,anomaly_advisory,5257.25,DOUBLE_YELLOW,[13],False,False,,,
+2024_São_Paulo,anomaly_advisory,6465.25,DOUBLE_YELLOW,[2],False,False,,,
+2024_São_Paulo,anomaly_advisory,6579.25,VSC,[2],False,False,,,
+2024_São_Paulo,anomaly_advisory,6890.25,SC,[],False,False,,,
+2024_São_Paulo,anomaly_advisory,7143.25,RED,[14],False,False,,,
+2024_São_Paulo,anomaly_advisory,8780.25,DOUBLE_YELLOW,[13],False,False,,,
+2024_São_Paulo,anomaly_advisory,9040.25,DOUBLE_YELLOW,"[7, 8]",False,False,,,
+2024_São_Paulo,anomaly_advisory,9176.25,DOUBLE_YELLOW,[13],False,False,,,
+2024_São_Paulo,anomaly_advisory,9308.25,SC,"[8, 9]",False,False,,,
+2024_São_Paulo,anomaly_advisory,9794.25,DOUBLE_YELLOW,[13],False,False,,,
+2024_São_Paulo,anomaly_advisory,10467.25,DOUBLE_YELLOW,[13],False,False,,,
 2024_São_Paulo,detectors,4390.25,YELLOW,[11],True,False,-2.0,STOPPED,"speed 7 km/h vs ref 91 km/h, on the racing line"
 2024_São_Paulo,detectors,4645.25,DOUBLE_YELLOW,[10],True,False,-1.0,STOPPED,"speed 26 km/h vs ref 128 km/h, on the racing line"
 2024_São_Paulo,detectors,5257.25,DOUBLE_YELLOW,[13],False,False,,,
@@ -109,6 +164,13 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2024_São_Paulo,baseline,9308.25,SC,"[8, 9]",True,False,4.0,STOPPED,speed 0 km/h < 50 km/h
 2024_São_Paulo,baseline,9794.25,DOUBLE_YELLOW,[13],True,False,-2.5,STOPPED,speed 42 km/h < 50 km/h
 2024_São_Paulo,baseline,10467.25,DOUBLE_YELLOW,[13],False,False,,,
+2025_Australian,anomaly_advisory,4324.38,SC,[8],False,False,,,
+2025_Australian,anomaly_advisory,4415.38,DOUBLE_YELLOW,[20],False,False,,,
+2025_Australian,anomaly_advisory,7646.38,SC,[10],False,False,,,
+2025_Australian,anomaly_advisory,8230.38,DOUBLE_YELLOW,"[8, 9]",False,False,,,
+2025_Australian,anomaly_advisory,8965.38,DOUBLE_YELLOW,"[18, 19]",False,False,,,
+2025_Australian,anomaly_advisory,9194.38,DOUBLE_YELLOW,"[18, 19]",False,False,,,
+2025_Australian,anomaly_advisory,9217.38,SC,[2],False,False,,,
 2025_Australian,detectors,4324.38,SC,[8],True,False,15.88,IMPACT,"lost 143 km/h in 1 s (170 to 0 km/h), with brakes on"
 2025_Australian,detectors,4415.38,DOUBLE_YELLOW,[20],True,False,29.63,IMPACT,"lost 114 km/h in 1 s (119 to 0 km/h), with brakes on"
 2025_Australian,detectors,7646.38,SC,[10],True,False,4.13,IMPACT,"lost 116 km/h in 1 s (163 to 0 km/h), with brakes on"
@@ -123,12 +185,27 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2025_Australian,baseline,8965.38,DOUBLE_YELLOW,"[18, 19]",True,False,6.38,STOPPED,speed 41 km/h < 50 km/h
 2025_Australian,baseline,9194.38,DOUBLE_YELLOW,"[18, 19]",True,False,0.13,STOPPED,speed 0 km/h < 50 km/h
 2025_Australian,baseline,9217.38,SC,[2],True,False,14.88,STOPPED,speed 0 km/h < 50 km/h
+2025_Azerbaijan,anomaly_advisory,3500.92,SC,"[6, 7]",False,False,,,
+2025_Azerbaijan,anomaly_advisory,4403.92,DOUBLE_YELLOW,[17],False,False,,,
+2025_Azerbaijan,anomaly_advisory,5462.92,DOUBLE_YELLOW,[7],False,False,,,
 2025_Azerbaijan,detectors,3500.92,SC,"[6, 7]",True,False,0.42,IMPACT,"lost 83 km/h in 1 s (91 to 2 km/h), with brakes on"
 2025_Azerbaijan,detectors,4403.92,DOUBLE_YELLOW,[17],False,False,,,
 2025_Azerbaijan,detectors,5462.92,DOUBLE_YELLOW,[7],True,False,1.67,IMPACT,"lost 80 km/h in 1 s (80 to 0 km/h), with brakes on"
 2025_Azerbaijan,baseline,3500.92,SC,"[6, 7]",True,False,0.17,STOPPED,speed 0 km/h < 50 km/h
 2025_Azerbaijan,baseline,4403.92,DOUBLE_YELLOW,[17],False,False,,,
 2025_Azerbaijan,baseline,5462.92,DOUBLE_YELLOW,[7],True,False,1.17,STOPPED,speed 0 km/h < 50 km/h
+2025_British,anomaly_advisory,3402.39,YELLOW,[5],False,False,,,
+2025_British,anomaly_advisory,3422.39,VSC,[6],False,False,,,
+2025_British,anomaly_advisory,3715.39,DOUBLE_YELLOW,"[4, 5]",False,False,,,
+2025_British,anomaly_advisory,3802.39,YELLOW,[2],False,False,,,
+2025_British,anomaly_advisory,3895.39,VSC,[10],False,False,,,
+2025_British,anomaly_advisory,4878.39,SC,[12],False,False,,,
+2025_British,anomaly_advisory,5600.39,SC,[10],False,False,,,
+2025_British,anomaly_advisory,6177.39,YELLOW,[7],False,False,,,
+2025_British,anomaly_advisory,7995.39,YELLOW,[12],False,False,,,
+2025_British,anomaly_advisory,8307.39,YELLOW,"[11, 12]",False,False,,,
+2025_British,anomaly_advisory,8380.39,YELLOW,[7],False,False,,,
+2025_British,anomaly_advisory,8430.39,YELLOW,[15],False,False,,,
 2025_British,detectors,3402.39,YELLOW,[5],True,False,0.39,IMPACT,"lost 145 km/h in 1 s (211 to 76 km/h), with brakes on"
 2025_British,detectors,3422.39,VSC,[6],True,False,20.39,IMPACT,"lost 145 km/h in 1 s (211 to 76 km/h), with brakes on"
 2025_British,detectors,3715.39,DOUBLE_YELLOW,"[4, 5]",False,False,,,
@@ -153,6 +230,12 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2025_British,baseline,8307.39,YELLOW,"[11, 12]",False,False,,,
 2025_British,baseline,8380.39,YELLOW,[7],True,False,-0.11,STOPPED,speed 9 km/h < 50 km/h
 2025_British,baseline,8430.39,YELLOW,[15],True,False,-2.86,STOPPED,speed 42 km/h < 50 km/h
+2025_Dutch,anomaly_advisory,5099.99,SC,"[4, 5]",False,False,,,
+2025_Dutch,anomaly_advisory,5867.99,VSC,[],False,False,,,
+2025_Dutch,anomaly_advisory,6150.99,DOUBLE_YELLOW,[16],False,False,,,
+2025_Dutch,anomaly_advisory,7523.99,SC,"[4, 5]",False,False,,,
+2025_Dutch,anomaly_advisory,8604.99,SC,[11],False,False,,,
+2025_Dutch,anomaly_advisory,8783.99,DOUBLE_YELLOW,[5],False,False,,,
 2025_Dutch,detectors,5099.99,SC,"[4, 5]",True,False,0.24,STOPPED,"speed 17 km/h vs ref 182 km/h, on the racing line"
 2025_Dutch,detectors,5867.99,VSC,[],False,False,,,
 2025_Dutch,detectors,6150.99,DOUBLE_YELLOW,[16],False,False,,,
@@ -165,6 +248,13 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2025_Dutch,baseline,7523.99,SC,"[4, 5]",False,False,,,
 2025_Dutch,baseline,8604.99,SC,[11],True,False,1.24,STOPPED,speed 27 km/h < 50 km/h
 2025_Dutch,baseline,8783.99,DOUBLE_YELLOW,[5],False,False,,,
+2025_Miami,anomaly_advisory,3449.16,DOUBLE_YELLOW,[2],False,False,,,
+2025_Miami,anomaly_advisory,3461.16,DOUBLE_YELLOW,[4],False,False,,,
+2025_Miami,anomaly_advisory,3479.16,DOUBLE_YELLOW,[2],False,False,,,
+2025_Miami,anomaly_advisory,3573.16,VSC,"[13, 14]",False,False,,,
+2025_Miami,anomaly_advisory,3744.16,DOUBLE_YELLOW,[13],False,False,,,
+2025_Miami,anomaly_advisory,6098.16,VSC,[],False,False,,,
+2025_Miami,anomaly_advisory,6522.16,VSC,[],False,False,,,
 2025_Miami,detectors,3449.16,DOUBLE_YELLOW,[2],True,False,-5.59,STOPPED,"speed 10 km/h vs ref 120 km/h, on the racing line"
 2025_Miami,detectors,3461.16,DOUBLE_YELLOW,[4],False,False,,,
 2025_Miami,detectors,3479.16,DOUBLE_YELLOW,[2],True,False,24.41,STOPPED,"speed 10 km/h vs ref 120 km/h, on the racing line"
@@ -179,6 +269,11 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2025_Miami,baseline,3744.16,DOUBLE_YELLOW,[13],True,False,27.16,STOPPED,speed 42 km/h < 50 km/h
 2025_Miami,baseline,6098.16,VSC,[],True,False,44.66,STOPPED,speed 47 km/h < 50 km/h
 2025_Miami,baseline,6522.16,VSC,[],True,False,44.41,STOPPED,speed 22 km/h < 50 km/h
+2026_Australian,anomaly_advisory,4681.38,VSC,[],False,False,,,
+2026_Australian,anomaly_advisory,4689.38,DOUBLE_YELLOW,[13],False,False,,,
+2026_Australian,anomaly_advisory,5311.38,VSC,[20],False,False,,,
+2026_Australian,anomaly_advisory,6673.38,VSC,[],False,False,,,
+2026_Australian,anomaly_advisory,6676.38,DOUBLE_YELLOW,"[12, 13]",False,False,,,
 2026_Australian,detectors,4681.38,VSC,[],True,False,18.13,STOPPED,"speed 73 km/h vs ref 288 km/h, on the racing line"
 2026_Australian,detectors,4689.38,DOUBLE_YELLOW,[13],True,False,26.13,STOPPED,"speed 73 km/h vs ref 288 km/h, on the racing line"
 2026_Australian,detectors,5311.38,VSC,[20],True,False,2.13,STOPPED,"speed 0 km/h vs ref 165 km/h, on the racing line"
@@ -189,6 +284,18 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2026_Australian,baseline,5311.38,VSC,[20],True,False,2.63,STOPPED,speed 0 km/h < 50 km/h
 2026_Australian,baseline,6673.38,VSC,[],False,False,,,
 2026_Australian,baseline,6676.38,DOUBLE_YELLOW,"[12, 13]",False,False,,,
+2026_Belgian,anomaly_advisory,3398.9,SC,"[4, 5, 6, 7]",False,False,,,
+2026_Belgian,anomaly_advisory,3449.9,YELLOW,[15],False,False,,,
+2026_Belgian,anomaly_advisory,3644.9,DOUBLE_YELLOW,[13],False,False,,,
+2026_Belgian,anomaly_advisory,3654.9,YELLOW,"[7, 8]",False,False,,,
+2026_Belgian,anomaly_advisory,3681.9,DOUBLE_YELLOW,[15],False,False,,,
+2026_Belgian,anomaly_advisory,3682.9,DOUBLE_YELLOW,"[7, 8]",False,False,,,
+2026_Belgian,anomaly_advisory,3793.9,DOUBLE_YELLOW,"[15, 16]",False,False,,,
+2026_Belgian,anomaly_advisory,4377.9,DOUBLE_YELLOW,[7],False,False,,,
+2026_Belgian,anomaly_advisory,5476.9,VSC,[],True,False,32.4,ANOMALY,anomaly score 0.75 (threshold 0.75)
+2026_Belgian,anomaly_advisory,5488.9,DOUBLE_YELLOW,"[18, 19]",False,False,,,
+2026_Belgian,anomaly_advisory,5721.9,VSC,[],False,False,,,
+2026_Belgian,anomaly_advisory,5732.9,DOUBLE_YELLOW,"[15, 16]",False,False,,,
 2026_Belgian,detectors,3398.9,SC,"[4, 5, 6, 7]",True,False,3.15,IMPACT,"lost 88 km/h in 1 s (128 to 13 km/h), without braking"
 2026_Belgian,detectors,3449.9,YELLOW,[15],True,False,0.4,STOPPED,"speed 30 km/h vs ref 181 km/h, on the racing line"
 2026_Belgian,detectors,3644.9,DOUBLE_YELLOW,[13],False,False,,,
@@ -197,7 +304,7 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2026_Belgian,detectors,3682.9,DOUBLE_YELLOW,"[7, 8]",True,True,,,
 2026_Belgian,detectors,3793.9,DOUBLE_YELLOW,"[15, 16]",False,False,,,
 2026_Belgian,detectors,4377.9,DOUBLE_YELLOW,[7],False,False,,,
-2026_Belgian,detectors,5476.9,VSC,[],True,False,32.4,ANOMALY,anomaly score 0.75 (threshold 0.75)
+2026_Belgian,detectors,5476.9,VSC,[],False,False,,,
 2026_Belgian,detectors,5488.9,DOUBLE_YELLOW,"[18, 19]",False,False,,,
 2026_Belgian,detectors,5721.9,VSC,[],False,False,,,
 2026_Belgian,detectors,5732.9,DOUBLE_YELLOW,"[15, 16]",False,False,,,
@@ -213,12 +320,21 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2026_Belgian,baseline,5488.9,DOUBLE_YELLOW,"[18, 19]",False,False,,,
 2026_Belgian,baseline,5721.9,VSC,[],True,False,-4.1,STOPPED,speed 35 km/h < 50 km/h
 2026_Belgian,baseline,5732.9,DOUBLE_YELLOW,"[15, 16]",False,False,,,
+2026_British,anomaly_advisory,3382.51,YELLOW,[7],False,False,,,
+2026_British,anomaly_advisory,3494.51,YELLOW,[8],False,False,,,
+2026_British,anomaly_advisory,5360.51,VSC,[],False,False,,,
+2026_British,anomaly_advisory,5373.51,DOUBLE_YELLOW,[11],False,False,,,
+2026_British,anomaly_advisory,5386.51,DOUBLE_YELLOW,[11],False,False,,,
+2026_British,anomaly_advisory,6920.51,VSC,[10],True,False,6.01,ANOMALY,anomaly score 0.77 (threshold 0.75)
+2026_British,anomaly_advisory,7023.51,DOUBLE_YELLOW,[10],False,False,,,
+2026_British,anomaly_advisory,7815.51,SC,[15],False,False,,,
+2026_British,anomaly_advisory,8375.51,SC,[],False,False,,,
 2026_British,detectors,3382.51,YELLOW,[7],True,False,1.01,IMPACT,"lost 93 km/h in 1 s (138 to 16 km/h), with brakes on"
 2026_British,detectors,3494.51,YELLOW,[8],True,False,4.76,IMPACT,"lost 125 km/h in 1 s (135 to 45 km/h), with brakes on"
 2026_British,detectors,5360.51,VSC,[],False,False,,,
 2026_British,detectors,5373.51,DOUBLE_YELLOW,[11],False,False,,,
 2026_British,detectors,5386.51,DOUBLE_YELLOW,[11],False,False,,,
-2026_British,detectors,6920.51,VSC,[10],True,False,6.01,ANOMALY,anomaly score 0.77 (threshold 0.75)
+2026_British,detectors,6920.51,VSC,[10],True,False,3.76,STOPPED,"speed 43 km/h vs ref 281 km/h, on the racing line"
 2026_British,detectors,7023.51,DOUBLE_YELLOW,[10],False,False,,,
 2026_British,detectors,7815.51,SC,[15],True,False,0.76,IMPACT,"lost 148 km/h in 1 s (217 to 0 km/h), with brakes on"
 2026_British,detectors,8375.51,SC,[],False,False,,,
@@ -231,6 +347,14 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2026_British,baseline,7023.51,DOUBLE_YELLOW,[10],False,False,,,
 2026_British,baseline,7815.51,SC,[15],True,False,0.01,STOPPED,speed 5 km/h < 50 km/h
 2026_British,baseline,8375.51,SC,[],False,False,,,
+2026_Canadian,anomaly_advisory,4706.53,DOUBLE_YELLOW,"[11, 12]",False,False,,,
+2026_Canadian,anomaly_advisory,5180.53,YELLOW,[11],False,False,,,
+2026_Canadian,anomaly_advisory,6038.53,VSC,"[9, 10]",False,False,,,
+2026_Canadian,anomaly_advisory,6861.53,YELLOW,[11],False,False,,,
+2026_Canadian,anomaly_advisory,7293.53,VSC,[],False,False,,,
+2026_Canadian,anomaly_advisory,7812.53,VSC,[],False,False,,,
+2026_Canadian,anomaly_advisory,7814.53,DOUBLE_YELLOW,[12],False,False,,,
+2026_Canadian,anomaly_advisory,8516.53,YELLOW,[1],False,False,,,
 2026_Canadian,detectors,4706.53,DOUBLE_YELLOW,"[11, 12]",False,False,,,
 2026_Canadian,detectors,5180.53,YELLOW,[11],False,False,,,
 2026_Canadian,detectors,6038.53,VSC,"[9, 10]",False,False,,,
@@ -247,6 +371,12 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2026_Canadian,baseline,7812.53,VSC,[],True,False,-6.22,STOPPED,speed 37 km/h < 50 km/h
 2026_Canadian,baseline,7814.53,DOUBLE_YELLOW,[12],True,False,-4.22,STOPPED,speed 37 km/h < 50 km/h
 2026_Canadian,baseline,8516.53,YELLOW,[1],True,False,-0.97,STOPPED,speed 4 km/h < 50 km/h
+2026_Dutch,anomaly_advisory,3493.22,DOUBLE_YELLOW,"[16, 17, 18]",False,False,,,
+2026_Dutch,anomaly_advisory,5326.22,YELLOW,[13],False,False,,,
+2026_Dutch,anomaly_advisory,5584.22,YELLOW,[3],False,False,,,
+2026_Dutch,anomaly_advisory,9441.22,VSC,"[4, 5]",False,False,,,
+2026_Dutch,anomaly_advisory,10659.22,VSC,[],False,False,,,
+2026_Dutch,anomaly_advisory,10682.22,DOUBLE_YELLOW,"[7, 8]",False,False,,,
 2026_Dutch,detectors,3493.22,DOUBLE_YELLOW,"[16, 17, 18]",True,False,0.97,IMPACT,"lost 158 km/h in 1 s (171 to 0 km/h), with brakes on"
 2026_Dutch,detectors,5326.22,YELLOW,[13],False,False,,,
 2026_Dutch,detectors,5584.22,YELLOW,[3],False,False,,,
@@ -259,12 +389,28 @@ race,system,t_official,flag,sectors,matched,held,lead_s,our_type,our_evidence
 2026_Dutch,baseline,9441.22,VSC,"[4, 5]",True,False,7.47,STOPPED,speed 40 km/h < 50 km/h
 2026_Dutch,baseline,10659.22,VSC,[],False,False,,,
 2026_Dutch,baseline,10682.22,DOUBLE_YELLOW,"[7, 8]",False,False,,,
+2026_Italian,anomaly_advisory,3597.82,SC,"[14, 15, 16]",False,False,,,
+2026_Italian,anomaly_advisory,5998.82,YELLOW,"[7, 8]",False,False,,,
+2026_Italian,anomaly_advisory,7854.82,VSC,"[2, 3]",False,False,,,
 2026_Italian,detectors,3597.82,SC,"[14, 15, 16]",True,False,8.57,IMPACT,"lost 138 km/h in 1 s (234 to 6 km/h), without braking"
 2026_Italian,detectors,5998.82,YELLOW,"[7, 8]",True,False,15.07,IMPACT,"lost 225 km/h in 1 s (298 to 73 km/h), harder than braking"
 2026_Italian,detectors,7854.82,VSC,"[2, 3]",True,False,2.57,STOPPED,"speed 9 km/h vs ref 80 km/h, on the racing line"
 2026_Italian,baseline,3597.82,SC,"[14, 15, 16]",True,False,7.82,STOPPED,speed 8 km/h < 50 km/h
 2026_Italian,baseline,5998.82,YELLOW,"[7, 8]",False,False,,,
 2026_Italian,baseline,7854.82,VSC,"[2, 3]",True,False,4.82,STOPPED,speed 31 km/h < 50 km/h
+2026_Miami,anomaly_advisory,3905.26,SC,"[13, 14, 15]",False,False,,,
+2026_Miami,anomaly_advisory,3921.26,DOUBLE_YELLOW,[19],False,False,,,
+2026_Miami,anomaly_advisory,4013.26,DOUBLE_YELLOW,[18],False,False,,,
+2026_Miami,anomaly_advisory,4198.26,DOUBLE_YELLOW,[16],False,False,,,
+2026_Miami,anomaly_advisory,4201.26,DOUBLE_YELLOW,[15],False,False,,,
+2026_Miami,anomaly_advisory,4374.26,DOUBLE_YELLOW,[16],False,False,,,
+2026_Miami,anomaly_advisory,4540.26,YELLOW,[13],False,False,,,
+2026_Miami,anomaly_advisory,4563.26,DOUBLE_YELLOW,"[15, 16]",False,False,,,
+2026_Miami,anomaly_advisory,4627.26,DOUBLE_YELLOW,[15],False,False,,,
+2026_Miami,anomaly_advisory,4640.26,DOUBLE_YELLOW,[15],False,False,,,
+2026_Miami,anomaly_advisory,5148.26,YELLOW,[19],False,False,,,
+2026_Miami,anomaly_advisory,8148.26,YELLOW,[19],False,False,,,
+2026_Miami,anomaly_advisory,8991.25,DOUBLE_YELLOW,[4],False,False,,,
 2026_Miami,detectors,3905.26,SC,"[13, 14, 15]",True,False,3.51,STOPPED,"speed 0 km/h vs ref 170 km/h, on the racing line"
 2026_Miami,detectors,3921.26,DOUBLE_YELLOW,[19],True,False,-0.49,STOPPED,"speed 10 km/h vs ref 70 km/h, on the racing line"
 2026_Miami,detectors,4013.26,DOUBLE_YELLOW,[18],False,False,,,

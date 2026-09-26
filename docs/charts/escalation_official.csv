@@ -8,12 +8,12 @@ race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_
 2023_Mexico_City,4084.92,4084.92,VSC,VSC,track-wide,missed,,,,,no car collapse,,,"field not racing (SC, VSC, restart or procession)"
 2023_Mexico_City,6483.92,6503.92,SC,RED,9 10,earlier,19.67,6484.25,SC,SC,,20,IMPACT STOPPED,car 20 stopped for 3.0 s after an impact
 2024_Canadian,2435.0,2480.0,SC,SC,3 4,earlier,44.0,2436.0,SC,SC,,2,IMPACT STOPPED,car 2 stopped for 3.0 s after an impact
-2024_Canadian,5064.0,5093.0,SC,SC,5 6,earlier,25.25,5067.75,RED,RED,,11,IMPACT STOPPED,multi-car incident
+2024_Canadian,5064.0,5093.0,SC,SC,5 6,earlier,25.25,5067.75,RED,RED,,55,MULTI STOPPED,multi-car incident
 2024_Mexico_City,3380.85,3417.85,SC,SC,3 4,earlier,33.85,3384.0,SC,SC,,,,car 22 stopped for 3.0 s after an impact
 2024_Qatar,3306.81,3349.81,SC,SC,3,earlier,40.56,3309.25,RED,RED,,,,multi-car incident
-2024_Qatar,6468.81,6468.81,SC,SC,track-wide,missed,,,,,car collapse seen,44,,car 44 collapsed 61 s before the first official message; we made no recommendation
+2024_Qatar,6468.81,6468.81,SC,SC,track-wide,missed,,,,,car collapse seen,44,,car 44 collapsed 20 s before the first official message; we made no recommendation
 2024_Qatar,7179.81,7180.81,VSC,SC,12,later,-3.69,7184.5,SC,SC,,27,IMPACT STOPPED,car 27 stopped for 3.0 s after an impact
-2024_São_Paulo,6579.25,6618.25,VSC,VSC,2,earlier,36.0,6582.25,SC,SC,,30,STOPPED,car 27 stopped for 3.0 s after an impact
+2024_São_Paulo,6579.25,6618.25,VSC,VSC,2,earlier,36.0,6582.25,SC,SC,,27,IMPACT STOPPED,car 27 stopped for 3.0 s after an impact
 2024_São_Paulo,6890.25,6890.25,SC,SC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage)
 2024_São_Paulo,7143.25,7159.25,RED,RED,14,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage)
 2024_São_Paulo,9308.25,9311.25,SC,SC,8 9,earlier,3.25,9308.0,SC,SC,,55,IMPACT STOPPED,car 55 stopped for 3.0 s after an impact
@@ -31,7 +31,7 @@ race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_
 2025_Dutch,8604.99,8620.99,SC,SC,11,earlier,6.99,8614.0,VSC,VSC,,4,STOPPED,"car 4 stopped for 10.0 s, no impact detected"
 2025_Miami,3573.16,3576.16,VSC,VSC,13 14,later,-3.09,3579.25,VSC,VSC,,,,"car 7 stopped for 10.0 s, no impact detected"
 2025_Miami,6098.16,6098.16,VSC,VSC,track-wide,missed,,,,,car collapse seen,87,STOPPED,car 87 collapsed 48 s before the first official message; we showed double yellow but did not escalate
-2025_Miami,6522.16,6522.16,VSC,VSC,track-wide,earlier,34.66,6487.5,VSC,VSC,,5,,"car 5 stopped for 10.0 s, no impact detected"
+2025_Miami,6522.16,6522.16,VSC,VSC,track-wide,earlier,34.66,6487.5,VSC,VSC,,5,STOPPED,"car 5 stopped for 10.0 s, no impact detected"
 2026_Australian,4681.38,4681.38,VSC,VSC,track-wide,earlier,3.38,4678.0,VSC,VSC,,6,STOPPED,"car 6 stopped for 10.0 s, no impact detected"
 2026_Australian,5311.38,5328.38,VSC,VSC,20,earlier,9.13,5319.25,VSC,VSC,,77,STOPPED,"car 77 stopped for 10.0 s, no impact detected"
 2026_Australian,6673.38,6673.38,VSC,VSC,track-wide,missed,,,,,car collapse seen,63,IMPACT,car 63 collapsed 59 s before the first official message; we showed yellow but did not escalate
@@ -49,4 +49,4 @@ race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_
 2026_Dutch,10659.22,10659.22,VSC,VSC,track-wide,missed,,,,,car collapse seen,23,,car 23 collapsed 99 s before the first official message; we made no recommendation
 2026_Italian,3597.82,3613.82,SC,SC,14 15 16,missed,,,,,no car collapse,,,"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,7854.82,7869.82,VSC,VSC,2 3,earlier,7.57,7862.25,VSC,VSC,,18,STOPPED,"car 18 stopped for 10.0 s, no impact detected"
-2026_Miami,3905.26,3934.26,SC,SC,13 14 15,earlier,22.51,3911.75,VSC,VSC,,6,IMPACT,"car 6 stopped for 10.0 s, no impact detected"
+2026_Miami,3905.26,3934.26,SC,SC,13 14 15,earlier,22.51,3911.75,VSC,VSC,,6,ANOMALY SPIN STOPPED,"car 6 stopped for 10.0 s, no impact detected"

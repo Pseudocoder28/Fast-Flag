@@ -64,23 +64,32 @@ def detection_loro() -> list[str]:
 def detection_deployed() -> list[str]:
     ev = pd.read_csv(CHARTS / "detect_eval.csv", encoding="utf-8")
     al = pd.read_csv(CHARTS / "detect_alerts.csv", encoding="utf-8")
-    al = al[al["system"] == "detectors"]
-    out = ["## Detection as deployed (production settings plus ANOMALY alerts)", "",
-           "Source: detect_eval.csv, detect_alerts.csv. Thresholds were selected on these same races, so these are "
-           "not strictly out of sample (use the headline above for that); the ANOMALY model is leave-one-race-out.", ""]
-    for system, label in (("detectors", "Our system"), ("baseline", "Untuned 50 km/h speed threshold")):
+    inc = pd.read_csv(CHARTS / "detect_incidents.csv", encoding="utf-8")
+    out = ["## Detection as deployed (production settings; ANOMALY as an advisory)", "",
+           "Source: detect_eval.csv, detect_alerts.csv, detect_incidents.csv. Thresholds were selected on these same "
+           "races, so these are not strictly out of sample (use the headline above for that); the ANOMALY model is "
+           "leave-one-race-out. ANOMALY detections are advisories (watch markers on the dashboard, confirmation for "
+           "race control), not alerts, so they are not in the recall or false alarms below.", ""]
+    for system, label in (("detectors", "Our system (rule-based alerts)"), ("baseline", "Untuned 50 km/h speed threshold")):
         g = ev[ev["system"] == system]
-        inc, m, held = g["incidents"].sum(), g["matched"].sum(), g["held"].sum()
+        n, m, held = g["incidents"].sum(), g["matched"].sum(), g["held"].sum()
         hours, fa = g["hours"].sum(), g["false_alarms"].sum()
-        out.append(f"- {label}: recall {pct(m / inc)} ({m} of {inc}, {held} by a still-held stopped-car alert), "
+        out.append(f"- {label}: recall {pct(m / n)} ({m} of {n}, {held} by a still-held stopped-car alert), "
                    f"{fa} false alarms in {hours:.1f} race hours = {fa / hours:.1f}/h.")
-    by_type = al.groupby("type")["false_alarm"].agg(["size", "sum"])
+    by_type = al[al["system"] == "detectors"].groupby("type")["false_alarm"].agg(["size", "sum"])
     out.append("- Our alerts by type (alerts / false alarms): " + ", ".join(
         f"{k} {int(v['size'])}/{int(v['sum'])}" for k, v in by_type.iterrows()) + ".")
-    if "ANOMALY" in by_type.index:
-        a = by_type.loc["ANOMALY"]
-        out.append(f"- ANOMALY as an alert: {int(a['size'])} alerts, {int(a['sum'])} false. It roughly doubles the "
-                   "false-alarm rate for about 2 extra incidents. Its measurable value is as a risk-model feature (below).")
+    adv = ev[ev["system"] == "anomaly_advisory"]
+    if len(adv):
+        n_adv, fa_adv, hours = adv["alerts"].sum(), adv["false_alarms"].sum(), adv["hours"].sum()
+        key = ["race", "t_official"]
+        both = inc[inc["system"] == "detectors"].merge(inc[inc["system"] == "anomaly_advisory"], on=key,
+                                                        suffixes=("", "_adv"))
+        extra = int((both["matched_adv"] & ~both["matched"]).sum())
+        out.append(f"- ANOMALY advisories: {n_adv} in {hours:.1f} race hours ({n_adv / hours:.1f}/h), {n_adv - fa_adv} "
+                   f"of them near an official incident; they would add {extra} incident(s) the rule-based alerts "
+                   "missed. Counted as alerts they would roughly double the false-alarm rate, so they stay advisories: "
+                   "the model's measurable value is as a risk-model feature (below) and as confirmation for race control.")
     return out + [""]
 
 
@@ -90,7 +99,10 @@ def latency_from_onset() -> list[str]:
     out = ["## Latency from crash onset: race control vs us", "",
            "Source: latency_by_type.csv / .md / .png. Onset = speed below 50% of the car's own speed at that point "
            "on its previous 3 clean laps, for 1 s (full rule in latency_by_type.md). Latency on crashes with a "
-           "clear collapse, which is what our detectors are best at: not a recall figure.", ""]
+           "clear collapse, which is what our detectors are best at: not a recall figure. The onset car is the first "
+           "car of the last chain of collapses (less than 10 s apart) up to race control's first message; until "
+           "26 Sept it was the earliest collapse in a 120 s window, which anchored 7 of 63 incidents on an earlier, "
+           "unrelated slowdown. The change can only shorten race control's measured delay.", ""]
     for f in FLAG_NAMES:
         g = ev[ev["flag"] == f]
         if g.empty:
@@ -185,9 +197,9 @@ def escalation() -> list[str]:
             f"only, {c['no official flag']} with no official flag).",
             f"- Flag choice: same first flag as race control in {e['same_first_flag']} of {e['matched']}; our "
             f"{len(ours)} recommendations by flag: {by_ours}. FastF1 puts stopped cars on the racing line, so the "
-            f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" picks race "
-            f"control's flag {ir['right_with_impact_rule']} of {ir['escalations_with_onset_car']} times, \"always SC\" "
-            f"{ir['right_if_always_sc']}.",
+            f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" separates "
+            f"race control's VSCs from its SCs and reds correctly {ir['right_with_impact_rule']} of "
+            f"{ir['escalations_with_onset_car']} times, \"always SC\" {ir['right_if_always_sc']}.",
             ""]
 
 

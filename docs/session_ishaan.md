@@ -60,14 +60,16 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
   2. `git fetch origin && git checkout --detach origin/a-work`
   3. Terminal 1: `python -m src.replay.mock_server --no-recs`
   4. Terminal 2: `python -m src.racecontrol`
-  5. Open http://localhost:8000, then jump to the incident: `curl -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 1, "seek_t": 4370}'`
-  6. Try speed 10 and 50: same curl with `'{"speed": 10}'` and `'{"speed": 50}'`.
+  5. Open http://localhost:8000, click the Incidents tab and click the first incident (it jumps to 30 s before race control's first message). The curl command above still works too.
+  6. Try speed 10 and 50 with the 10x and 50x buttons under the map.
   7. If you have `data/features` and `data/models` from Naman: stop terminal 1, run `python -m src.replay.server` instead and repeat steps 4 to 6.
   8. Back to your branch: `git checkout b-work`, then `git stash pop` if you stashed.
 - Check:
   - Cars move smoothly at 1x, 10x and 50x.
   - Car 23 stops in sector 9 and is clearly marked as stopped.
   - Sector 9 lights up on the map and a row appears in the alert feed before the official YELLOW at t=4390.18.
+  - The lead-time strip under the map pairs our YELLOW with the official one and shows a green +2.9 s.
+  - Play/pause, 1x to 50x, -30 s/+30 s and clicking the seek bar all move the replay.
   - The banner says it is a replay of historical FastF1 data.
   - Nothing overlaps or gets cut off at your screen size.
   - No errors in the browser console (F12, Console tab).

@@ -25,7 +25,7 @@ Missed official escalations:
 | 2023_Australian | 6454.2 | VSC | track-wide | car collapse seen | car 63 collapsed 31 s before the first official message; we showed double yellow but did not escalate |
 | 2023_Australian | 9605.2 | RED | track-wide | no car collapse | car already slow or stopped before the window (re-flag of an earlier stoppage) |
 | 2023_Mexico_City | 4084.9 | VSC | track-wide | no car collapse | field not racing (SC, VSC, restart or procession) |
-| 2024_Qatar | 6468.8 | SC | track-wide | car collapse seen | car 44 collapsed 61 s before the first official message; we made no recommendation |
+| 2024_Qatar | 6468.8 | SC | track-wide | car collapse seen | car 44 collapsed 20 s before the first official message; we made no recommendation |
 | 2024_São_Paulo | 6890.2 | SC | track-wide | no car collapse | car already slow or stopped before the window (re-flag of an earlier stoppage) |
 | 2024_São_Paulo | 7159.2 | RED | 14 | no car collapse | car already slow or stopped before the window (re-flag of an earlier stoppage) |
 | 2025_British | 3487.4 | VSC | 6 | no car collapse | lap 1 or 2: no clean reference laps yet |
@@ -56,7 +56,7 @@ Missed official escalations:
 - Our first flag matched race control's in 22 of 29 matched escalations (official Red flag and ours Red flag: 1; official Safety car and ours Red flag: 2; official Safety car and ours Safety car: 13; official Safety car and ours VSC: 3; official VSC and ours Safety car: 2; official VSC and ours VSC: 8).
 - Our 59 recommendations by flag: VSC 17, Safety car 34, Red flag 8.
 - The lateral offset cannot choose between them. FastF1 positions of stopped cars sit on the racing line, even for retired cars parked in run-off: of 616,792 stopped-car rows (below 5 km/h, outside the pit lane), 99.97% are within 1 m of it and 118 are more than 8 m away (short episodes: 2026_Italian car 16, 2026_Miami car 6).
-- An impact separates them better. On the 26 official escalations with an onset car, 9 of 13 SC or red followed an IMPACT or MULTI detection involving the car and 11 of 13 VSC did not: "SC after an impact, VSC otherwise" picks race control's flag 20 times, "always SC" 13 times. In-sample, and a small sample.
+- An impact separates them better. On the 26 official escalations with an onset car, 8 of 13 SC or red followed an IMPACT or MULTI detection involving the car and 10 of 13 VSC did not: "SC after an impact, VSC otherwise" separates race control's VSCs from its SCs and reds correctly 18 times, "always SC" 13 times. This check does not tell SC from red; exact agreement is the first line. In-sample, and a small sample.
 
 ## Per race
 

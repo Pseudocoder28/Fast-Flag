@@ -167,7 +167,7 @@ def evaluate(rid: str, out_dir: Path, allow_holdout: bool, label: str = "", scop
                                      summarise as summarise_escalation, tables)
     from src.eval.incidents import INCIDENT_FLAGS
     from src.eval.latency_by_type import plot as plot_latency, race_events, summary
-    from src.eval.run import score
+    from src.eval.run import advisories, rule_alerts, score
     from src.replay.pipeline import all_processors
     label = label or rid.replace("_", " ")
     race = RaceData.load(rid)
@@ -175,9 +175,8 @@ def evaluate(rid: str, out_dir: Path, allow_holdout: bool, label: str = "", scop
     dets = [e["data"] for e in eng.advance(eng.t_end) if e["kind"] == "detection"]
     base_eng = Engine(race, [NaiveThreshold()])
     base = [e["data"] for e in base_eng.advance(base_eng.t_end) if e["kind"] == "detection"]
-    rules = [d for d in dets if d["type"] != "ANOMALY"]
-    detection = {"with_anomaly_alerts": summarise(score(race, "detectors", dets)),
-                 "rules_only": summarise(score(race, "detectors", rules)),
+    detection = {"rule_alerts": summarise(score(race, "detectors", rule_alerts(dets))),
+                 "anomaly_advisories": summarise(score(race, "anomaly_advisory", advisories(dets))),
                  "naive_speed_threshold": summarise(score(race, "baseline", base))}
     events, missing = race_events(rid, dets=dets, allow_holdout=allow_holdout)
     ev = pd.DataFrame(events)
@@ -192,7 +191,8 @@ def evaluate(rid: str, out_dir: Path, allow_holdout: bool, label: str = "", scop
         charts.append(f"latency_{rid}.png")
     found, rec_source = crashes(rid, allow_holdout=allow_holdout)
     for c in found:
-        plot_crash(c, out_dir / f"case_{rid}_car{c['car']}.png")
+        plot_crash(c, out_dir / f"case_{rid}_car{c['car']}.png", scope_note=scope_note or label,
+                   source=f"holdout_{rid}.json")
         charts.append(f"case_{rid}_car{c['car']}.png")
     card = race_scorecard(rid, suite_for=production_suite, allow_holdout=allow_holdout)
     off, ours = tables([card])

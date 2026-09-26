@@ -1,9 +1,9 @@
 race,system,t,type,msector,drivers,evidence,false_alarm
+2023_Australian,anomaly_advisory,5780.25,ANOMALY,20,63,anomaly score 0.76 (threshold 0.75),True
+2023_Australian,anomaly_advisory,8856.5,ANOMALY,2,21,anomaly score 0.76 (threshold 0.75),True
 2023_Australian,detectors,3761.75,IMPACT,5,16,"lost 95 km/h in 1 s (95 to 0 km/h), with brakes on",False
 2023_Australian,detectors,4387.75,IMPACT,9,23,"lost 145 km/h in 1 s (180 to 33 km/h), with brakes on",False
-2023_Australian,detectors,5780.25,ANOMALY,20,63,anomaly score 0.76 (threshold 0.75),True
 2023_Australian,detectors,6431.75,STOPPED,20,63,"speed 75 km/h vs ref 303 km/h, on the racing line",False
-2023_Australian,detectors,8856.5,ANOMALY,2,21,anomaly score 0.76 (threshold 0.75),True
 2023_Australian,detectors,9401.75,STOPPED,6,20,"speed 35 km/h vs ref 163 km/h, on the racing line",False
 2023_Australian,detectors,10757.0,STOPPED,2,2,"speed 0 km/h vs ref 195 km/h, on the racing line",False
 2023_Australian,detectors,10757.0,STOPPED,2,21,"speed 0 km/h vs ref 180 km/h, on the racing line",False
@@ -124,11 +124,12 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2023_Australian,baseline,10671.0,STOPPED,17,21,speed 42 km/h < 50 km/h,True
 2023_Australian,baseline,10671.0,STOPPED,17,77,speed 45 km/h < 50 km/h,True
 2023_Australian,baseline,10760.75,STOPPED,4,31,speed 21 km/h < 50 km/h,False
+2023_Mexico_City,anomaly_advisory,5745.75,ANOMALY,1,27,anomaly score 0.76 (threshold 0.76),True
+2023_Mexico_City,anomaly_advisory,6170.0,ANOMALY,1,10,anomaly score 0.76 (threshold 0.76),True
+2023_Mexico_City,anomaly_advisory,6354.25,ANOMALY,1,18,anomaly score 0.76 (threshold 0.76),True
+2023_Mexico_City,anomaly_advisory,6435.25,ANOMALY,1,77,anomaly score 0.76 (threshold 0.76),True
+2023_Mexico_City,anomaly_advisory,10755.75,ANOMALY,16,18,anomaly score 0.76 (threshold 0.76),False
 2023_Mexico_City,detectors,3758.75,IMPACT,3,11,"lost 80 km/h in 1 s (95 to 24 km/h), with brakes on",False
-2023_Mexico_City,detectors,5745.75,ANOMALY,1,27,anomaly score 0.76 (threshold 0.76),True
-2023_Mexico_City,detectors,6170.0,ANOMALY,1,10,anomaly score 0.76 (threshold 0.76),True
-2023_Mexico_City,detectors,6354.25,ANOMALY,1,18,anomaly score 0.76 (threshold 0.76),True
-2023_Mexico_City,detectors,6435.25,ANOMALY,1,77,anomaly score 0.76 (threshold 0.76),True
 2023_Mexico_City,detectors,6480.25,IMPACT,10,20,"lost 158 km/h in 1 s (179 to 0 km/h), with brakes on",False
 2023_Mexico_City,detectors,8018.75,STOPPED,15,1,"speed 31 km/h vs ref 152 km/h, on the racing line",True
 2023_Mexico_City,detectors,8022.0,STOPPED,14,16,"speed 31 km/h vs ref 141 km/h, on the racing line",True
@@ -161,48 +162,49 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2023_Mexico_City,baseline,8067.25,STOPPED,15,31,speed 46 km/h < 50 km/h,True
 2023_Mexico_City,baseline,9235.75,STOPPED,3,22,speed 24 km/h < 50 km/h,False
 2023_Mexico_City,baseline,10732.25,STOPPED,14,18,speed 20 km/h < 50 km/h,False
-2023_Monaco,detectors,5196.75,ANOMALY,1,23,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,5366.5,ANOMALY,1,2,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,5623.75,ANOMALY,1,2,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,6179.25,ANOMALY,1,44,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,6251.25,ANOMALY,1,31,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,6329.5,ANOMALY,1,55,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,6478.75,ANOMALY,1,11,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7189.5,ANOMALY,1,16,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7420.25,ANOMALY,1,10,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7693.75,ANOMALY,1,4,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7816.75,ANOMALY,1,77,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7817.5,ANOMALY,1,18,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7920.75,ANOMALY,1,24,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7924.75,ANOMALY,1,23,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7965.5,ANOMALY,1,2,anomaly score 0.76 (threshold 0.76),True
-2023_Monaco,detectors,7972.5,ANOMALY,1,22,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7976.75,ANOMALY,1,14,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,7991.75,ANOMALY,1,21,anomaly score 0.80 (threshold 0.76),True
-2023_Monaco,detectors,8008.25,ANOMALY,1,63,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8011.5,ANOMALY,1,31,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8015.75,ANOMALY,1,44,anomaly score 0.79 (threshold 0.76),True
-2023_Monaco,detectors,8023.25,ANOMALY,1,11,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,5196.75,ANOMALY,1,23,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,5366.5,ANOMALY,1,2,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,5623.75,ANOMALY,1,2,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,6179.25,ANOMALY,1,44,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,6251.25,ANOMALY,1,31,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,6329.5,ANOMALY,1,55,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,6478.75,ANOMALY,1,11,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7189.5,ANOMALY,1,16,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7420.25,ANOMALY,1,10,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7693.75,ANOMALY,1,4,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7816.75,ANOMALY,1,77,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7817.5,ANOMALY,1,18,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7920.75,ANOMALY,1,24,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7924.75,ANOMALY,1,23,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7965.5,ANOMALY,1,2,anomaly score 0.76 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7972.5,ANOMALY,1,22,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7976.75,ANOMALY,1,14,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,7991.75,ANOMALY,1,21,anomaly score 0.80 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8008.25,ANOMALY,1,63,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8011.5,ANOMALY,1,31,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8015.75,ANOMALY,1,44,anomaly score 0.79 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8023.25,ANOMALY,1,11,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8028.0,ANOMALY,1,10,anomaly score 0.79 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8082.5,ANOMALY,1,1,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8084.75,ANOMALY,1,81,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8094.0,ANOMALY,1,4,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8129.0,ANOMALY,1,16,anomaly score 0.79 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8134.25,ANOMALY,1,55,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8135.75,ANOMALY,1,27,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8418.0,ANOMALY,1,20,anomaly score 0.77 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8457.0,ANOMALY,1,11,anomaly score 0.76 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,8668.0,ANOMALY,1,27,anomaly score 0.76 (threshold 0.76),True
+2023_Monaco,anomaly_advisory,9762.25,ANOMALY,1,11,anomaly score 0.77 (threshold 0.76),True
 2023_Monaco,detectors,8023.75,IMPACT,7,55,"lost 80 km/h in 1 s (82 to 0 km/h), with brakes on",False
-2023_Monaco,detectors,8028.0,ANOMALY,1,10,anomaly score 0.79 (threshold 0.76),True
 2023_Monaco,detectors,8036.25,STOPPED,7,18,"speed 0 km/h vs ref 79 km/h, on the racing line",False
+2023_Monaco,detectors,8038.5,STOPPED,7,63,"speed 0 km/h vs ref 76 km/h, on the racing line",False
 2023_Monaco,detectors,8038.5,MULTI,7,"18,63","cars 18, 63 in sectors 7-7 within 5 s",False
-2023_Monaco,detectors,8082.5,ANOMALY,1,1,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8084.75,ANOMALY,1,81,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8094.0,ANOMALY,1,4,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8129.0,ANOMALY,1,16,anomaly score 0.79 (threshold 0.76),True
-2023_Monaco,detectors,8134.25,ANOMALY,1,55,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8135.75,ANOMALY,1,27,anomaly score 0.77 (threshold 0.76),True
 2023_Monaco,detectors,8347.5,STOPPED,17,20,"speed 0 km/h vs ref 64 km/h, on the racing line",False
 2023_Monaco,detectors,8410.5,STOPPED,8,2,"speed 0 km/h vs ref 51 km/h, on the racing line",False
-2023_Monaco,detectors,8418.0,ANOMALY,1,20,anomaly score 0.77 (threshold 0.76),True
-2023_Monaco,detectors,8457.0,ANOMALY,1,11,anomaly score 0.76 (threshold 0.76),True
 2023_Monaco,detectors,8534.0,STOPPED,2,20,"speed 0 km/h vs ref 147 km/h, on the racing line",False
-2023_Monaco,detectors,8668.0,ANOMALY,1,27,anomaly score 0.76 (threshold 0.76),True
 2023_Monaco,detectors,8674.25,STOPPED,7,23,"speed 0 km/h vs ref 79 km/h, on the racing line",False
 2023_Monaco,detectors,9423.75,STOPPED,7,22,"speed 13 km/h vs ref 89 km/h, on the racing line",False
 2023_Monaco,detectors,9684.25,STOPPED,2,2,"speed 0 km/h vs ref 133 km/h, on the racing line",True
-2023_Monaco,detectors,9762.25,ANOMALY,1,11,anomaly score 0.77 (threshold 0.76),True
 2023_Monaco,baseline,3758.5,STOPPED,8,14,speed 49 km/h < 50 km/h,False
 2023_Monaco,baseline,3759.0,STOPPED,7,2,speed 44 km/h < 50 km/h,False
 2023_Monaco,baseline,3759.0,STOPPED,8,31,speed 43 km/h < 50 km/h,False
@@ -1482,12 +1484,12 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2024_Canadian,baseline,5632.0,STOPPED,11,10,speed 43 km/h < 50 km/h,True
 2024_Canadian,baseline,5633.5,STOPPED,11,27,speed 44 km/h < 50 km/h,True
 2024_Canadian,baseline,6277.75,STOPPED,9,22,speed 9 km/h < 50 km/h,False
+2024_Mexico_City,anomaly_advisory,5830.0,ANOMALY,1,18,anomaly score 0.75 (threshold 0.75),True
+2024_Mexico_City,anomaly_advisory,6069.25,ANOMALY,1,27,anomaly score 0.75 (threshold 0.75),True
+2024_Mexico_City,anomaly_advisory,6908.0,ANOMALY,1,30,anomaly score 0.75 (threshold 0.75),True
 2024_Mexico_City,detectors,3380.0,IMPACT,3,22,"lost 104 km/h in 1 s (115 to 0 km/h), with brakes on",False
 2024_Mexico_City,detectors,3394.75,STOPPED,4,23,"speed 26 km/h vs ref 126 km/h, on the racing line",False
 2024_Mexico_City,detectors,3905.25,STOPPED,3,18,"speed 41 km/h vs ref 347 km/h, on the racing line",True
-2024_Mexico_City,detectors,5830.0,ANOMALY,1,18,anomaly score 0.75 (threshold 0.75),True
-2024_Mexico_City,detectors,6069.25,ANOMALY,1,27,anomaly score 0.75 (threshold 0.75),True
-2024_Mexico_City,detectors,6908.0,ANOMALY,1,30,anomaly score 0.75 (threshold 0.75),True
 2024_Mexico_City,baseline,3379.75,STOPPED,3,22,speed 3 km/h < 50 km/h,False
 2024_Mexico_City,baseline,3384.75,STOPPED,3,23,speed 43 km/h < 50 km/h,False
 2024_Mexico_City,baseline,3429.25,STOPPED,11,24,speed 49 km/h < 50 km/h,True
@@ -1578,6 +1580,13 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2024_Mexico_City,baseline,4112.0,STOPPED,13,14,speed 45 km/h < 50 km/h,True
 2024_Mexico_City,baseline,5167.5,STOPPED,6,18,speed 38 km/h < 50 km/h,True
 2024_Mexico_City,baseline,5288.5,STOPPED,14,11,speed 47 km/h < 50 km/h,True
+2024_Qatar,anomaly_advisory,4161.5,ANOMALY,2,18,anomaly score 0.77 (threshold 0.75),True
+2024_Qatar,anomaly_advisory,5505.75,ANOMALY,2,63,anomaly score 0.77 (threshold 0.75),True
+2024_Qatar,anomaly_advisory,5626.0,ANOMALY,2,77,anomaly score 0.76 (threshold 0.75),True
+2024_Qatar,anomaly_advisory,6237.0,ANOMALY,2,27,anomaly score 0.77 (threshold 0.75),True
+2024_Qatar,anomaly_advisory,6436.5,ANOMALY,2,81,anomaly score 0.76 (threshold 0.75),False
+2024_Qatar,anomaly_advisory,7967.5,ANOMALY,2,44,anomaly score 0.78 (threshold 0.75),True
+2024_Qatar,anomaly_advisory,8683.5,ANOMALY,2,23,anomaly score 0.77 (threshold 0.75),True
 2024_Qatar,detectors,3309.25,STOPPED,3,27,"speed 0 km/h vs ref 172 km/h, on the racing line",False
 2024_Qatar,detectors,3309.25,STOPPED,3,31,"speed 7 km/h vs ref 176 km/h, on the racing line",False
 2024_Qatar,detectors,3309.25,STOPPED,3,43,"speed 0 km/h vs ref 185 km/h, on the racing line",False
@@ -1587,15 +1596,9 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2024_Qatar,detectors,3325.0,MULTI,6,"18,23","cars 18, 23 in sectors 6-6 within 5 s",True
 2024_Qatar,detectors,3609.25,STOPPED,7,10,"speed 42 km/h vs ref 243 km/h, on the racing line",True
 2024_Qatar,detectors,3851.0,IMPACT,3,30,"lost 104 km/h in 1 s (117 to 0 km/h), with brakes on",False
-2024_Qatar,detectors,4161.5,ANOMALY,2,18,anomaly score 0.77 (threshold 0.75),True
-2024_Qatar,detectors,5505.75,ANOMALY,2,63,anomaly score 0.77 (threshold 0.75),True
-2024_Qatar,detectors,5626.0,ANOMALY,2,77,anomaly score 0.76 (threshold 0.75),True
-2024_Qatar,detectors,6237.0,ANOMALY,2,27,anomaly score 0.77 (threshold 0.75),True
-2024_Qatar,detectors,6436.5,ANOMALY,2,81,anomaly score 0.76 (threshold 0.75),False
 2024_Qatar,detectors,7087.25,IMPACT,15,11,"lost 84 km/h in 1 s (130 to 20 km/h), without braking",True
 2024_Qatar,detectors,7178.25,IMPACT,11,27,"lost 166 km/h in 1 s (222 to 67 km/h), with brakes on",False
-2024_Qatar,detectors,7967.5,ANOMALY,2,44,anomaly score 0.78 (threshold 0.75),True
-2024_Qatar,detectors,8683.5,ANOMALY,2,23,anomaly score 0.77 (threshold 0.75),True
+2024_Qatar,detectors,8689.0,STOPPED,2,23,"speed 80 km/h vs ref 291 km/h, on the racing line",True
 2024_Qatar,baseline,3307.5,STOPPED,3,27,speed 0 km/h < 50 km/h,False
 2024_Qatar,baseline,3307.5,STOPPED,3,31,speed 15 km/h < 50 km/h,False
 2024_Qatar,baseline,3307.5,STOPPED,3,43,speed 7 km/h < 50 km/h,False
@@ -1838,15 +1841,15 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Australian,baseline,9569.5,STOPPED,19,22,speed 47 km/h < 50 km/h,True
 2025_Australian,baseline,9570.0,STOPPED,19,16,speed 47 km/h < 50 km/h,True
 2025_Australian,baseline,9713.0,STOPPED,19,81,speed 48 km/h < 50 km/h,True
+2025_Azerbaijan,anomaly_advisory,5294.0,ANOMALY,21,23,anomaly score 0.80 (threshold 0.75),True
+2025_Azerbaijan,anomaly_advisory,5824.0,ANOMALY,2,30,anomaly score 0.77 (threshold 0.75),True
+2025_Azerbaijan,anomaly_advisory,5953.75,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
+2025_Azerbaijan,anomaly_advisory,6710.0,ANOMALY,2,87,anomaly score 0.76 (threshold 0.75),True
+2025_Azerbaijan,anomaly_advisory,6772.75,ANOMALY,21,6,anomaly score 0.80 (threshold 0.75),True
+2025_Azerbaijan,anomaly_advisory,7671.25,ANOMALY,2,18,anomaly score 0.77 (threshold 0.75),True
 2025_Azerbaijan,detectors,3500.5,IMPACT,7,81,"lost 83 km/h in 1 s (91 to 2 km/h), with brakes on",False
 2025_Azerbaijan,detectors,3660.5,STOPPED,7,10,"speed 29 km/h vs ref 244 km/h, on the racing line",True
-2025_Azerbaijan,detectors,5294.0,ANOMALY,21,23,anomaly score 0.80 (threshold 0.75),True
 2025_Azerbaijan,detectors,5461.25,IMPACT,7,43,"lost 80 km/h in 1 s (80 to 0 km/h), with brakes on",False
-2025_Azerbaijan,detectors,5824.0,ANOMALY,2,30,anomaly score 0.77 (threshold 0.75),True
-2025_Azerbaijan,detectors,5953.75,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
-2025_Azerbaijan,detectors,6710.0,ANOMALY,2,87,anomaly score 0.76 (threshold 0.75),True
-2025_Azerbaijan,detectors,6772.75,ANOMALY,21,6,anomaly score 0.80 (threshold 0.75),True
-2025_Azerbaijan,detectors,7671.25,ANOMALY,2,18,anomaly score 0.77 (threshold 0.75),True
 2025_Azerbaijan,baseline,3500.75,STOPPED,7,81,speed 0 km/h < 50 km/h,False
 2025_Azerbaijan,baseline,3537.75,STOPPED,15,14,speed 41 km/h < 50 km/h,True
 2025_Azerbaijan,baseline,3537.75,STOPPED,16,16,speed 45 km/h < 50 km/h,True
@@ -1913,6 +1916,19 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Azerbaijan,baseline,4028.5,STOPPED,17,12,speed 44 km/h < 50 km/h,True
 2025_Azerbaijan,baseline,5222.0,STOPPED,9,44,speed 44 km/h < 50 km/h,True
 2025_Azerbaijan,baseline,5461.75,STOPPED,7,43,speed 0 km/h < 50 km/h,False
+2025_Belgian,anomaly_advisory,9688.75,ANOMALY,2,44,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9692.5,ANOMALY,2,27,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9695.0,ANOMALY,2,10,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9803.25,ANOMALY,2,30,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9806.0,ANOMALY,2,5,anomaly score 0.75 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9815.5,ANOMALY,2,43,anomaly score 0.75 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9901.25,ANOMALY,2,4,anomaly score 0.75 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9924.0,ANOMALY,2,22,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9925.5,ANOMALY,2,6,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,9936.0,ANOMALY,2,31,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,11588.5,ANOMALY,2,43,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,11687.75,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
+2025_Belgian,anomaly_advisory,12002.5,ANOMALY,2,27,anomaly score 0.77 (threshold 0.75),True
 2025_Belgian,detectors,8365.25,STOPPED,9,55,"speed 37 km/h vs ref 216 km/h, on the racing line",True
 2025_Belgian,detectors,8415.25,STOPPED,16,43,"speed 38 km/h vs ref 288 km/h, on the racing line",True
 2025_Belgian,detectors,8415.25,STOPPED,15,44,"speed 33 km/h vs ref 283 km/h, on the racing line",True
@@ -1923,19 +1939,6 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Belgian,detectors,8421.25,MULTI,16,"12,14,18","cars 12, 14, 18 in sectors 16-16 within 5 s",True
 2025_Belgian,detectors,8618.0,STOPPED,19,12,"speed 56 km/h vs ref 311 km/h, on the racing line",True
 2025_Belgian,detectors,8640.5,STOPPED,3,5,"speed 41 km/h vs ref 290 km/h, on the racing line",True
-2025_Belgian,detectors,9688.75,ANOMALY,2,44,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,9692.5,ANOMALY,2,27,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,9695.0,ANOMALY,2,10,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,9803.25,ANOMALY,2,30,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,9806.0,ANOMALY,2,5,anomaly score 0.75 (threshold 0.75),True
-2025_Belgian,detectors,9815.5,ANOMALY,2,43,anomaly score 0.75 (threshold 0.75),True
-2025_Belgian,detectors,9901.25,ANOMALY,2,4,anomaly score 0.75 (threshold 0.75),True
-2025_Belgian,detectors,9924.0,ANOMALY,2,22,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,9925.5,ANOMALY,2,6,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,9936.0,ANOMALY,2,31,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,11588.5,ANOMALY,2,43,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,11687.75,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
-2025_Belgian,detectors,12002.5,ANOMALY,2,27,anomaly score 0.77 (threshold 0.75),True
 2025_Belgian,baseline,8251.75,STOPPED,20,16,speed 44 km/h < 50 km/h,True
 2025_Belgian,baseline,8252.25,STOPPED,20,1,speed 39 km/h < 50 km/h,True
 2025_Belgian,baseline,8253.0,STOPPED,20,23,speed 44 km/h < 50 km/h,True
@@ -1969,6 +1972,8 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Belgian,baseline,8642.75,STOPPED,1,44,speed 45 km/h < 50 km/h,True
 2025_Belgian,baseline,8647.75,STOPPED,2,12,speed 42 km/h < 50 km/h,True
 2025_Belgian,baseline,9159.0,STOPPED,20,12,speed 41 km/h < 50 km/h,True
+2025_British,anomaly_advisory,8220.75,ANOMALY,2,44,anomaly score 0.76 (threshold 0.75),True
+2025_British,anomaly_advisory,8285.25,ANOMALY,2,22,anomaly score 0.76 (threshold 0.75),True
 2025_British,detectors,3402.0,IMPACT,5,30,"lost 145 km/h in 1 s (211 to 76 km/h), with brakes on",False
 2025_British,detectors,3790.25,IMPACT,2,5,"lost 144 km/h in 1 s (193 to 5 km/h), with brakes on",False
 2025_British,detectors,3890.5,STOPPED,10,5,"speed 63 km/h vs ref 299 km/h, on the racing line",False
@@ -1976,8 +1981,6 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_British,detectors,5596.75,IMPACT,10,6,"lost 180 km/h in 1 s (218 to 0 km/h), harder than braking",False
 2025_British,detectors,6176.5,IMPACT,7,87,"lost 82 km/h in 1 s (118 to 77 km/h), without braking",False
 2025_British,detectors,7995.0,IMPACT,11,63,"lost 211 km/h in 1 s (237 to 0 km/h), harder than braking",False
-2025_British,detectors,8220.75,ANOMALY,2,44,anomaly score 0.76 (threshold 0.75),True
-2025_British,detectors,8285.25,ANOMALY,2,22,anomaly score 0.76 (threshold 0.75),True
 2025_British,detectors,8307.0,IMPACT,11,87,"lost 194 km/h in 1 s (273 to 37 km/h), harder than braking",False
 2025_British,detectors,8380.0,IMPACT,7,87,"lost 109 km/h in 1 s (137 to 8 km/h), with brakes on",False
 2025_British,detectors,8380.25,IMPACT,7,31,"lost 90 km/h in 1 s (140 to 68 km/h), without braking",False
@@ -2167,33 +2170,33 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Miami,baseline,6526.25,STOPPED,19,31,speed 49 km/h < 50 km/h,False
 2025_Miami,baseline,6526.5,STOPPED,12,30,speed 38 km/h < 50 km/h,False
 2025_Miami,baseline,6618.5,STOPPED,18,1,speed 42 km/h < 50 km/h,True
+2026_Australian,anomaly_advisory,7822.75,ANOMALY,2,55,anomaly score 0.77 (threshold 0.75),True
+2026_Australian,anomaly_advisory,8006.25,ANOMALY,1,18,anomaly score 0.75 (threshold 0.75),True
 2026_Australian,detectors,4663.25,STOPPED,13,6,"speed 73 km/h vs ref 288 km/h, on the racing line",False
 2026_Australian,detectors,4847.0,IMPACT,3,31,"lost 105 km/h in 1 s (207 to 102 km/h), without braking",True
 2026_Australian,detectors,5290.75,STOPPED,18,77,"speed 49 km/h vs ref 214 km/h, on the racing line",True
 2026_Australian,detectors,6615.25,IMPACT,17,63,"lost 98 km/h in 1 s (212 to 112 km/h), without braking",False
-2026_Australian,detectors,7822.75,ANOMALY,2,55,anomaly score 0.77 (threshold 0.75),True
-2026_Australian,detectors,8006.25,ANOMALY,1,18,anomaly score 0.75 (threshold 0.75),True
 2026_Australian,baseline,3757.5,STOPPED,0,81,speed 0 km/h < 50 km/h,True
 2026_Australian,baseline,4668.0,STOPPED,13,6,speed 28 km/h < 50 km/h,False
 2026_Australian,baseline,4898.25,STOPPED,19,44,speed 40 km/h < 50 km/h,True
 2026_Australian,baseline,5291.75,STOPPED,18,77,speed 49 km/h < 50 km/h,True
 2026_Australian,baseline,7988.0,STOPPED,19,55,speed 35 km/h < 50 km/h,True
+2026_Belgian,anomaly_advisory,4938.75,ANOMALY,2,11,anomaly score 0.77 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5128.25,ANOMALY,2,10,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5150.75,ANOMALY,2,55,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5239.0,ANOMALY,2,30,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5242.75,ANOMALY,2,43,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5444.5,ANOMALY,2,3,anomaly score 0.75 (threshold 0.75),False
+2026_Belgian,anomaly_advisory,5564.25,ANOMALY,2,12,anomaly score 0.75 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5601.5,ANOMALY,2,23,anomaly score 0.75 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5831.0,ANOMALY,2,6,anomaly score 0.75 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5834.25,ANOMALY,2,5,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5840.75,ANOMALY,2,27,anomaly score 0.77 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,5857.0,ANOMALY,2,87,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,6943.0,ANOMALY,2,1,anomaly score 0.76 (threshold 0.75),True
+2026_Belgian,anomaly_advisory,7192.0,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
 2026_Belgian,detectors,3395.75,IMPACT,7,63,"lost 88 km/h in 1 s (128 to 13 km/h), without braking",False
 2026_Belgian,detectors,3449.5,STOPPED,15,31,"speed 30 km/h vs ref 181 km/h, on the racing line",False
-2026_Belgian,detectors,4938.75,ANOMALY,2,11,anomaly score 0.77 (threshold 0.75),True
-2026_Belgian,detectors,5128.25,ANOMALY,2,10,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,5150.75,ANOMALY,2,55,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,5239.0,ANOMALY,2,30,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,5242.75,ANOMALY,2,43,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,5444.5,ANOMALY,2,3,anomaly score 0.75 (threshold 0.75),False
-2026_Belgian,detectors,5564.25,ANOMALY,2,12,anomaly score 0.75 (threshold 0.75),True
-2026_Belgian,detectors,5601.5,ANOMALY,2,23,anomaly score 0.75 (threshold 0.75),True
-2026_Belgian,detectors,5831.0,ANOMALY,2,6,anomaly score 0.75 (threshold 0.75),True
-2026_Belgian,detectors,5834.25,ANOMALY,2,5,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,5840.75,ANOMALY,2,27,anomaly score 0.77 (threshold 0.75),True
-2026_Belgian,detectors,5857.0,ANOMALY,2,87,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,6943.0,ANOMALY,2,1,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,7192.0,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
 2026_Belgian,detectors,8444.5,STOPPED,1,12,"speed 71 km/h vs ref 270 km/h, on the racing line",True
 2026_Belgian,baseline,3396.25,STOPPED,7,63,speed 0 km/h < 50 km/h,False
 2026_Belgian,baseline,3448.5,STOPPED,14,31,speed 25 km/h < 50 km/h,False
@@ -2205,13 +2208,14 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Belgian,baseline,5726.0,STOPPED,20,14,speed 35 km/h < 50 km/h,False
 2026_Belgian,baseline,5774.25,STOPPED,20,44,speed 41 km/h < 50 km/h,False
 2026_Belgian,baseline,5791.75,STOPPED,20,3,speed 46 km/h < 50 km/h,True
+2026_British,anomaly_advisory,5747.25,ANOMALY,2,23,anomaly score 0.76 (threshold 0.75),True
+2026_British,anomaly_advisory,6914.5,ANOMALY,10,27,anomaly score 0.77 (threshold 0.75),False
 2026_British,detectors,3381.5,IMPACT,7,87,"lost 93 km/h in 1 s (138 to 16 km/h), with brakes on",False
 2026_British,detectors,3384.5,STOPPED,7,23,"speed 21 km/h vs ref 170 km/h, on the racing line",False
 2026_British,detectors,3384.5,MULTI,7,"23,87","cars 23, 87 in sectors 7-7 within 5 s",False
 2026_British,detectors,3430.75,IMPACT,15,63,"lost 126 km/h in 1 s (231 to 100 km/h), without braking",True
 2026_British,detectors,3489.75,IMPACT,8,27,"lost 125 km/h in 1 s (135 to 45 km/h), with brakes on",False
-2026_British,detectors,5747.25,ANOMALY,2,23,anomaly score 0.76 (threshold 0.75),True
-2026_British,detectors,6914.5,ANOMALY,10,27,anomaly score 0.77 (threshold 0.75),False
+2026_British,detectors,6916.75,STOPPED,10,27,"speed 43 km/h vs ref 281 km/h, on the racing line",False
 2026_British,detectors,7814.75,IMPACT,14,3,"lost 148 km/h in 1 s (217 to 0 km/h), with brakes on",False
 2026_British,baseline,3382.0,STOPPED,7,87,speed 44 km/h < 50 km/h,False
 2026_British,baseline,3384.0,STOPPED,7,23,speed 19 km/h < 50 km/h,False
@@ -2405,6 +2409,8 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Italian,baseline,9665.5,STOPPED,3,77,speed 37 km/h < 50 km/h,True
 2026_Italian,baseline,9680.75,STOPPED,3,63,speed 49 km/h < 50 km/h,True
 2026_Italian,baseline,9683.5,STOPPED,3,12,speed 49 km/h < 50 km/h,True
+2026_Miami,anomaly_advisory,3922.0,ANOMALY,7,6,anomaly score 0.79 (threshold 0.75),True
+2026_Miami,anomaly_advisory,6652.25,ANOMALY,3,77,anomaly score 0.76 (threshold 0.75),True
 2026_Miami,detectors,3827.0,IMPACT,17,6,"lost 83 km/h in 1 s (194 to 101 km/h), with brakes on",True
 2026_Miami,detectors,3901.75,STOPPED,16,6,"speed 0 km/h vs ref 170 km/h, on the racing line",False
 2026_Miami,detectors,3921.75,STOPPED,18,10,"speed 10 km/h vs ref 70 km/h, on the racing line",False
@@ -2412,7 +2418,6 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Miami,detectors,3924.0,MULTI,18,"10,30","cars 10, 30 in sectors 18-18 within 5 s",False
 2026_Miami,detectors,4215.5,STOPPED,16,27,"speed 52 km/h vs ref 331 km/h, on the racing line",False
 2026_Miami,detectors,5149.0,STOPPED,18,18,"speed 13 km/h vs ref 80 km/h, on the racing line",False
-2026_Miami,detectors,6652.25,ANOMALY,3,77,anomaly score 0.76 (threshold 0.75),True
 2026_Miami,detectors,6928.75,IMPACT,17,77,"lost 84 km/h in 1 s (168 to 72 km/h), without braking",True
 2026_Miami,detectors,8991.0,IMPACT,4,16,"lost 87 km/h in 1 s (140 to 7 km/h), without braking",False
 2026_Miami,detectors,9049.5,STOPPED,1,12,"speed 71 km/h vs ref 288 km/h, on the racing line",True

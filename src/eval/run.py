@@ -9,6 +9,9 @@ Metrics per race and in total (definitions in src.eval.incidents):
   a car's first detection after 60 s without one (MULTI: per sector), and race hours
   exclude time suspended under a red flag
 - the same for the naive speed-threshold baseline
+ANOMALY detections are advisories (watch markers on the dashboard, confirmation for race
+control), not alerts: they are scored as their own system, anomaly_advisory, and never
+count towards the detectors' recall or false alarms.
 
 Run: python -m src.eval.run                       (all built training races, detectors vs baseline)
      python -m src.eval.run 2023_Australian 2024_Canadian --verbose
@@ -41,6 +44,16 @@ ALERT_GAP_S = 60.0
 FA_AFTER_S = 60.0         # an alert this long after an incident's last message still belongs to it
 MOVING_KMH = 60.0         # a held STOPPED alert ends when the car moves again ...
 MAX_HOLD_S = 900.0        # ... enters the pit lane, loses data, or after 15 minutes
+ADVISORY_TYPES = ("ANOMALY",)
+
+
+def rule_alerts(dets: list[dict]) -> list[dict]:
+    """Detections that are alerts: every type except the ANOMALY advisory."""
+    return [d for d in dets if d["type"] not in ADVISORY_TYPES]
+
+
+def advisories(dets: list[dict]) -> list[dict]:
+    return [d for d in dets if d["type"] in ADVISORY_TYPES]
 
 
 @dataclass
@@ -144,6 +157,9 @@ def run_race(rid: str, cfg: Config | None = None, anomaly: bool = True,
     for system, proc in (("detectors", suite), ("baseline", NaiveThreshold())):
         eng = Engine(race, [proc])
         dets = [e["data"] for e in eng.advance(eng.t_end) if e["kind"] == "detection"]
+        if system == "detectors":
+            out.append(score(race, "anomaly_advisory", advisories(dets)))
+            dets = rule_alerts(dets)
         out.append(score(race, system, dets))
     return out
 
@@ -193,7 +209,7 @@ def main() -> None:
     print(df.pivot(index="race", columns="system", values=["recall", "median_lead_s", "fa_per_hour"]).round(2))
     print()
     print(tot.round(3).to_string(index=False))
-    al = pd.DataFrame([row for r in results for row in r.alert_rows if r.system == "detectors"])
+    al = pd.DataFrame([row for r in results for row in r.alert_rows if r.system in ("detectors", "anomaly_advisory")])
     if len(al):
         print("\ndetector alerts by type:")
         print(al.groupby("type")["false_alarm"].agg(alerts="size", false_alarms="sum").to_string())
@@ -207,9 +223,11 @@ def main() -> None:
         pd.DataFrame([row for r in results for row in r.alert_rows]).to_csv(CHARTS / "detect_alerts.csv", index=False, encoding="utf-8")
         by_type = (al.groupby("type")["false_alarm"].agg(alerts="size", false_alarms="sum").reset_index()
                    if len(al) else pd.DataFrame())
-        anomaly_note = ("ANOMALY: model trained on the other training races (leave-one-race-out), alerting "
-                        "above the 99.995th percentile of scores on normal racing and only for cars slower than "
-                        "the field or their own last lap." if not a.no_anomaly else "ANOMALY: off for this run.")
+        anomaly_note = ("ANOMALY is an advisory, not an alert: its detections are scored as their own row "
+                        "(anomaly_advisory) and are not counted in the detectors' recall or false alarms. Model "
+                        "trained on the other training races (leave-one-race-out), firing above the 99.995th "
+                        "percentile of scores on normal racing and only for cars slower than the field or their own "
+                        "last lap." if not a.no_anomaly else "ANOMALY: off for this run.")
         (CHARTS / "detect_eval.md").write_text(
             "# Detection eval (training races)\n\nReplay of historical FastF1 data. Matching and metric "
             "definitions: src/eval/incidents.py and src/eval/run.py.\n\n"
@@ -219,7 +237,8 @@ def main() -> None:
             + " Baseline: the untuned naive speed threshold (any car below 50 km/h outside the pit lane for 1 s); "
             "for a like-for-like comparison at the same false-alarm rate see tune_results.md.\n\n"
             + tot.round(3).to_markdown(index=False)
-            + "\n\n## Detector alerts by type\n\n" + (by_type.to_markdown(index=False) if len(by_type) else "none")
+            + "\n\n## Detector alerts and ANOMALY advisories by type\n\n"
+            + (by_type.to_markdown(index=False) if len(by_type) else "none")
             + "\n\n## Per race\n\n" + df.round(3).to_markdown(index=False) + "\n", encoding="utf-8")
 
 

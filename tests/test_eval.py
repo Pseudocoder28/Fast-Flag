@@ -82,3 +82,13 @@ def test_impact_signal_is_scored_against_always_sc() -> None:
                          "onset_car_alerts": a} for f, a in rows])
     r = impact_signal(off)
     assert r["right_with_impact_rule"] == 3 and r["right_if_always_sc"] == 2
+
+
+def test_onset_is_the_start_of_the_last_chain_of_collapses_before_the_first_message() -> None:
+    from src.eval.latency_by_type import onset_cars, pick_onset
+    cand = pd.DataFrame({"t": [100.0, 170.0, 172.0, 184.0], "drv": ["30", "27", "55", "4"]})
+    onset = pick_onset(cand, t_first=180.0)
+    assert onset["drv"] == "27"                           # 55 hit 27 two seconds later: the chain starts with 27
+    assert onset_cars(cand, onset) == {"27", "55", "4"}   # car 30 slowed 70 s earlier: not part of this incident
+    late = pd.DataFrame({"t": [182.0, 184.0], "drv": ["1", "2"]})
+    assert pick_onset(late, t_first=180.0)["drv"] == "1"  # none before the message: the first just after it

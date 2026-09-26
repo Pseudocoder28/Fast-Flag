@@ -8,8 +8,6 @@ from pathlib import Path
 from tests.test_contracts import check_rec
 
 from src.racecontrol.engine import (
-    ANOMALY_MAX_CONF,
-    ANOMALY_MIN_SEV,
     GLOBAL_CLEAR_AFTER_S,
     GLOBAL_MIN_HOLD_S,
     GLOBAL_RANK,
@@ -241,19 +239,12 @@ def test_no_downgrade_before_hold_and_clear_window() -> None:
 # --- ANOMALY ------------------------------------------------------------
 
 
-def test_anomaly_alone_capped_at_yellow_and_low_confidence() -> None:
-    rc = RaceControl()
-    rc.on_tick(make_tick(0.0, [make_car("23", 9)]))
-    recs = rc.on_detection(make_det("det-1", 0.0, "23", 9, "ANOMALY", 0.9))
-    assert recs and recs[0]["flag"] == "YELLOW"
-    assert recs[0]["confidence"] <= ANOMALY_MAX_CONF
-
-
-def test_anomaly_below_threshold_does_nothing() -> None:
-    rc = RaceControl()
-    rc.on_tick(make_tick(0.0, [make_car("23", 9)]))
-    recs = rc.on_detection(make_det("det-1", 0.0, "23", 9, "ANOMALY", ANOMALY_MIN_SEV - 0.1))
-    assert recs == []
+def test_anomaly_alone_is_an_advisory_and_raises_no_flag() -> None:
+    for severity in (0.5, 0.99):
+        rc = RaceControl()
+        rc.on_tick(make_tick(0.0, [make_car("23", 9)]))
+        assert rc.on_detection(make_det("det-1", 0.0, "23", 9, "ANOMALY", severity)) == []
+        assert 9 not in rc.sectors or rc.sectors[9].flag == "CLEAR"
 
 
 def test_anomaly_corroboration_boosts_physical_rec_not_itself() -> None:
