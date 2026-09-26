@@ -8,6 +8,7 @@ Run it on Naman's Mac: the holdout data (`data/holdout/2026_Azerbaijan*`) is onl
 
 - "This is a replay of historical FastF1 data from this morning's Azerbaijan Grand Prix. Our models never saw this race: it was run once, after the code was frozen."
 - Say "earlier than the race control feed". Never say "earlier than the marshals": marshals wave local flags before any race control message.
+- Car colours (risk heat) are an honest prediction here, because the model never saw this race. On the 20 training races the risk model trained on the very race, so red cars there are memory, not prediction: never present them as a prediction (the fallback below uses the mock, whose risk values come from the leave-one-race-out model).
 - Numbers on slides come only from `docs/charts/NUMBERS.md`. The leads in this segment are read off the screen, from the live replay.
 
 ## Setup (before going on stage)

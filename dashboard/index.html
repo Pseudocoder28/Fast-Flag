@@ -6,7 +6,7 @@
 <title>Fast Flag pit wall</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23111418'/%3E%3Cpath d='M4 2.5v11' stroke='%23e6e8eb' stroke-width='1.4'/%3E%3Cpath d='M5 3h7l-1.6 2.4L12 7.8H5z' fill='%23ffd400'/%3E%3C/svg%3E">
 <!-- bump v= on every dashboard change, so a normal reload never runs cached code -->
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 <div id="app">
@@ -30,7 +30,7 @@
   <main id="map-panel" class="panel">
     <div class="map-wrap">
       <canvas id="track" aria-label="Track map with marshal sectors and cars"></canvas>
-      <div class="map-note">Cars coloured by predicted incident risk in the next 30 s</div>
+      <div class="map-note">Car colour: risk model heat for the next 30 s. A prediction only on races the model never trained on (2021 and 2026 Azerbaijan)</div>
     </div>
 
     <section class="timeline" aria-label="Lead time over the race control feed">
@@ -91,6 +91,6 @@
     </section>
   </aside>
 </div>
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>
