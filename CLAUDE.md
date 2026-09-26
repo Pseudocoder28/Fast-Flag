@@ -4,8 +4,10 @@ Short rules and contracts. `PROJECT_BRIEF.md` is the single source of truth for 
 
 ## Who is who
 
-- **A = Naman.** Claude Max account, Mac, main builder. Owns `src/ingest/`, `src/replay/` (including the FastAPI server and mock server), `src/detect/`, `src/predict/`, `src/eval/`, `fixtures/`, `docs/charts/` and `requirements-a.txt`. Starts with `docs/KICKOFF.md`, then follows `docs/session_a.md`.
-- **B = Ishaan.** Claude Pro account. Owns `src/racecontrol/`, `src/bridge/`, `dashboard/`, `firmware/`, `requirements-b.txt`, the pitch slides and the demo script. Follows `docs/session_ishaan.md`.
+- **A = Naman.** Claude Max account, Mac, main builder. Owns `src/ingest/`, `src/replay/` (including the FastAPI server and mock server), `src/detect/`, `src/predict/`, `src/eval/`, `src/racecontrol/`, `dashboard/`, `fixtures/`, `docs/charts/` and `requirements-a.txt`. Starts with `docs/KICKOFF.md`, then follows `docs/session_a.md`.
+- **B = Ishaan.** Claude Pro account, and a Codex account while his Claude limit resets. Owns `src/bridge/`, `firmware/`, `requirements-b.txt`, the pitch slides and the demo script. Tests the dashboard in his browser after every push and reports issues to Naman. Follows `docs/session_ishaan.md`.
+- **Handover (26 Sept, agreed by both):** `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol.py` moved from B to A when Ishaan's Claude limit ran out.
+- **Tests:** `tests/test_<area>.py` belongs to the owner of that area. `tests/test_contracts.py` stays shared.
 - **Shared, changed only by agreement:** `CLAUDE.md`, `PROJECT_BRIEF.md`, `docs/` (except `docs/charts/`), `requirements.txt`, `tests/test_contracts.py`, `pytest.ini`, `.gitignore`, `README.md`.
 
 ## Hard rules
@@ -24,7 +26,9 @@ Short rules and contracts. `PROJECT_BRIEF.md` is the single source of truth for 
 - WebSocket `ws://localhost:8000/stream`, envelope `{"kind": "tick|detection|risk|rec|official", "data": {...}}`.
 - Detection types: STOPPED, IMPACT, SPIN, DROPOUT, MULTI, ANOMALY. Recommendation flags: CLEAR, YELLOW, DOUBLE_YELLOW, VSC, SC, RED.
 - racecontrol publishes by sending `rec` envelopes on the same socket, and the server rebroadcasts them.
-- HTTP: `POST /replay`, `GET /track`, `GET /official`, dashboard served at `/`. The mock server implements all of these, plus `--no-recs`.
+- HTTP: `POST /replay`, `GET /track`, `GET /official`, `GET /status`, `GET /races`, dashboard served at `/`. The mock server implements all of these, plus `--no-recs`.
+- `RaceControl.on_tick(tick)` returns `(recs, did_reset)`. `on_detection` and `on_risk` return a list of recs.
+- Parked until after M2: the proposed `human` envelope. It is not in the contract, so nothing sends or handles it yet.
 - Units: seconds (SessionTime), metres, km/h. `drv` is the car number as a string.
 - `official` data: `{t, category, message, flag, scope, msector, drivers}`, `msector` null when track-wide. Tick: cars with no fresh data are omitted, `gap_ahead_m` is -1.0 when unknown.
 - Serial protocol: PROJECT_BRIEF.md Section 7.7.

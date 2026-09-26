@@ -199,8 +199,9 @@ Reactive but fast. Each detector outputs the Detection contract.
 - Leave-one-race-out cross validation. Then one single run on the holdout.
 - Frame honestly: some incidents have no precursor. This is risk forecasting, not a crystal ball.
 
-### 6.5 Race control engine (B)
+### 6.5 Race control engine (A, taken over from B on 26 Sept)
 Consumes detections + risk, maintains a per-sector flag state machine, emits Recommendations.
+- Interface (`src/racecontrol/engine.py`, class `RaceControl`): `on_tick(tick)` returns `(recs, did_reset)`, where `did_reset` is True when the tick jumped back in time (seek or loop) and all flag state was wiped. `on_detection(det)` and `on_risk(risk)` return a list of recs.
 - Single car stopped in run-off, low severity: YELLOW in that sector.
 - Car stopped on racing line, or high severity: DOUBLE_YELLOW, consider VSC.
 - Multi-car incident or high SC probability: SC.
@@ -209,7 +210,7 @@ Consumes detections + risk, maintains a per-sector flag state machine, emits Rec
 - Hysteresis so flags do not flicker.
 - Narration: template message immediately ("YELLOW IN TRACK SECTOR 7"), optional Ollama-generated steward summary generated asynchronously. The LLM never decides, it only explains.
 
-### 6.6 Dashboard (B)
+### 6.6 Dashboard (A, taken over from B on 26 Sept)
 - Served by FastAPI as static HTML + JS, subscribes to the WebSocket. No build step, no CDN dependencies (WiFi).
 - Canvas track map: reference line, marshal sectors colored by current flag, car dots colored by risk.
 - Alert feed: time, car(s), sector, recommendation, confidence, reason.
@@ -268,6 +269,9 @@ Consumes detections + risk, maintains a per-sector flag state machine, emits Rec
 - Publishing: any client may send an envelope with `kind` = `rec` on the same socket. The server rebroadcasts it to every subscriber. The mock server does the same.
 - `GET /track` returns the map for the loaded race: `{"race": "2024_Singapore", "ref_line": [[x, y], ...], "msectors": [{"id": 7, "start_dist": 0.0, "end_dist": 0.0}], "corners": [{"number": 1, "x": 0.0, "y": 0.0}]}` (metres).
 - `GET /official` returns all official events for the loaded race, for the dashboard timeline and jump-to-incident list only. Never fed to detect or predict.
+- `GET /status` returns the replay state: `{"race": "2023_Australian", "t": 4390.25, "speed": 1.0, "t_start": 4240.0, "t_end": 4569.75, "clients": 2}`. The real server adds `"finished": false`. `POST /replay` returns the same object.
+- `GET /races` returns the race ids that can be loaded with `POST /replay`, e.g. `["2023_Australian", "2024_Canadian"]`. The real server lists built training races (plus the holdout only when started with `--holdout`), the mock server lists only the fixture race.
+- Parked until after M2: the proposed `human` envelope kind. It is not part of the contract, so nothing sends or handles it yet.
 - Official event shape (the `data` of an `official` envelope and each item of `GET /official`), added at kickoff:
   `{"t": 4390.18, "category": "Flag", "message": "YELLOW IN TRACK SECTOR 9", "flag": "YELLOW|DOUBLE_YELLOW|RED|SC|VSC|CLEAR", "scope": "Sector|Track", "msector": 9, "drivers": []}`. `msector` is `null` for track-wide events (SC, VSC, RED, TRACK CLEAR).
 - Tick details, added at kickoff: a car with no fresh data (latest sample older than 1 s) is left out of that tick (that gap is a DROPOUT signal). `gap_ahead_m` is `-1.0` when unknown (for example in the pit lane). Values at tick t are the latest sample at or before t, never interpolated towards a future sample.
@@ -316,9 +320,9 @@ fast-flag/
     detect/                # A
     predict/               # A: risk model, SC model
     eval/                  # A: matching, metrics, chart data
-    racecontrol/           # B: rules, flag state machine, narration
+    racecontrol/           # A (from B, 26 Sept): rules, flag state machine, narration
     bridge/                # B: serial bridge (after MVP)
-  dashboard/               # B: static HTML/JS served by FastAPI
+  dashboard/               # A (from B, 26 Sept): static HTML/JS served by FastAPI
   firmware/                # B (after MVP)
     uno_marshal/
     nano_dash/
@@ -330,14 +334,20 @@ Git: each person commits only in owned directories. `main` only receives working
 
 ## 9. Ownership
 
-**A (teammate, this account):** src/ingest, src/replay, src/detect, src/predict, src/eval, fixtures/, server.
-**B (Ishaan):** src/racecontrol, dashboard/, src/bridge, firmware/, pitch slides, demo script.
+**A (Naman, this account):** src/ingest, src/replay (server and mock server), src/detect, src/predict, src/eval, src/racecontrol, dashboard/, fixtures/, docs/charts/.
+**B (Ishaan):** src/bridge, firmware/, pitch slides, demo script. Tests the dashboard in his browser after every push and reports issues to A.
 
-Shared: CLAUDE.md, PROJECT_BRIEF.md, docs/, requirements.txt, tests/test_contracts.py. New packages go in your own requirements-a.txt or requirements-b.txt, pinned, and you announce them.
+Handover on 26 Sept (agreed by both): src/racecontrol, dashboard/ and tests/test_racecontrol.py moved from B to A when B's Claude limit ran out. B uses a Codex account while the limit resets.
+
+Tests: tests/test_<area>.py belongs to the owner of that area. tests/test_contracts.py stays shared.
+
+Shared: CLAUDE.md, PROJECT_BRIEF.md, docs/ (except docs/charts/), requirements.txt, tests/test_contracts.py. New packages go in your own requirements-a.txt or requirements-b.txt, pinned, and you announce them.
 
 ---
 
 ## 10. Timeline and milestones
+
+Since the 26 Sept handover (Section 9), the racecontrol and dashboard items below marked B are done by A.
 
 **M0, 1:00pm: Kickoff done**
 - Cache scan running, repo scaffolded, CLAUDE.md written, contracts agreed

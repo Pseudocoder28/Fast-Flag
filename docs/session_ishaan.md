@@ -1,21 +1,24 @@
 # Session: Ishaan (B)
 
-Start Claude Code in the repo folder and send:
+Start Claude Code (or Codex, see below) in the repo folder and send:
 `Read CLAUDE.md, PROJECT_BRIEF.md and docs/session_ishaan.md, then follow docs/session_ishaan.md.`
 
 Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 
 ## Role
 
-- Race control engine, dashboard, serial bridge, firmware, pitch slides and demo script.
-- Owned: `src/racecontrol/`, `src/bridge/`, `dashboard/`, `firmware/`, `requirements-b.txt`.
+- Serial bridge, firmware, pitch slides and demo script. Tests the dashboard in the browser after every push.
+- Owned: `src/bridge/`, `firmware/`, `requirements-b.txt`.
+- Handover (26 Sept, agreed): `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol.py` are Naman's now. B1 to B3 (engine, client, dashboard skeleton) are done and merged in PR #5. Report dashboard and race control problems to Naman, never fix them yourself.
 - Branch: `b-work`. Commit messages start with `B:`.
+- `b-work` was deleted on GitHub after PR #5 merged. Your local `b-work` is fine: `git push -u origin b-work` recreates it the next time you push.
 
 ## Claude Code setup (Pro account)
 
 - `claude update`
 - `claude --model sonnet` inside the repo folder.
 - Stubborn bug after 2 tries: `/model`, pick Opus, press `s` (this session only).
+- Claude limit used up: use your Codex account until it resets. Codex does not read `CLAUDE.md` on its own, so always start it with the first message above. Every `CLAUDE.md` rule applies to Codex too.
 
 ## Setup
 
@@ -28,7 +31,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 5. `git checkout b-work && git merge main`
 6. `pytest` (must pass)
 7. `python -m src.replay.mock_server`
-8. Open http://localhost:8000 (a placeholder page until you create `dashboard/index.html` in B3).
+8. Open http://localhost:8000 (the dashboard).
 
 ## Fixture facts (what the mock server plays)
 
@@ -36,7 +39,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 - Incident: car `23` (Albon) crashes at Turn 6, marshal sector 9. IMPACT at t=4387.25, STOPPED at t=4390.5.
 - Official: YELLOW sector 9 at t=4390.18, SC at t=4402.18, RED at t=4560.18.
 - Jump straight to it: `curl -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 1, "seek_t": 4370}'`. Speed 0 pauses.
-- `GET /status` shows current replay time and speed.
+- `GET /status` shows current replay time and speed. `GET /races` lists the races you can load.
 - `official` data: `{t, category, message, flag, scope, msector, drivers}`, `msector` is null for track-wide events (SC, RED).
 - Ticks: a car with no fresh data is left out of that tick. `gap_ahead_m` is -1.0 when unknown.
 - Detections, risk and recs in the fixtures are hand-built. Ticks and official events are real data.
@@ -50,41 +53,28 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 - SG90 servo sweeps. Buzzer sounds through a BJT (never driven straight from a pin).
 - Done when: you message Naman a list of working and dead parts.
 
-**B1. Race control engine core (1:00pm to 5:00pm)**
-- Goal: per-sector flag state machine (PROJECT_BRIEF.md Section 6.5).
-- Input: `tick`, `detection`, `risk` (Sections 7.1 to 7.3).
-- Output: `rec` (Section 7.4).
-- Pure logic in `src/racecontrol/engine.py`: class `RaceControl` with `on_tick`, `on_detection` and `on_risk`, each returning a list of recs. Rules from 6.5, hysteresis and clearing after N seconds.
-- Template message on every rec, e.g. `YELLOW IN TRACK SECTOR 7`.
-- Put your tests in your own files, e.g. `tests/test_racecontrol.py`.
-- Done when: a pytest test feeds `fixtures/detections_sample.jsonl` and `fixtures/ticks_sample.jsonl` and gets YELLOW or stronger for the fixture incident, with no flag flicker.
+**Ongoing: test the dashboard in your browser after every push (now until code freeze)**
+- Goal: a second laptop and browser catch dashboard problems early. You report, Naman fixes.
+- When Naman says he pushed:
+  1. Save your own work: commit it, or `git stash`.
+  2. `git fetch origin && git checkout --detach origin/a-work`
+  3. Terminal 1: `python -m src.replay.mock_server --no-recs`
+  4. Terminal 2: `python -m src.racecontrol`
+  5. Open http://localhost:8000, then jump to the incident: `curl -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 1, "seek_t": 4370}'`
+  6. Try speed 10 and 50: same curl with `'{"speed": 10}'` and `'{"speed": 50}'`.
+  7. If you have `data/features` and `data/models` from Naman: stop terminal 1, run `python -m src.replay.server` instead and repeat steps 4 to 6.
+  8. Back to your branch: `git checkout b-work`, then `git stash pop` if you stashed.
+- Check:
+  - Cars move smoothly at 1x, 10x and 50x.
+  - Car 23 stops in sector 9 and is clearly marked as stopped.
+  - Sector 9 lights up on the map and a row appears in the alert feed before the official YELLOW at t=4390.18.
+  - The banner says it is a replay of historical FastF1 data.
+  - Nothing overlaps or gets cut off at your screen size.
+  - No errors in the browser console (F12, Console tab).
+- Report to Naman: what you did, what you saw, a screenshot, browser name and window size. Never edit `dashboard/` or `src/racecontrol/`.
+- Done when: every push Naman tells you about gets either "works" or an issue list from you.
 
-**B2. Race control client (1:00pm to 5:00pm)**
-- Goal: run the engine live on the stream.
-- Input: envelopes from `ws://localhost:8000/stream`.
-- Output: `rec` envelopes sent back on the same socket (the server rebroadcasts them).
-- `python -m src.racecontrol` connects, feeds the engine and sends recs.
-- Done when: with `python -m src.replay.mock_server --no-recs` running, your recs appear on the stream.
-
-**B3. Dashboard skeleton (1:00pm to 5:00pm)**
-- Goal: pit wall view (Section 6.6).
-- Input: `GET /track`, stream envelopes.
-- Output: `dashboard/index.html`, `dashboard/app.js`, `dashboard/style.css`. No CDN, no build step.
-- Canvas map: reference line, marshal sectors coloured by current flag, car dots coloured by risk.
-- Alert feed: time, cars, sector, flag, confidence, reason.
-- Done when: the mock replay shows cars moving and the fixture incident appears in the feed.
-
-**B4. Dashboard features (5:00pm to 9:00pm)**
-- Lead-time timeline: our recs next to `official` envelopes.
-- Replay controls: speed and seek through `POST /replay`, jump-to-incident list from `GET /official`.
-- Banner on screen: "Replay of historical FastF1 data" (honesty rule).
-- Done when: you can jump to the fixture incident and see our alert time next to the official one.
-
-**M1 at 9:00pm:** Naman merges the real server. Pull `main`, merge it into `b-work` and run the dashboard and racecontrol against the real stream instead of the mock.
-
-**B5. Integration (9:00pm to midnight)**
-- Fix your side of any mismatch. Contract mismatches in A's code: message Naman, never patch his files.
-- Done when: a training race incident runs end to end on Naman's laptop.
+**M1:** Naman runs the real server, racecontrol and dashboard end to end and merges into `main`. Pull `main` and merge it into `b-work`.
 
 **M2 at midnight: MVP checkpoint.** Replay, detect, recommend and dashboard working end to end.
 
@@ -98,8 +88,8 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 **M3 at 5:00am:** prediction, narration and hardware working.
 
 **B7. Pitch (5:00am to 8:00am)**
-- Dashboard polish.
-- Slides and 3-minute demo script following PROJECT_BRIEF.md Section 12, using Naman's charts in `docs/charts/`.
+- Tell Naman what the dashboard still needs for the demo (he does the dashboard polish now).
+- Slides and 3-minute demo script following PROJECT_BRIEF.md Section 12, using Naman's charts in `docs/charts/`. Every number on a slide comes from `docs/charts/NUMBERS.md` (Naman writes it, ask him if a figure is missing).
 - Prepare the judge questions in Section 12.
 
 **M4 at 8:00am: code freeze.** Rehearse the demo 3+ times, record a backup video, finalize slides by 10:30am, submit by 11:30am.
@@ -110,8 +100,9 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 
 ## Don't touch
 
-- `src/ingest/`, `src/replay/`, `src/detect/`, `src/predict/`, `src/eval/`, `fixtures/`, `docs/charts/`
-- `CLAUDE.md`, `PROJECT_BRIEF.md`, `requirements.txt`, `tests/test_contracts.py`, `tests/test_mock_server.py`
+- `src/ingest/`, `src/replay/`, `src/detect/`, `src/predict/`, `src/eval/`, `src/racecontrol/`, `dashboard/`, `fixtures/`, `docs/charts/`
+- Naman's tests: `tests/test_racecontrol.py`, `tests/test_mock_server.py` and every other `tests/test_<area>.py` for his areas.
+- Shared, only by agreement: `CLAUDE.md`, `PROJECT_BRIEF.md`, `requirements.txt`, `tests/test_contracts.py`
 
 ## Merging
 
