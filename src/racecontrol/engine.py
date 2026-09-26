@@ -17,6 +17,10 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   a crash is never hidden behind another car's stop. Lateral offset cannot make this
   call: FastF1 positions of stopped cars sit on the racing line even in run-off
   (docs/charts/escalation.md).
+- ANOMALY is an advisory: it never raises a flag on its own (86 of its 89 alerts on
+  the training races matched no official incident, docs/charts/detect_eval.md). It
+  only raises the confidence of a sector that a physical detection flagged within
+  ANOMALY_CORROBORATION_WINDOW_S. The dashboard shows it as a watch marker.
 - A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
   wipes all flag state.
 """
@@ -34,8 +38,6 @@ ON_TRACK_LAT_OFF_M = 8.0
 DROPOUT_HIGH_SEV = 0.9
 MULTI_SC_SEV = 0.85
 RED_SEV = 0.95
-ANOMALY_MIN_SEV = 0.75
-ANOMALY_MAX_CONF = 0.6
 ANOMALY_CORROBORATION_WINDOW_S = 5.0
 ANOMALY_CORROBORATION_BOOST = 0.15
 SC_STOPPED_HOLD_S = 3.0      # stopped after an impact: SC after this long
@@ -272,6 +274,8 @@ class RaceControl:
         return None
 
     def _on_anomaly(self, det: dict) -> list[dict]:
+        """Advisory only: confirms a sector a physical detection flagged moments ago,
+        never raises a flag by itself."""
         msector = det["msector"]
         det_t = det["t"]
         sec = self.sectors.setdefault(msector, SectorState())
@@ -289,28 +293,7 @@ class RaceControl:
                 )
             ]
 
-        if det["severity"] < ANOMALY_MIN_SEV:
-            return []
-
-        target = "YELLOW"
-        conf = min(ANOMALY_MAX_CONF, det["severity"])
-        if SECTOR_RANK[target] <= SECTOR_RANK[sec.flag]:
-            return []
-
-        drv = det["drivers"][0]
-        reason = f"anomaly score high for car {drv}"
-        sec.flag = target
-        sec.since_t = det_t
-        sec.confidence = conf
-        sec.reason = reason
-        sec.cause_drivers |= set(det["drivers"])
-        sec.cause_detection_ids.append(det["id"])
-        return [
-            self._make_rec(
-                det_t, msector, target, conf, reason,
-                _sector_message(target, msector), sec.cause_detection_ids,
-            )
-        ]
+        return []
 
     def _physical_target(
         self, det: dict, sec: SectorState, car: dict, drv: str
