@@ -385,3 +385,16 @@ def test_only_track_clear_ends_a_track_wide_flag() -> None:
     envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "STOPPED"), rec(100.0, "DOUBLE_YELLOW", 9, ["d1"]),
             rec(103.0, "SC", 9, []), rec(120.0, "CLEAR", 9, [], ""), rec(125.0, "CLEAR", 9, [], "TRACK CLEAR")]
     assert [u.text for u in narrate(envs)][-2:] == ["Sector 9 clear.", "Track clear."]
+
+
+def test_forward_seek_resets_like_the_engine() -> None:
+    # live test on 2021 Azerbaijan: a seek from Stroll's crash (SC out, never cleared) to Verstappen's
+    # muted the new Safety Car and both confirmations until the voice reset on forward jumps too
+    stroll = [tick(5262.0, 20), det("a", 5275.25, ["18"], 20, "IMPACT"), rec(5275.25, "YELLOW", 20, ["a"]),
+              rec(5279.25, "SC", 20, ["a"]), official(5311.99, "SC", None), tick(5321.0, 20)]
+    ver = [tick(7266.0, 21), det("c", 7279.0, ["33"], 21, "IMPACT"), rec(7279.0, "YELLOW", 21, ["c"]),
+           rec(7283.25, "SC", 21, []), official(7297.99, "DOUBLE_YELLOW", 21), official(7366.99, "SC", None)]
+    assert [u.text for u in narrate(stroll + ver)][-4:] == [
+        "Yellow flag. Car 33, impact, sector 21.", "Safety Car. Car 33, impact, sector 21.",
+        "Race control confirms Double yellow, 19.0 seconds after Fast Flag.",
+        "Race control confirms Safety Car, 83.7 seconds after Fast Flag."]

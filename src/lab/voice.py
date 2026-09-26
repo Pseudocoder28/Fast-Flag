@@ -161,7 +161,7 @@ class Narrator:
 
     def on_tick(self, tick: dict) -> list[Utterance]:
         t = float(tick["t"])
-        if self.t is not None and t < self.t - RESET_JUMP_S:
+        if self.t is not None and abs(t - self.t) > RESET_JUMP_S:     # a seek or loop, back or forward
             self.reset()
         self.t = t
         for car in tick.get("cars", []):

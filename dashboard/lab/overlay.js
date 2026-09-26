@@ -402,7 +402,7 @@ function remember(drv, dist, speed, green) {
 
 function onTick(tick) {
   const t = Number(tick.t);
-  if (S.t !== null && t < S.t - RESET_JUMP_S) resetAll();
+  if (S.t !== null && Math.abs(t - S.t) > RESET_JUMP_S) resetAll();     // a seek or loop, back or forward
   S.t = t;
   ui.replayT.textContent = `REPLAY t ${t.toFixed(1)} s · LAP ${tick.lap}`;
   let maxDist = 0;
