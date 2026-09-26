@@ -74,6 +74,8 @@ Close on the slide with `docs/lab/delay_cost_2021_Azerbaijan_car18_5274.png`, or
 | 7 cars | Passed at racing speed between the crash onset and race control's Safety Car (delay-cost chart). One more car, Gasly, passed 0.3 s before our call, so it is not in the overlay's count. | `delay_cost.json` |
 | 0.12 cars per second | Mean over the 62 crash curves, first 60 s after onset. | `delay_cost.json` |
 
+The slide numbers come from `docs/charts/NUMBERS.md`, section "Lab: cost of delay". The overlay's live clock can differ from them by a car. The chart compares each car with its own previous 3 clean laps. The overlay can only compare with what it has seen since the page loaded: the car's last green lap, or the field's median speed at that point. For Stroll both give 6. For Verstappen the chart gives 11 from our call and the live overlay showed 12.
+
 If a judge asks why the clock says 6 and the chart says 7: the chart counts from the crash, the clock counts from our call.
 
 ## Backup clip: Verstappen, same race (if there is time, or if the Stroll run misbehaves)
@@ -82,8 +84,9 @@ Car 33, lap 46, onset 7278.25 s, again a tyre failure on the straight. Cue with 
 
 - Voice: "Yellow flag. Car 33, impact, sector 21." (7279.0), then Double yellow, then "Safety Car. Car 33, stopped, sector 21." (7283.25).
 - Race control's double yellow comes at 7297.99: "Race control confirms Double yellow, 19.0 seconds after Fast Flag."
-- Race control's Safety Car comes at 7366.99: "Race control confirms Safety Car, 83.7 seconds after Fast Flag." The clock freezes at 83.7 s with 12 cars exposed.
-- Say: "83.7 seconds between our Safety Car call and race control's. 12 cars passed the wreck at racing speed in that time."
+- Race control's Safety Car comes at 7366.99: "Race control confirms Safety Car, 83.7 seconds after Fast Flag." The clock freezes at 83.7 s. In the live test it showed 12 cars exposed.
+- Say: "83.7 seconds between our Safety Car call and race control's. Watch the counter: every one of those cars went past the wreck at racing speed."
+- Don't say a car count for this clip. NUMBERS.md says 11 cars from our call, and the slides use that number. The overlay showed 12 because its live speed reference differs, as explained in the table above. A spoken 12 next to a slide saying 11 would look like an error.
 
 ## If something goes wrong
 

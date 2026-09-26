@@ -6,15 +6,15 @@ The lab never edits core files. Anything it needs or finds in the core goes here
 
 Fixed on `main` in PR #7 ("the corrected VSC split"). The lab output and the core CSV now agree.
 
-## 2. Onset grouping differs from `src.eval.latency_by_type` (for information)
+## 2. Partly adopted: onset grouping in `src.eval.latency_by_type`
 
-`src/lab/delay_cost.py` groups official incidents into crashes (`group_crashes`). It diverges from `latency_by_type.race_events` in two ways, which the lab review found necessary for honest per-crash cards:
+- **Adopted (aa56cdd):** a second crash inside the 120 s window now gets its own onset. The onset car is the first car of the last chain of collapses (less than 10 s apart) before race control's first message. The 2024 Canadian example now anchors on Sainz at 5062.5 s, as in the lab.
+- **Not adopted:** for official incidents with only track-wide flags, the lab only accepts alerts in a sector matching the onset car's sector. The core keeps accepting any sector, because the A7 holdout has already run and changing the rule would split the training and holdout definitions. The lab keeps its stricter rule for its own per-crash cards. The two definitions differ only for track-wide-only incidents.
 
-- A second crash within 120 s of an earlier one gets its own onset, instead of being credited to the first crash's onset car. Example: 2024 Canadian, the Sainz/Albon crash at 5062.5 s, which `latency_by_type` attributes to Perez at 4984.0 s along with its SC.
-- For official incidents with only track-wide flags, alerts must be in a sector matching the onset car's sector, instead of any sector.
+## 3. Resolved: `rest_position` could put the crash site in a pit box
 
-The core may want the same rules. No change is needed for the lab.
+`src.eval.case_study.rest_position` now skips pit-lane ticks. No published crash site changed. The lab's `rest_position_on_track` wrapper still works and gives the same result.
 
-## 3. `src.eval.case_study.rest_position` can put the crash site in a pit box (for information)
+## 4. Lab numbers in `NUMBERS.md`
 
-It takes the first tick below 5 km/h within 30 s and does not exclude the pit lane. 2025 Australian Norris, onset 8955.25 s, ends up in his pit box 700 m from the incident. The lab wraps it (`rest_position_on_track`). The core case studies would need the same guard.
+Added in PR #10 (38fcad2, 34ae014): `src/eval/numbers.py` reads `docs/lab/delay_cost.json`, section "Lab: cost of delay". The slides quote those numbers.
