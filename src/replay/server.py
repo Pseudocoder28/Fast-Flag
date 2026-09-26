@@ -1,7 +1,8 @@
 """Real server: plays built races over the Section 7.5 contract, same as mock_server.
 
-Run: python -m src.replay.server                          (2023_Australian)
+Run: python -m src.replay.server                          (2023_Australian, with detectors)
      python -m src.replay.server --race 2024_Canadian
+     python -m src.replay.server --no-detect                (ticks and official events only)
      python -m src.replay.server --race 2026_Azerbaijan --holdout   (A7 demo only)
 
 Endpoints (identical to the mock server, plus GET /races):
@@ -38,7 +39,7 @@ STEP_S = 0.05            # wall-clock step of the playback loop
 DEFAULT_RACE = "2023_Australian"
 
 
-def no_processors() -> list[Processor]:
+def no_processors(race: RaceData) -> list[Processor]:
     return []
 
 
@@ -61,7 +62,7 @@ class Hub:
 
 
 class LiveReplay:
-    def __init__(self, race: RaceData, make_processors: Callable[[], list[Processor]],
+    def __init__(self, race: RaceData, make_processors: Callable[[RaceData], list[Processor]],
                  allow_holdout: bool = False) -> None:
         self.make_processors = make_processors
         self.allow_holdout = allow_holdout
@@ -71,7 +72,7 @@ class LiveReplay:
 
     def load(self, race: RaceData) -> None:
         self.race = race
-        self.engine = Engine(race, self.make_processors())
+        self.engine = Engine(race, self.make_processors(race))
 
     def switch(self, rid: str) -> None:
         if is_holdout_id(rid) and not self.allow_holdout:
@@ -95,7 +96,7 @@ class LiveReplay:
                 "clients": len(self.hub.clients)}
 
 
-def create_app(race: RaceData | None = None, make_processors: Callable[[], list[Processor]] = no_processors,
+def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData], list[Processor]] = no_processors,
                allow_holdout: bool = False, autoplay: bool = True) -> FastAPI:
     replay = LiveReplay(race or RaceData.load(DEFAULT_RACE), make_processors, allow_holdout)
 
@@ -126,7 +127,7 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[], list[
     @app.post("/replay")
     async def control(body: dict) -> dict:
         if body.get("race") and body["race"] != replay.race.race:
-            replay.switch(str(body["race"]))
+            await asyncio.to_thread(replay.switch, str(body["race"]))   # loading + scoring takes seconds
         if "speed" in body:
             replay.speed = float(body["speed"])
         if body.get("seek_t") is not None:
@@ -164,12 +165,17 @@ def main() -> None:
     p.add_argument("--race", default=DEFAULT_RACE)
     p.add_argument("--holdout", action="store_true", help="allow loading holdout races (A7 demo only)")
     p.add_argument("--speed", type=float, default=1.0)
+    p.add_argument("--no-detect", action="store_true", help="stream ticks and official events only")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
     a = p.parse_args()
     if is_holdout_id(a.race) and not a.holdout:
         p.error(f"{a.race} is a holdout race: add --holdout")
-    app = create_app(RaceData.load(a.race), allow_holdout=a.holdout)
+    make = no_processors
+    if not a.no_detect:
+        from src.detect.pipeline import detection_processors
+        make = detection_processors
+    app = create_app(RaceData.load(a.race), make_processors=make, allow_holdout=a.holdout)
     app.state.replay.speed = a.speed
     uvicorn.run(app, host=a.host, port=a.port)
 

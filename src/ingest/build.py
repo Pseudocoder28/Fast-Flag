@@ -36,6 +36,7 @@ from src.ingest.official import official_events
 from src.ingest.plot_track import PLOTS, plot_track
 from src.ingest.reference import build_track_ref, msectors_in_order
 from src.ingest.scan import CACHE_DIR, OUT_CSV as RANKING_CSV
+from src.ingest.sectors import sector_matches
 
 FEATURES = Path("data/features")
 HOLDOUT_DIR = Path("data/holdout")
@@ -51,18 +52,6 @@ def resolve(rid: str) -> tuple[int, int, str]:
         if race_id(year, ev["EventName"]) == rid:
             return year, int(ev["RoundNumber"]), str(ev["Location"])
     raise KeyError(f"unknown race id {rid}")
-
-
-def sector_offset(car: int, flagged: int, n: int) -> int:
-    """Circular offset from the flagged marshal sector to the car's sector."""
-    return (car - flagged + n // 2) % n - n // 2
-
-
-def flag_matches(car: int, flagged: int, n: int) -> bool:
-    """Race control also flags the sectors before an incident (e.g. car stopped in
-    sector 18, double yellows in 16 and 17), so the car may be up to 2 sectors
-    downstream of the flagged sector, or 1 upstream."""
-    return -1 <= sector_offset(car, flagged, n) <= 2
 
 
 def flag_alignment(df: pd.DataFrame, official: list[dict], n_sectors: int) -> tuple[int, int]:
@@ -84,7 +73,7 @@ def flag_alignment(df: pd.DataFrame, official: list[dict], n_sectors: int) -> tu
             continue
         total += 1
         w = slow[(slow["t"] >= e["t"] - 20) & (slow["t"] <= e["t"] + 2)]
-        hits += any(flag_matches(int(m), e["msector"], n_sectors) for m in w["msector"].unique())
+        hits += any(sector_matches(int(m), e["msector"], n_sectors) for m in w["msector"].unique())
     return hits, total
 
 
@@ -108,7 +97,7 @@ def build_race(rid: str, holdout: bool = False) -> dict:
     ref = build_track_ref(load(year, rnd, "Q"))
     race = load(year, rnd, "R")
     t_start, t_end = race_window(race)
-    df = add_features(merge_session(race, ref, t_start, t_end + END_MARGIN_S), race)
+    df = add_features(merge_session(race, ref, t_start, t_end + END_MARGIN_S), race, ref)
     df.insert(0, "race", rid)
     df.to_parquet(out_dir / f"{rid}.parquet", index=False)
     official = official_events(race)

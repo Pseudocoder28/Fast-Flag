@@ -1,2 +1,4 @@
 # A (Naman) additions, pinned
 matplotlib==3.11.2
+tabulate==0.9.0
+joblib==1.6.0

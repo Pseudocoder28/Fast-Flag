@@ -35,6 +35,79 @@ def add_car_dynamics(df: pd.DataFrame) -> pd.DataFrame:
     same_ahead = df["ahead_drv"].notna() & (df["ahead_drv"] == g["ahead_drv"].shift(WIN_1S))
     closing = g["gap_ahead_m"].shift(WIN_1S) - df["gap_ahead_m"]
     df["closing_rate"] = closing.where(same_ahead)            # m/s, positive = catching the car ahead
+    df = add_windows(df, g)
+    return df.sort_values(["t", "drv"])
+
+
+def rolling(g, col: str, how: str, n: int = WIN_2S) -> pd.Series:
+    r = g[col].rolling(n, min_periods=2)
+    return getattr(r, how)().reset_index(level=0, drop=True)
+
+
+def add_windows(df: pd.DataFrame, g) -> pd.DataFrame:
+    """2 s backward windows used by the detectors and the ANOMALY model (Section 6.3)."""
+    df["ratio_min_2s"] = rolling(g, "speed_ratio", "min")
+    df["dspeed_min_2s"] = rolling(g, "dspeed_1s", "min")
+    df["lat_abs_max_2s"] = rolling(g, "lat_off_abs", "max")
+    df["brake_throttle_2s"] = rolling(g, "brake_throttle", "mean")
+    return df
+
+
+def ref_point(ref, dist: np.ndarray) -> np.ndarray:
+    """Reference line point at each lap distance (NaN distance -> NaN point)."""
+    n = len(ref.ref_xy)
+    idx = np.clip(np.searchsorted(ref.ref_dist, np.nan_to_num(dist)) - 1, 0, n - 1)
+    out = ref.ref_xy[idx].astype(float)
+    out[~np.isfinite(dist)] = np.nan
+    return out
+
+
+def add_heading(df: pd.DataFrame, ref) -> pd.DataFrame:
+    """Angle in degrees between the car's path over the last 1 s and the reference
+    line's path between the same two track positions (0 = following the track,
+    180 = going backwards). Comparing chord with chord means a hairpin bends both
+    paths the same way. This is the direction of travel, not where the car points
+    (there is no yaw channel): it shows a car leaving the track or reversing.
+    NaN when the car moved less than 4 m (no reliable direction)."""
+    df = df.sort_values(["drv", "t"])
+    g = df.groupby("drv", sort=False)
+    dx = (df["x"] - g["x"].shift(WIN_1S)).to_numpy()
+    dy = (df["y"] - g["y"].shift(WIN_1S)).to_numpy()
+    r1 = ref_point(ref, df["dist"].to_numpy())
+    r0 = ref_point(ref, g["dist"].shift(WIN_1S).to_numpy())
+    rx, ry = r1[:, 0] - r0[:, 0], r1[:, 1] - r0[:, 1]
+    moved, rlen = np.hypot(dx, dy), np.hypot(rx, ry)
+    cos = (dx * rx + dy * ry) / (moved * rlen + 1e-9)
+    ang = np.degrees(np.arccos(np.clip(cos, -1, 1)))
+    df["heading_err"] = np.where((moved >= 4.0) & (rlen >= 4.0), ang, np.nan)
+    return df.sort_values(["t", "drv"])
+
+
+def add_prev_lap(df: pd.DataFrame, length: float) -> pd.DataFrame:
+    """The car's speed at the same point one lap earlier, and today's speed as a
+    share of it (lap_ratio, capped at 1.1 so only being slower stands out).
+    Race distance only counts forward progress, so the lookup always lands on
+    samples from about one lap before: causal by construction."""
+    df = df.sort_values(["drv", "t"])
+    prev = np.full(len(df), np.nan)
+    pos = 0
+    for _, g in df.groupby("drv", sort=False):
+        d = g["dist"].to_numpy()
+        step = (np.diff(d, prepend=d[0]) + length / 2) % length - length / 2
+        step = np.where(np.isfinite(step) & (step > 0) & (step < 150), step, 0.0)
+        rd = np.cumsum(step)
+        v = g["speed"].to_numpy(float)
+        ok = np.isfinite(v) & np.isfinite(d)
+        target = rd - length
+        if ok.sum() > 1:
+            p = np.interp(target, rd[ok], v[ok])
+            p[target < rd[ok][0]] = np.nan
+            prev[pos:pos + len(g)] = p
+        pos += len(g)
+    df["prev_lap_speed"] = prev
+    df["lap_ratio"] = (df["speed"] / df["prev_lap_speed"].clip(lower=20)).clip(upper=1.1)
+    df["lap_ratio_min_2s"] = df.groupby("drv", sort=False)["lap_ratio"].rolling(
+        WIN_2S, min_periods=2).min().reset_index(level=0, drop=True)
     return df.sort_values(["t", "drv"])
 
 
@@ -80,16 +153,26 @@ def add_field_state(df: pd.DataFrame) -> pd.DataFrame:
     field_in_pit: share of cars in the pit lane. field_slow: share of on-track cars
     below 30 km/h (standing starts, restarts). suspended: red flag, or most of the
     field in the pit lane (track status can read green during a red flag suspension).
+    field_ratio: median speed ratio of on-track cars. rel_ratio: the car's speed
+    ratio divided by it, so SC / VSC periods, processions and wet races look
+    normal and only a car that is slow compared with the field stands out.
     """
     on = df["speed"].notna()
+    track = on & ~df["in_pit"] & df["x"].notna()
     g = df[on].groupby("t")
     state = pd.DataFrame({
         "field_in_pit": g["in_pit"].mean(),
         "field_slow": df[on & ~df["in_pit"]].assign(slow=lambda d: d["speed"] < 30).groupby("t")["slow"].mean(),
+        "field_ratio": df[track].groupby("t")["speed_ratio"].median(),
     }).reset_index()
     out = df.merge(state, on="t", how="left")
     out["field_slow"] = out["field_slow"].fillna(0.0)
+    out["field_ratio"] = out["field_ratio"].fillna(1.0)
     out["suspended"] = (out["track_status"] == "5") | (out["field_in_pit"] >= 0.5)
+    out["rel_ratio"] = out["speed_ratio"] / out["field_ratio"].clip(0.2, 1.0)
+    out = out.sort_values(["drv", "t"])
+    out["rel_ratio_min_2s"] = out.groupby("drv", sort=False)["rel_ratio"].rolling(
+        WIN_2S, min_periods=2).min().reset_index(level=0, drop=True)
     return out
 
 
@@ -106,8 +189,11 @@ def add_race_context(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def add_features(df: pd.DataFrame, session) -> pd.DataFrame:
+def add_features(df: pd.DataFrame, session, ref=None) -> pd.DataFrame:
     df = add_car_dynamics(df)
+    if ref is not None:
+        df = add_heading(df, ref)
+        df = add_prev_lap(df, ref.length)
     df = add_battle(df)
     df = add_lap_info(df, session.laps)
     df = add_weather(df, getattr(session, "weather_data", None))

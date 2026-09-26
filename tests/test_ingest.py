@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from src.ingest.build import flag_matches
+from src.ingest.sectors import sector_matches as flag_matches
 from src.ingest.features import add_car_dynamics
 from src.ingest.merge import add_gaps, asof
 from src.ingest.reference import TrackRef
@@ -79,3 +79,26 @@ def test_flag_matches_upstream_sectors() -> None:
     assert flag_matches(18, 16, 20) and flag_matches(18, 18, 20) and flag_matches(17, 18, 20)
     assert not flag_matches(18, 15, 20)
     assert flag_matches(1, 20, 20) and flag_matches(20, 1, 20)   # wraps at the line
+
+
+def test_project_path_keeps_the_car_on_its_own_part_of_the_track() -> None:
+    # hairpin: out along y = 0 to x = 200, back along y = 10 (two parts 10 m apart)
+    out = np.column_stack([np.arange(0, 200, 5.0), np.zeros(40)])
+    back = np.column_stack([np.arange(200, 0, -5.0), np.full(40, 10.0)])
+    xy = np.vstack([out, back])
+    ref = TrackRef(xy, np.arange(len(xy)) * 5.0, len(xy) * 5.0 + 10, [], [])
+    # a car on the way out that drifts 6 m wide, towards the return leg
+    x, y = np.arange(50, 150, 5.0), np.r_[np.zeros(5), np.full(15, 6.0)]
+    t = np.arange(20) * 0.25
+    naive, _ = ref.project(x, y)
+    path, _ = ref.project_path(x, y, t)
+    assert (naive > 200).any()                  # nearest point snaps to the return leg
+    assert (path < 200).all()                   # continuity keeps it on the way out
+
+
+def test_backward_position_glitch_is_held() -> None:
+    from src.ingest.merge import hold_position_glitches
+    f = pd.DataFrame({"x": [0.0, 10, 20, 11, 30], "y": 0.0, "dist": [0.0, 10, 20, 11, 30],
+                      "lat_off": 0.0, "speed": 100.0})
+    out = hold_position_glitches(f.copy(), length=5000.0)
+    assert out["dist"].tolist() == [0.0, 10, 20, 20, 30]      # the out-of-order sample is replaced

@@ -16,10 +16,12 @@ import numpy as np
 import pandas as pd
 
 from src.ingest.official import to_session_time
-from src.ingest.reference import POS_SCALE, TrackRef, secs, valid_pos
+from src.ingest.reference import POS_SCALE, TrackRef, circ, secs, valid_pos
 
 GRID_S = 0.25
 MAX_STALE_S = 1.0
+GLITCH_BACK_M = 2.0      # a car at speed cannot move backwards along the track
+GLITCH_MIN_KMH = 30.0
 CAR_COLS = {"Speed": "speed", "Throttle": "throttle", "Brake": "brake", "nGear": "gear", "RPM": "rpm"}
 
 
@@ -48,6 +50,21 @@ def driver_frame(session, drv: str, grid: np.ndarray) -> pd.DataFrame:
     df["x"] = asof(grid, pt, pos["X"].to_numpy(float)) * POS_SCALE
     df["y"] = asof(grid, pt, pos["Y"].to_numpy(float)) * POS_SCALE
     return df
+
+
+def hold_position_glitches(f: pd.DataFrame, length: float, passes: int = 3) -> pd.DataFrame:
+    """FastF1 position samples sometimes arrive out of order: a car at speed appears
+    to jump a few metres backwards for one sample. Keep the previous position for
+    those rows instead (uses only earlier rows, so it stays causal)."""
+    cols = ["x", "y", "dist", "lat_off"]
+    for _ in range(passes):
+        prog = circ((f["dist"] - f["dist"].shift(1)).to_numpy(), length)
+        bad = (prog < -GLITCH_BACK_M) & (f["speed"].to_numpy() > GLITCH_MIN_KMH)
+        if not bad.any():
+            break
+        prev = f[cols].shift(1)
+        f.loc[bad, cols] = prev.loc[bad, cols].to_numpy()
+    return f
 
 
 def pit_intervals(laps: pd.DataFrame, drv: str) -> list[tuple[float, float]]:
@@ -137,9 +154,10 @@ def merge_session(session, ref: TrackRef, t_start: float | None = None,
     for drv in drivers:
         f = driver_frame(session, drv, grid)
         f["in_pit"] = in_pit_mask(grid, pit_intervals(session.laps, drv))
+        f["dist"], f["lat_off"] = ref.project_path(f["x"].to_numpy(), f["y"].to_numpy(), grid)
+        f = hold_position_glitches(f, ref.length)
         frames.append(f)
     df = pd.concat(frames, ignore_index=True)
-    df["dist"], df["lat_off"] = ref.project(df["x"].to_numpy(), df["y"].to_numpy())
     # timing-line pit flags miss the entry / exit roads, pit lane starts and some stops
     df["in_pit"] = df["in_pit"] | ref.near_pit(df["x"].to_numpy(), df["y"].to_numpy(), df["lat_off"].to_numpy())
     df["msector"] = ref.msector_of(df["dist"].to_numpy())

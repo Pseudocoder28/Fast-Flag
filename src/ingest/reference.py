@@ -85,6 +85,40 @@ class TrackRef:
         lat[ok] = tangent[:, 0] * rel[:, 1] - tangent[:, 1] * rel[:, 0]
         return dist, lat
 
+    def project_path(self, x: np.ndarray, y: np.ndarray, t: np.ndarray, k: int = 8,
+                     max_extra_m: float = 20.0, reset_gap_s: float = 2.0) -> tuple[np.ndarray, np.ndarray]:
+        """Like project(), for one car's positions in time order.
+
+        Where two parts of the circuit run close together, the nearest reference
+        point can belong to the wrong part. Among the k nearest points within
+        max_extra_m of the nearest one, pick the one closest along the lap to the
+        car's previous position. Only uses earlier samples, so it stays causal."""
+        pts = np.column_stack([x, y])
+        ok = np.isfinite(pts).all(axis=1)
+        dist = np.full(len(pts), np.nan)
+        lat = np.full(len(pts), np.nan)
+        if not ok.any():
+            return dist, lat
+        dd, cand = self.tree.query(pts[ok], k=k)
+        valid = dd <= dd[:, :1] + max_extra_m
+        spread = np.where(valid, np.abs(circ(self.ref_dist[cand] - self.ref_dist[cand[:, :1]], self.length)), 0)
+        chosen = cand[:, 0].copy()
+        tt = np.asarray(t, float)[ok]
+        for r in np.flatnonzero(spread.max(axis=1) > 50.0):     # ambiguous rows only
+            if r == 0 or tt[r] - tt[r - 1] > reset_gap_s:
+                continue
+            jump = np.abs(circ(self.ref_dist[cand[r]] - self.ref_dist[chosen[r - 1]], self.length))
+            jump[~valid[r]] = np.inf
+            chosen[r] = cand[r, int(np.argmin(jump))]
+        nxt = (chosen + 1) % len(self.ref_xy)
+        tangent = self.ref_xy[nxt] - self.ref_xy[chosen]
+        tangent /= np.linalg.norm(tangent, axis=1, keepdims=True) + 1e-9
+        rel = pts[ok] - self.ref_xy[chosen]
+        along = np.einsum("ij,ij->i", rel, tangent)
+        dist[ok] = (self.ref_dist[chosen] + along) % self.length
+        lat[ok] = tangent[:, 0] * rel[:, 1] - tangent[:, 1] * rel[:, 0]
+        return dist, lat
+
     def msector_of(self, dist: np.ndarray) -> np.ndarray:
         """Marshal sector id for each distance (0 where unknown)."""
         out = np.zeros(len(dist), dtype=int)
@@ -128,6 +162,11 @@ class TrackRef:
     @classmethod
     def load(cls, path: Path) -> "TrackRef":
         return cls.from_json(json.loads(path.read_text()))
+
+
+def circ(d: np.ndarray, length: float) -> np.ndarray:
+    """Signed circular difference along the lap, in (-length / 2, length / 2]."""
+    return (d + length / 2) % length - length / 2
 
 
 def clean_laps(laps: pd.DataFrame, strict: bool = True) -> pd.DataFrame:

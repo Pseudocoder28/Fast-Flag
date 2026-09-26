@@ -1,0 +1,2536 @@
+race,system,t,type,msector,drivers,evidence,false_alarm
+2023_Australian,detectors,3761.75,IMPACT,5,16,"lost 95 km/h in 1 s (95 to 0 km/h), with brakes on",False
+2023_Australian,detectors,4387.75,IMPACT,9,23,"lost 145 km/h in 1 s (180 to 33 km/h), with brakes on",False
+2023_Australian,detectors,5592.5,STOPPED,9,1,"speed 30 km/h vs ref 232 km/h, on the racing line",True
+2023_Australian,detectors,5617.25,STOPPED,9,55,"speed 12 km/h vs ref 234 km/h, on the racing line",True
+2023_Australian,detectors,5618.5,STOPPED,9,21,"speed 11 km/h vs ref 234 km/h, on the racing line",True
+2023_Australian,detectors,5618.5,MULTI,9,"21,55","cars 21, 55 in sectors 9-9 within 5 s",True
+2023_Australian,detectors,5619.0,STOPPED,9,31,"speed 11 km/h vs ref 232 km/h, on the racing line",True
+2023_Australian,detectors,5620.0,STOPPED,9,11,"speed 10 km/h vs ref 232 km/h, on the racing line",True
+2023_Australian,detectors,5624.25,STOPPED,9,77,"speed 3 km/h vs ref 234 km/h, on the racing line",True
+2023_Australian,detectors,5627.25,STOPPED,9,24,"speed 13 km/h vs ref 245 km/h, on the racing line",True
+2023_Australian,detectors,5632.5,STOPPED,9,2,"speed 15 km/h vs ref 248 km/h, on the racing line",True
+2023_Australian,detectors,5635.0,STOPPED,9,20,"speed 17 km/h vs ref 263 km/h, on the racing line",True
+2023_Australian,detectors,5648.5,STOPPED,14,22,"speed 61 km/h vs ref 318 km/h, on the racing line",True
+2023_Australian,detectors,5712.75,STOPPED,20,44,"speed 0 km/h vs ref 307 km/h, on the racing line",True
+2023_Australian,detectors,5713.5,STOPPED,20,1,"speed 4 km/h vs ref 307 km/h, on the racing line",True
+2023_Australian,detectors,5713.5,MULTI,20,"1,44","cars 1, 44 in sectors 20-20 within 5 s",True
+2023_Australian,detectors,5716.5,STOPPED,20,14,"speed 5 km/h vs ref 306 km/h, on the racing line",True
+2023_Australian,detectors,5718.25,STOPPED,20,18,"speed 3 km/h vs ref 304 km/h, on the racing line",True
+2023_Australian,detectors,5720.75,STOPPED,20,10,"speed 0 km/h vs ref 303 km/h, on the racing line",True
+2023_Australian,detectors,5721.75,STOPPED,20,27,"speed 0 km/h vs ref 303 km/h, on the racing line",True
+2023_Australian,detectors,5781.75,STOPPED,20,63,"speed 63 km/h vs ref 289 km/h, on the racing line",True
+2023_Australian,detectors,6431.75,STOPPED,20,63,"speed 75 km/h vs ref 303 km/h, on the racing line",False
+2023_Australian,detectors,9401.75,STOPPED,6,20,"speed 35 km/h vs ref 163 km/h, on the racing line",False
+2023_Australian,detectors,10702.5,STOPPED,20,1,"speed 0 km/h vs ref 307 km/h, on the racing line",True
+2023_Australian,detectors,10704.5,STOPPED,20,44,"speed 0 km/h vs ref 307 km/h, on the racing line",True
+2023_Australian,detectors,10704.5,MULTI,20,"1,44","cars 1, 44 in sectors 20-20 within 5 s",True
+2023_Australian,detectors,10707.25,STOPPED,20,14,"speed 0 km/h vs ref 306 km/h, on the racing line",True
+2023_Australian,detectors,10709.25,STOPPED,20,55,"speed 7 km/h vs ref 304 km/h, on the racing line",True
+2023_Australian,detectors,10711.25,STOPPED,20,10,"speed 0 km/h vs ref 303 km/h, on the racing line",True
+2023_Australian,detectors,10755.5,STOPPED,2,2,"speed 5 km/h vs ref 195 km/h, on the racing line",False
+2023_Australian,detectors,10755.5,STOPPED,2,21,"speed 0 km/h vs ref 180 km/h, on the racing line",False
+2023_Australian,detectors,10755.5,MULTI,2,"2,21","cars 2, 21 in sectors 2-2 within 5 s",False
+2023_Australian,detectors,10761.25,STOPPED,4,31,"speed 12 km/h vs ref 282 km/h, on the racing line",False
+2023_Australian,baseline,3762.25,STOPPED,5,16,speed 4 km/h < 50 km/h,False
+2023_Australian,baseline,3812.25,STOPPED,17,1,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,3813.25,STOPPED,17,4,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,3813.25,STOPPED,17,55,speed 35 km/h < 50 km/h,True
+2023_Australian,baseline,3813.75,STOPPED,17,14,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,3813.75,STOPPED,17,23,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,3814.0,STOPPED,17,31,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,3814.5,STOPPED,17,10,speed 39 km/h < 50 km/h,True
+2023_Australian,baseline,3814.5,STOPPED,17,20,speed 47 km/h < 50 km/h,True
+2023_Australian,baseline,3814.75,STOPPED,17,18,speed 37 km/h < 50 km/h,True
+2023_Australian,baseline,3815.25,STOPPED,17,22,speed 41 km/h < 50 km/h,True
+2023_Australian,baseline,3815.25,STOPPED,17,27,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,3816.75,STOPPED,17,21,speed 49 km/h < 50 km/h,True
+2023_Australian,baseline,3819.25,STOPPED,17,81,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,3821.25,STOPPED,17,2,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,3821.25,STOPPED,17,24,speed 35 km/h < 50 km/h,True
+2023_Australian,baseline,3821.75,STOPPED,19,63,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,3823.0,STOPPED,17,11,speed 49 km/h < 50 km/h,True
+2023_Australian,baseline,3825.25,STOPPED,17,77,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,3954.75,STOPPED,19,44,speed 47 km/h < 50 km/h,True
+2023_Australian,baseline,3956.75,STOPPED,19,1,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,3959.5,STOPPED,19,55,speed 48 km/h < 50 km/h,True
+2023_Australian,baseline,4062.5,STOPPED,15,18,speed 49 km/h < 50 km/h,True
+2023_Australian,baseline,4388.25,STOPPED,9,23,speed 4 km/h < 50 km/h,False
+2023_Australian,baseline,4476.25,STOPPED,2,11,speed 47 km/h < 50 km/h,True
+2023_Australian,baseline,4502.5,STOPPED,9,44,speed 45 km/h < 50 km/h,False
+2023_Australian,baseline,4502.75,STOPPED,9,1,speed 40 km/h < 50 km/h,False
+2023_Australian,baseline,4504.5,STOPPED,9,14,speed 41 km/h < 50 km/h,False
+2023_Australian,baseline,4505.5,STOPPED,9,18,speed 46 km/h < 50 km/h,False
+2023_Australian,baseline,4506.5,STOPPED,9,10,speed 40 km/h < 50 km/h,False
+2023_Australian,baseline,4508.5,STOPPED,9,27,speed 40 km/h < 50 km/h,False
+2023_Australian,baseline,4512.5,STOPPED,9,63,speed 46 km/h < 50 km/h,False
+2023_Australian,baseline,4514.5,STOPPED,9,22,speed 39 km/h < 50 km/h,False
+2023_Australian,baseline,4515.5,STOPPED,9,4,speed 40 km/h < 50 km/h,False
+2023_Australian,baseline,4516.25,STOPPED,9,81,speed 38 km/h < 50 km/h,False
+2023_Australian,baseline,4517.25,STOPPED,9,55,speed 40 km/h < 50 km/h,False
+2023_Australian,baseline,4518.0,STOPPED,9,21,speed 37 km/h < 50 km/h,False
+2023_Australian,baseline,4519.0,STOPPED,9,31,speed 38 km/h < 50 km/h,False
+2023_Australian,baseline,4520.25,STOPPED,9,24,speed 35 km/h < 50 km/h,False
+2023_Australian,baseline,4522.5,STOPPED,9,77,speed 42 km/h < 50 km/h,False
+2023_Australian,baseline,4523.0,STOPPED,9,2,speed 43 km/h < 50 km/h,False
+2023_Australian,baseline,5586.25,STOPPED,9,14,speed 47 km/h < 50 km/h,True
+2023_Australian,baseline,5589.25,STOPPED,9,1,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,5590.0,STOPPED,9,10,speed 48 km/h < 50 km/h,True
+2023_Australian,baseline,5590.25,STOPPED,9,18,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,5591.0,STOPPED,9,44,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,5591.25,STOPPED,9,27,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,5592.75,STOPPED,9,63,speed 41 km/h < 50 km/h,True
+2023_Australian,baseline,5597.5,STOPPED,9,22,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,5601.25,STOPPED,9,4,speed 39 km/h < 50 km/h,True
+2023_Australian,baseline,5604.0,STOPPED,9,81,speed 38 km/h < 50 km/h,True
+2023_Australian,baseline,5606.25,STOPPED,9,55,speed 45 km/h < 50 km/h,True
+2023_Australian,baseline,5608.5,STOPPED,9,21,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,5613.25,STOPPED,9,31,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,5615.25,STOPPED,9,11,speed 36 km/h < 50 km/h,True
+2023_Australian,baseline,5622.25,STOPPED,9,24,speed 38 km/h < 50 km/h,True
+2023_Australian,baseline,5622.25,STOPPED,9,77,speed 24 km/h < 50 km/h,True
+2023_Australian,baseline,5624.25,STOPPED,9,2,speed 34 km/h < 50 km/h,True
+2023_Australian,baseline,5631.75,STOPPED,9,20,speed 31 km/h < 50 km/h,True
+2023_Australian,baseline,5661.75,STOPPED,18,14,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,5663.75,STOPPED,18,18,speed 39 km/h < 50 km/h,True
+2023_Australian,baseline,5672.25,STOPPED,19,1,speed 39 km/h < 50 km/h,True
+2023_Australian,baseline,5672.5,STOPPED,19,44,speed 45 km/h < 50 km/h,True
+2023_Australian,baseline,5678.75,STOPPED,19,10,speed 38 km/h < 50 km/h,True
+2023_Australian,baseline,5680.5,STOPPED,19,27,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,5684.25,STOPPED,19,22,speed 41 km/h < 50 km/h,True
+2023_Australian,baseline,5684.5,STOPPED,19,4,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,5685.5,STOPPED,18,55,speed 34 km/h < 50 km/h,True
+2023_Australian,baseline,5686.5,STOPPED,18,21,speed 35 km/h < 50 km/h,True
+2023_Australian,baseline,5687.5,STOPPED,19,81,speed 48 km/h < 50 km/h,True
+2023_Australian,baseline,5688.5,STOPPED,18,31,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,5689.25,STOPPED,18,11,speed 37 km/h < 50 km/h,True
+2023_Australian,baseline,5694.0,STOPPED,18,24,speed 47 km/h < 50 km/h,True
+2023_Australian,baseline,5696.25,STOPPED,18,77,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,5697.25,STOPPED,18,20,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,5698.75,STOPPED,18,2,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,6438.25,STOPPED,1,63,speed 45 km/h < 50 km/h,False
+2023_Australian,baseline,8897.5,STOPPED,19,1,speed 48 km/h < 50 km/h,True
+2023_Australian,baseline,9400.75,STOPPED,6,20,speed 42 km/h < 50 km/h,False
+2023_Australian,baseline,9457.0,STOPPED,7,31,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,9565.0,STOPPED,6,31,speed 38 km/h < 50 km/h,False
+2023_Australian,baseline,10538.25,STOPPED,3,55,speed 49 km/h < 50 km/h,True
+2023_Australian,baseline,10554.5,STOPPED,5,10,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,10557.75,STOPPED,5,18,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,10559.0,STOPPED,5,11,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,10562.75,STOPPED,5,27,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,10562.75,STOPPED,5,4,speed 33 km/h < 50 km/h,True
+2023_Australian,baseline,10566.5,STOPPED,5,31,speed 37 km/h < 50 km/h,True
+2023_Australian,baseline,10576.5,STOPPED,9,44,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,10578.25,STOPPED,9,14,speed 40 km/h < 50 km/h,True
+2023_Australian,baseline,10581.25,STOPPED,9,1,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,10585.0,STOPPED,8,81,speed 43 km/h < 50 km/h,True
+2023_Australian,baseline,10589.0,STOPPED,8,22,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,10592.0,STOPPED,8,77,speed 31 km/h < 50 km/h,True
+2023_Australian,baseline,10593.25,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,10594.75,STOPPED,8,2,speed 37 km/h < 50 km/h,True
+2023_Australian,baseline,10594.75,STOPPED,8,21,speed 41 km/h < 50 km/h,True
+2023_Australian,baseline,10647.5,STOPPED,17,1,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,10650.5,STOPPED,17,44,speed 45 km/h < 50 km/h,True
+2023_Australian,baseline,10651.0,STOPPED,17,14,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,10652.75,STOPPED,17,10,speed 36 km/h < 50 km/h,True
+2023_Australian,baseline,10656.25,STOPPED,17,18,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,10656.75,STOPPED,17,11,speed 39 km/h < 50 km/h,True
+2023_Australian,baseline,10660.75,STOPPED,17,4,speed 31 km/h < 50 km/h,True
+2023_Australian,baseline,10661.5,STOPPED,17,27,speed 38 km/h < 50 km/h,True
+2023_Australian,baseline,10662.0,STOPPED,16,2,speed 44 km/h < 50 km/h,True
+2023_Australian,baseline,10663.0,STOPPED,17,31,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,10664.25,STOPPED,17,24,speed 46 km/h < 50 km/h,True
+2023_Australian,baseline,10666.75,STOPPED,17,81,speed 38 km/h < 50 km/h,True
+2023_Australian,baseline,10670.75,STOPPED,17,22,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,10671.0,STOPPED,17,21,speed 42 km/h < 50 km/h,True
+2023_Australian,baseline,10671.0,STOPPED,17,77,speed 45 km/h < 50 km/h,True
+2023_Australian,baseline,10760.75,STOPPED,4,31,speed 21 km/h < 50 km/h,False
+2023_Mexico_City,detectors,3758.75,IMPACT,3,11,"lost 80 km/h in 1 s (95 to 24 km/h), with brakes on",False
+2023_Mexico_City,detectors,6480.25,IMPACT,10,20,"lost 158 km/h in 1 s (179 to 0 km/h), with brakes on",False
+2023_Mexico_City,detectors,8018.75,STOPPED,15,1,"speed 31 km/h vs ref 152 km/h, on the racing line",True
+2023_Mexico_City,detectors,8022.0,STOPPED,14,16,"speed 31 km/h vs ref 141 km/h, on the racing line",True
+2023_Mexico_City,detectors,8022.0,MULTI,14,"1,16","cars 1, 16 in sectors 14-15 within 5 s",True
+2023_Mexico_City,detectors,8023.25,STOPPED,14,44,"speed 27 km/h vs ref 130 km/h, on the racing line",True
+2023_Mexico_City,detectors,8026.0,STOPPED,14,55,"speed 31 km/h vs ref 141 km/h, on the racing line",True
+2023_Mexico_City,detectors,8027.0,STOPPED,14,3,"speed 27 km/h vs ref 141 km/h, on the racing line",True
+2023_Mexico_City,detectors,8037.75,STOPPED,15,81,"speed 21 km/h vs ref 133 km/h, on the racing line",True
+2023_Mexico_City,detectors,8043.25,STOPPED,15,63,"speed 12 km/h vs ref 122 km/h, on the racing line",True
+2023_Mexico_City,detectors,9232.75,IMPACT,3,22,"lost 82 km/h in 1 s (195 to 50 km/h), without braking",False
+2023_Mexico_City,detectors,10733.0,STOPPED,14,18,"speed 0 km/h vs ref 112 km/h, on the racing line",False
+2023_Mexico_City,baseline,3758.75,STOPPED,3,11,speed 24 km/h < 50 km/h,False
+2023_Mexico_City,baseline,6480.75,STOPPED,10,20,speed 9 km/h < 50 km/h,False
+2023_Mexico_City,baseline,6512.5,STOPPED,1,31,speed 47 km/h < 50 km/h,True
+2023_Mexico_City,baseline,6602.5,STOPPED,3,55,speed 42 km/h < 50 km/h,True
+2023_Mexico_City,baseline,6632.25,STOPPED,7,44,speed 44 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8008.0,STOPPED,14,1,speed 36 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8010.75,STOPPED,14,16,speed 41 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8013.75,STOPPED,14,44,speed 42 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8015.25,STOPPED,14,55,speed 43 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8022.5,STOPPED,14,3,speed 40 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8027.5,STOPPED,14,81,speed 41 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8029.75,STOPPED,14,63,speed 37 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8032.25,STOPPED,14,22,speed 39 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8038.75,STOPPED,14,27,speed 42 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8049.5,STOPPED,14,4,speed 44 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8052.25,STOPPED,14,10,speed 42 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8061.5,STOPPED,15,23,speed 46 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8063.5,STOPPED,14,2,speed 47 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8066.0,STOPPED,15,24,speed 47 km/h < 50 km/h,True
+2023_Mexico_City,baseline,8067.25,STOPPED,15,31,speed 46 km/h < 50 km/h,True
+2023_Mexico_City,baseline,9235.75,STOPPED,3,22,speed 24 km/h < 50 km/h,False
+2023_Mexico_City,baseline,10732.25,STOPPED,14,18,speed 20 km/h < 50 km/h,False
+2023_Monaco,detectors,8023.75,IMPACT,7,55,"lost 80 km/h in 1 s (82 to 0 km/h), with brakes on",False
+2023_Monaco,detectors,8036.25,STOPPED,7,18,"speed 0 km/h vs ref 79 km/h, on the racing line",False
+2023_Monaco,detectors,8038.5,STOPPED,7,63,"speed 0 km/h vs ref 76 km/h, on the racing line",False
+2023_Monaco,detectors,8038.5,MULTI,7,"18,63","cars 18, 63 in sectors 7-7 within 5 s",False
+2023_Monaco,detectors,8347.5,STOPPED,17,20,"speed 0 km/h vs ref 64 km/h, on the racing line",False
+2023_Monaco,detectors,8410.5,STOPPED,8,2,"speed 0 km/h vs ref 51 km/h, on the racing line",False
+2023_Monaco,detectors,8534.0,STOPPED,2,20,"speed 0 km/h vs ref 147 km/h, on the racing line",False
+2023_Monaco,detectors,8674.25,STOPPED,7,23,"speed 0 km/h vs ref 79 km/h, on the racing line",False
+2023_Monaco,detectors,9423.75,STOPPED,7,22,"speed 13 km/h vs ref 89 km/h, on the racing line",False
+2023_Monaco,detectors,9684.25,STOPPED,2,2,"speed 0 km/h vs ref 133 km/h, on the racing line",True
+2023_Monaco,baseline,3758.5,STOPPED,8,14,speed 49 km/h < 50 km/h,False
+2023_Monaco,baseline,3759.0,STOPPED,7,2,speed 44 km/h < 50 km/h,False
+2023_Monaco,baseline,3759.0,STOPPED,8,31,speed 43 km/h < 50 km/h,False
+2023_Monaco,baseline,3760.0,STOPPED,8,55,speed 45 km/h < 50 km/h,False
+2023_Monaco,baseline,3760.5,STOPPED,8,16,speed 43 km/h < 50 km/h,False
+2023_Monaco,baseline,3760.5,STOPPED,8,44,speed 46 km/h < 50 km/h,False
+2023_Monaco,baseline,3761.0,STOPPED,8,10,speed 42 km/h < 50 km/h,False
+2023_Monaco,baseline,3761.25,STOPPED,8,63,speed 44 km/h < 50 km/h,False
+2023_Monaco,baseline,3761.75,STOPPED,8,22,speed 41 km/h < 50 km/h,False
+2023_Monaco,baseline,3762.0,STOPPED,8,4,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,3762.75,STOPPED,8,81,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,3763.0,STOPPED,8,21,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,3763.0,STOPPED,8,23,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,3763.75,STOPPED,8,18,speed 29 km/h < 50 km/h,False
+2023_Monaco,baseline,3764.5,STOPPED,8,27,speed 35 km/h < 50 km/h,False
+2023_Monaco,baseline,3764.5,STOPPED,8,77,speed 27 km/h < 50 km/h,False
+2023_Monaco,baseline,3765.25,STOPPED,7,11,speed 26 km/h < 50 km/h,False
+2023_Monaco,baseline,3765.25,STOPPED,8,20,speed 26 km/h < 50 km/h,False
+2023_Monaco,baseline,3765.25,STOPPED,7,24,speed 48 km/h < 50 km/h,False
+2023_Monaco,baseline,3837.25,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,3840.25,STOPPED,8,31,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,3840.5,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,3842.0,STOPPED,8,44,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,3842.25,STOPPED,8,16,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,3844.25,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,3846.25,STOPPED,8,4,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,3847.0,STOPPED,8,81,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,3847.5,STOPPED,8,21,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,3848.25,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,3850.25,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,3850.75,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,3874.5,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,3875.25,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,3916.5,STOPPED,8,1,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,3920.25,STOPPED,8,31,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,3921.25,STOPPED,8,55,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,3922.25,STOPPED,8,44,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,3922.5,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,3924.75,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,3928.5,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,3929.25,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,3929.75,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,3930.75,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,3931.5,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,3951.75,STOPPED,8,24,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,3952.75,STOPPED,8,27,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,3999.75,STOPPED,8,31,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4000.75,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4002.75,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4005.25,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4010.0,STOPPED,8,23,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4010.25,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4011.0,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4011.75,STOPPED,8,20,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4029.75,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4079.0,STOPPED,8,31,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4080.0,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4081.75,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4084.5,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4089.5,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4089.75,STOPPED,8,21,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4090.0,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4090.75,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4091.25,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4092.0,STOPPED,8,20,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4105.25,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4107.0,STOPPED,8,27,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4159.0,STOPPED,8,55,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4160.75,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4163.25,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4165.0,STOPPED,8,22,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4167.0,STOPPED,8,4,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4168.75,STOPPED,8,81,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4169.5,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4170.5,STOPPED,8,77,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4171.0,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4172.0,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4179.0,STOPPED,8,11,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4182.25,STOPPED,8,24,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4184.0,STOPPED,8,27,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4239.25,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4240.25,STOPPED,8,10,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4242.25,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4246.0,STOPPED,8,4,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4247.75,STOPPED,8,81,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4248.25,STOPPED,8,21,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4248.5,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4249.5,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4250.25,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4251.25,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4253.0,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4255.75,STOPPED,8,11,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4261.0,STOPPED,8,27,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4317.5,STOPPED,8,44,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4318.25,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4319.5,STOPPED,8,10,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4320.75,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4326.5,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4327.25,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4328.75,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4329.5,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4330.75,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4332.0,STOPPED,8,18,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4333.75,STOPPED,8,11,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4337.0,STOPPED,8,24,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4338.0,STOPPED,8,27,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4385.75,STOPPED,8,14,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4394.75,STOPPED,8,55,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4397.25,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4400.0,STOPPED,8,63,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4405.5,STOPPED,8,81,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4405.75,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4406.25,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4407.25,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4408.75,STOPPED,8,2,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4410.0,STOPPED,8,20,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4411.5,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4414.5,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4415.75,STOPPED,8,27,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4473.0,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4475.75,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4479.0,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4480.25,STOPPED,8,22,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4482.25,STOPPED,8,4,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4485.5,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4486.75,STOPPED,8,77,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4488.25,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4489.25,STOPPED,8,20,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4490.25,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4492.25,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4493.0,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4537.75,STOPPED,8,1,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4551.0,STOPPED,8,31,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4551.25,STOPPED,8,55,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4554.0,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4557.5,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4564.25,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4565.25,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4565.75,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4568.5,STOPPED,8,2,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,4569.25,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4570.5,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4571.0,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4571.75,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4629.5,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4632.25,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4636.25,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4643.75,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4644.0,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4645.0,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4649.0,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4649.5,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4650.5,STOPPED,8,11,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,4650.5,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4651.25,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4651.75,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4708.0,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4710.5,STOPPED,8,16,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4714.5,STOPPED,8,63,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4723.75,STOPPED,8,21,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4724.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4726.0,STOPPED,8,77,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4729.5,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4731.0,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4731.25,STOPPED,8,27,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4731.5,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4731.5,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4769.0,STOPPED,8,1,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4774.25,STOPPED,8,14,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4788.0,STOPPED,8,44,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4788.5,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4791.75,STOPPED,8,63,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4800.0,STOPPED,8,4,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4802.25,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4804.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4805.5,STOPPED,8,77,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4810.0,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4810.25,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4811.25,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4811.25,STOPPED,8,18,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4812.0,STOPPED,8,24,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4812.5,STOPPED,8,27,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4846.0,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4864.25,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4866.25,STOPPED,8,44,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4866.75,STOPPED,8,16,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4870.5,STOPPED,8,63,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4885.25,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4885.75,STOPPED,8,77,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4890.25,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4890.75,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4891.5,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4891.75,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4892.25,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4894.0,STOPPED,8,27,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,4923.0,STOPPED,8,1,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,4929.25,STOPPED,8,14,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4941.5,STOPPED,8,31,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4942.25,STOPPED,8,55,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4944.75,STOPPED,8,44,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,4947.25,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4948.75,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,4960.5,STOPPED,8,81,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4961.25,STOPPED,8,21,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,4966.0,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4970.75,STOPPED,8,2,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,4971.0,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,4972.0,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,4972.0,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,4972.75,STOPPED,8,24,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,4974.75,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5000.0,STOPPED,8,1,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5006.75,STOPPED,8,14,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5020.5,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5022.5,STOPPED,8,44,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5023.25,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5025.5,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5036.25,STOPPED,8,4,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5040.5,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5046.5,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5047.0,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5051.0,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5051.5,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5052.5,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5053.0,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5053.5,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5055.0,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5076.5,STOPPED,8,1,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5098.0,STOPPED,8,31,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5099.0,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5101.0,STOPPED,8,44,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5101.5,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5103.5,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5105.5,STOPPED,8,63,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5115.25,STOPPED,8,4,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5118.5,STOPPED,8,81,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5119.5,STOPPED,8,21,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5126.5,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5126.75,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5129.75,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5132.75,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5135.5,STOPPED,8,24,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5136.0,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5177.0,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5180.0,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5184.0,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5194.5,STOPPED,8,4,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5199.25,STOPPED,8,21,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5205.0,STOPPED,8,77,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5208.5,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5216.0,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5216.25,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5217.25,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5238.75,STOPPED,8,14,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5255.5,STOPPED,8,55,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5258.0,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5262.0,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5268.0,STOPPED,8,22,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5273.75,STOPPED,8,4,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5277.0,STOPPED,8,81,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5278.25,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5283.0,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5287.0,STOPPED,8,20,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5288.0,STOPPED,8,18,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5289.25,STOPPED,8,11,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5295.25,STOPPED,8,27,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5298.0,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5298.5,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5307.5,STOPPED,8,1,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5308.75,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5316.0,STOPPED,8,14,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5333.0,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5336.0,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5340.5,STOPPED,8,63,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5355.75,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5357.5,STOPPED,8,21,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5361.25,STOPPED,8,77,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5365.5,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5366.5,STOPPED,8,18,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5367.0,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5372.75,STOPPED,8,27,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5378.0,STOPPED,8,24,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5397.75,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5410.5,STOPPED,8,31,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5411.0,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5414.5,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5426.5,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5432.0,STOPPED,8,4,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5435.0,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5437.0,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5439.25,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5444.25,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5445.75,STOPPED,8,11,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5450.25,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5463.5,STOPPED,8,23,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5475.75,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5489.25,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5491.75,STOPPED,8,44,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5492.25,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5496.5,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5506.0,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5510.75,STOPPED,8,4,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5514.25,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5516.75,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5517.25,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5522.75,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5523.25,STOPPED,8,18,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5524.25,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5527.75,STOPPED,8,27,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,5540.5,STOPPED,8,23,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5549.0,STOPPED,8,14,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5553.5,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5566.25,STOPPED,8,31,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5569.0,STOPPED,8,44,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5570.25,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5572.25,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5574.5,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5589.25,STOPPED,8,4,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5596.25,STOPPED,8,21,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,5596.75,STOPPED,8,77,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,5601.5,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5602.0,STOPPED,8,18,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5603.25,STOPPED,8,11,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5606.0,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5611.0,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5614.5,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5648.0,STOPPED,8,16,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5652.0,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5654.75,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5672.75,STOPPED,8,81,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5676.25,STOPPED,8,21,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,5676.75,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5680.0,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5681.0,STOPPED,8,18,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5681.75,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5684.25,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5688.75,STOPPED,8,24,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5691.5,STOPPED,8,1,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5694.0,STOPPED,8,23,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5703.25,STOPPED,8,14,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5722.25,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5724.25,STOPPED,8,44,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5725.25,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5729.75,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5732.0,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5743.5,STOPPED,8,22,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5753.25,STOPPED,8,81,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5756.5,STOPPED,8,21,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,5757.25,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5759.25,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5760.25,STOPPED,8,18,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5760.5,STOPPED,8,11,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5762.75,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5766.5,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5771.0,STOPPED,8,23,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5799.5,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5801.75,STOPPED,8,44,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5803.25,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5807.5,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5810.25,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5822.5,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5826.0,STOPPED,8,4,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5832.75,STOPPED,8,81,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,5837.25,STOPPED,8,21,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5837.25,STOPPED,8,77,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5838.25,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5840.25,STOPPED,8,11,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5841.75,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5844.5,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5846.0,STOPPED,8,1,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5858.0,STOPPED,8,14,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5877.0,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5879.0,STOPPED,8,44,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5880.5,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5885.0,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5888.5,STOPPED,8,2,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,5900.75,STOPPED,8,22,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5905.0,STOPPED,8,4,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,5916.5,STOPPED,8,21,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,5917.5,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5918.0,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5919.5,STOPPED,8,11,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5920.75,STOPPED,8,27,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,5923.0,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5925.25,STOPPED,8,23,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5935.0,STOPPED,8,14,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5954.5,STOPPED,8,55,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5956.5,STOPPED,8,44,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,5958.25,STOPPED,8,16,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,5962.5,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5966.0,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5996.75,STOPPED,8,21,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,5997.25,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5997.75,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,5998.5,STOPPED,8,18,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,5999.5,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6000.25,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6002.0,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6003.5,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6004.0,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6031.5,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6033.75,STOPPED,8,44,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6035.25,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6037.75,STOPPED,8,10,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6039.75,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6043.75,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6068.5,STOPPED,8,81,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6076.5,STOPPED,8,21,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,6077.75,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6077.75,STOPPED,8,77,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6079.0,STOPPED,8,18,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6079.5,STOPPED,8,11,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6080.5,STOPPED,8,1,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6081.5,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6082.5,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6083.0,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6089.25,STOPPED,8,14,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6107.0,STOPPED,8,31,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6108.5,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6111.75,STOPPED,8,44,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6113.0,STOPPED,8,16,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6115.0,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6117.25,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6121.75,STOPPED,8,2,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6136.0,STOPPED,8,22,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6141.0,STOPPED,8,4,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6146.75,STOPPED,8,81,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6155.75,STOPPED,8,21,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6156.75,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6157.5,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6159.0,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6159.5,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6160.75,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6161.75,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6162.5,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6186.25,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6190.5,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6194.5,STOPPED,8,63,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6199.0,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6219.25,STOPPED,8,4,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6224.75,STOPPED,8,81,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6235.0,STOPPED,8,21,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6235.75,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6238.25,STOPPED,8,1,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6238.25,STOPPED,8,20,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6238.75,STOPPED,8,11,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,6239.25,STOPPED,8,18,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6240.5,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6241.5,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6241.75,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6244.25,STOPPED,8,14,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6263.0,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6267.75,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6272.0,STOPPED,8,63,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6276.25,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6281.75,STOPPED,8,31,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6284.25,STOPPED,8,44,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6293.0,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6297.0,STOPPED,8,4,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,6303.5,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6314.0,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6314.5,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6316.5,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6318.25,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6318.75,STOPPED,8,11,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6320.25,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6321.25,STOPPED,8,24,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6322.5,STOPPED,8,14,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6323.25,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6345.0,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6349.75,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6353.75,STOPPED,8,2,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6361.5,STOPPED,8,44,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6381.75,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6393.0,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6393.25,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6394.5,STOPPED,8,1,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6399.0,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6400.0,STOPPED,8,18,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6402.0,STOPPED,8,14,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6402.5,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6403.5,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6403.75,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6425.0,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6427.25,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6431.0,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6435.25,STOPPED,8,31,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6449.25,STOPPED,8,22,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6453.0,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6460.0,STOPPED,8,81,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6472.75,STOPPED,8,1,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6474.0,STOPPED,8,21,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6474.0,STOPPED,8,77,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6477.5,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6478.25,STOPPED,8,18,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6480.0,STOPPED,8,14,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6482.25,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6482.75,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6483.5,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6500.0,STOPPED,8,16,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6502.5,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6504.5,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6509.5,STOPPED,8,2,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,6514.75,STOPPED,8,55,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6526.75,STOPPED,8,22,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6531.25,STOPPED,8,4,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6538.25,STOPPED,8,81,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6550.25,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6553.0,STOPPED,8,21,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6553.25,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6557.0,STOPPED,8,20,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6558.0,STOPPED,8,14,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6559.25,STOPPED,8,18,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6560.5,STOPPED,8,27,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,6561.5,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6561.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6577.5,STOPPED,8,16,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6579.75,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6581.75,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6587.0,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6609.75,STOPPED,8,4,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6615.75,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6627.5,STOPPED,8,1,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6632.25,STOPPED,8,21,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6632.75,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6635.75,STOPPED,8,14,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6638.25,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6639.0,STOPPED,8,18,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6639.75,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6640.75,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6641.5,STOPPED,8,23,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6654.5,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6657.25,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6659.0,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6664.5,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6666.75,STOPPED,8,31,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6682.5,STOPPED,8,22,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6687.75,STOPPED,8,4,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6693.25,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6704.75,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6711.25,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6712.0,STOPPED,8,77,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6713.25,STOPPED,8,14,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6716.75,STOPPED,8,20,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6717.5,STOPPED,8,18,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6718.75,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6719.5,STOPPED,8,24,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6720.25,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6732.0,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6734.75,STOPPED,8,10,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6736.0,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6742.25,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6761.25,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6766.0,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6771.25,STOPPED,8,81,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6781.5,STOPPED,8,1,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6790.0,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6791.5,STOPPED,8,77,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6795.0,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6795.75,STOPPED,8,18,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6797.25,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6798.25,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6798.5,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6809.25,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6813.5,STOPPED,8,63,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,6816.0,STOPPED,8,11,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6822.5,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6824.0,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6826.0,STOPPED,8,44,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6839.25,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6844.5,STOPPED,8,4,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6848.75,STOPPED,8,81,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6868.25,STOPPED,8,14,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6870.0,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6870.75,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6873.75,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6874.5,STOPPED,8,18,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6875.75,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6876.75,STOPPED,8,24,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6877.25,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6886.75,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6889.0,STOPPED,8,10,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6890.75,STOPPED,8,63,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6892.25,STOPPED,8,11,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,6897.75,STOPPED,8,31,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,6900.5,STOPPED,8,55,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6903.0,STOPPED,8,44,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6904.25,STOPPED,8,2,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,6917.25,STOPPED,8,22,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,6922.5,STOPPED,8,4,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6927.75,STOPPED,8,81,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6935.75,STOPPED,8,1,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6945.0,STOPPED,8,14,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6948.5,STOPPED,8,21,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6949.5,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6952.25,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,6952.75,STOPPED,8,18,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6954.25,STOPPED,8,27,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,6955.75,STOPPED,8,24,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,6956.0,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6965.0,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6967.5,STOPPED,8,10,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,6968.5,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6969.5,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6977.0,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,6982.75,STOPPED,8,2,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,6995.5,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7000.75,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7005.5,STOPPED,8,81,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7012.5,STOPPED,8,1,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7021.5,STOPPED,8,14,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7026.75,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7028.0,STOPPED,8,77,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7030.5,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7031.0,STOPPED,8,18,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7033.25,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7034.25,STOPPED,8,24,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7034.75,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7043.0,STOPPED,8,16,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7045.25,STOPPED,8,10,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7046.5,STOPPED,8,63,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7047.5,STOPPED,8,11,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7054.0,STOPPED,8,55,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7061.5,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7079.25,STOPPED,8,4,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7084.0,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7089.5,STOPPED,8,1,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7098.25,STOPPED,8,14,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7104.5,STOPPED,8,21,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7107.0,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7109.0,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7110.5,STOPPED,8,18,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7111.75,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7113.0,STOPPED,8,24,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7114.0,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7121.75,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7122.75,STOPPED,8,10,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7124.25,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7125.0,STOPPED,8,11,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7128.25,STOPPED,8,31,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7139.75,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7156.75,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7162.0,STOPPED,8,81,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7175.25,STOPPED,8,14,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7182.0,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7185.25,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7187.5,STOPPED,8,20,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7188.75,STOPPED,8,18,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7191.0,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7191.75,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7192.25,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7200.5,STOPPED,8,10,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7202.0,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7202.75,STOPPED,8,11,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7205.5,STOPPED,8,31,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7208.25,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7210.25,STOPPED,8,44,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7221.5,STOPPED,8,2,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7235.25,STOPPED,8,4,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7240.0,STOPPED,8,81,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7242.75,STOPPED,8,1,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7251.75,STOPPED,8,14,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7259.5,STOPPED,8,21,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7264.0,STOPPED,8,77,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7265.75,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7267.25,STOPPED,8,18,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7269.5,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7270.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7270.75,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7277.5,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7279.25,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7280.25,STOPPED,8,11,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7282.5,STOPPED,8,31,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7285.25,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7288.5,STOPPED,8,44,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7296.0,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7301.25,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7307.5,STOPPED,8,22,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7312.75,STOPPED,8,4,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7317.5,STOPPED,8,81,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7320.0,STOPPED,8,1,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7329.25,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7337.5,STOPPED,8,21,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7342.0,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7344.5,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7345.5,STOPPED,8,18,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7347.75,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7348.75,STOPPED,8,24,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7349.75,STOPPED,8,23,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7354.5,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7356.25,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7357.25,STOPPED,8,11,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7359.5,STOPPED,8,31,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7362.5,STOPPED,8,55,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7365.0,STOPPED,8,44,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7380.75,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7385.75,STOPPED,8,22,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7390.75,STOPPED,8,4,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7395.0,STOPPED,8,81,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7396.75,STOPPED,8,1,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7406.5,STOPPED,8,14,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7415.0,STOPPED,8,21,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7420.5,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7423.25,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7424.25,STOPPED,8,18,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7426.5,STOPPED,8,27,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7427.5,STOPPED,8,24,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7428.5,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7433.5,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7439.0,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7448.5,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7451.0,STOPPED,8,10,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7459.5,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7472.75,STOPPED,8,81,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7474.25,STOPPED,8,1,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7483.5,STOPPED,8,14,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7492.75,STOPPED,8,21,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7498.5,STOPPED,8,77,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7502.25,STOPPED,8,20,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7503.25,STOPPED,8,18,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7505.75,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7506.5,STOPPED,8,24,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7507.0,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7510.5,STOPPED,8,63,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7511.0,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7513.5,STOPPED,8,31,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7515.75,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7525.0,STOPPED,8,16,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7527.5,STOPPED,8,10,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7538.5,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7547.25,STOPPED,8,4,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7551.75,STOPPED,8,1,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7553.75,STOPPED,8,81,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7560.5,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7570.5,STOPPED,8,21,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7576.75,STOPPED,8,77,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7580.75,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7581.5,STOPPED,8,18,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7584.5,STOPPED,8,27,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7585.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7585.75,STOPPED,8,24,speed 48 km/h < 50 km/h,True
+2023_Monaco,baseline,7587.5,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7588.25,STOPPED,8,11,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7591.0,STOPPED,8,31,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7592.5,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7603.5,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,7618.25,STOPPED,8,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7620.25,STOPPED,8,22,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7625.5,STOPPED,8,4,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7629.0,STOPPED,8,1,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7632.5,STOPPED,8,81,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7638.0,STOPPED,8,14,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7648.5,STOPPED,8,21,speed 47 km/h < 50 km/h,True
+2023_Monaco,baseline,7655.25,STOPPED,8,77,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7660.0,STOPPED,8,20,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7663.75,STOPPED,8,27,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7664.75,STOPPED,8,24,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7665.75,STOPPED,8,63,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7666.75,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7667.25,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7669.0,STOPPED,8,31,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,7670.0,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7677.0,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,7699.0,STOPPED,8,22,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7700.5,STOPPED,8,2,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7707.5,STOPPED,8,1,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7711.0,STOPPED,8,81,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7719.75,STOPPED,8,14,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,7725.5,STOPPED,8,4,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7727.75,STOPPED,8,21,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7736.75,STOPPED,8,77,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7741.75,STOPPED,8,18,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,7741.75,STOPPED,8,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7745.5,STOPPED,8,27,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,7746.5,STOPPED,8,63,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7747.5,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7747.5,STOPPED,8,24,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7749.75,STOPPED,8,31,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,7749.75,STOPPED,8,55,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7752.25,STOPPED,8,44,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7753.25,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7755.5,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7756.75,STOPPED,8,10,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7786.75,STOPPED,8,22,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7787.25,STOPPED,8,2,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,7795.5,STOPPED,8,1,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7798.25,STOPPED,8,81,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7808.25,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7812.75,STOPPED,8,4,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7816.0,STOPPED,8,21,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7830.25,STOPPED,8,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7834.0,STOPPED,8,63,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7837.0,STOPPED,8,27,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7839.0,STOPPED,8,31,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7839.25,STOPPED,8,55,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7841.5,STOPPED,8,24,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7843.0,STOPPED,8,44,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7843.5,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7844.0,STOPPED,8,10,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7844.0,STOPPED,8,11,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7850.75,STOPPED,8,77,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,7852.25,STOPPED,8,18,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7880.5,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7880.75,STOPPED,8,2,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7887.25,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7889.0,STOPPED,8,81,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,7899.0,STOPPED,8,14,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7901.75,STOPPED,8,4,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,7906.0,STOPPED,8,21,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7921.75,STOPPED,8,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7923.0,STOPPED,8,63,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,7928.5,STOPPED,8,27,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,7929.75,STOPPED,8,31,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7930.25,STOPPED,8,55,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,7933.25,STOPPED,8,44,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7936.75,STOPPED,8,16,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7940.0,STOPPED,8,10,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,7941.0,STOPPED,8,11,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7941.25,STOPPED,8,77,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,7942.25,STOPPED,8,18,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,7956.5,STOPPED,8,24,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,7960.0,STOPPED,8,23,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,7984.5,STOPPED,7,81,speed 48 km/h < 50 km/h,False
+2023_Monaco,baseline,7990.0,STOPPED,8,1,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,7996.5,STOPPED,8,4,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8001.25,STOPPED,8,2,speed 34 km/h < 50 km/h,False
+2023_Monaco,baseline,8009.25,STOPPED,8,22,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,8014.75,STOPPED,8,14,speed 44 km/h < 50 km/h,False
+2023_Monaco,baseline,8023.75,STOPPED,7,55,speed 0 km/h < 50 km/h,False
+2023_Monaco,baseline,8024.25,STOPPED,8,20,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8026.75,STOPPED,7,27,speed 45 km/h < 50 km/h,False
+2023_Monaco,baseline,8028.75,STOPPED,7,77,speed 49 km/h < 50 km/h,False
+2023_Monaco,baseline,8030.5,STOPPED,8,21,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,8035.5,STOPPED,8,16,speed 36 km/h < 50 km/h,False
+2023_Monaco,baseline,8037.0,STOPPED,7,63,speed 0 km/h < 50 km/h,False
+2023_Monaco,baseline,8048.25,STOPPED,8,31,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8051.5,STOPPED,8,24,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8052.25,STOPPED,8,44,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8053.0,STOPPED,17,81,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,8054.0,STOPPED,7,11,speed 34 km/h < 50 km/h,False
+2023_Monaco,baseline,8056.0,STOPPED,8,23,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8066.0,STOPPED,8,10,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8101.0,STOPPED,8,2,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8109.0,STOPPED,8,22,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8122.75,STOPPED,8,1,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8123.75,STOPPED,8,81,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8131.5,STOPPED,8,4,speed 37 km/h < 50 km/h,False
+2023_Monaco,baseline,8138.25,STOPPED,8,77,speed 35 km/h < 50 km/h,False
+2023_Monaco,baseline,8141.25,STOPPED,7,14,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,8150.75,STOPPED,8,44,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8166.25,STOPPED,8,16,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8171.75,STOPPED,8,55,speed 35 km/h < 50 km/h,False
+2023_Monaco,baseline,8174.25,STOPPED,8,27,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8201.5,STOPPED,8,2,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8208.25,STOPPED,17,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,8211.25,STOPPED,8,22,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8226.25,STOPPED,8,1,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,8252.25,STOPPED,8,31,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,8313.75,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,8329.25,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,8342.5,STOPPED,2,55,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,8355.5,STOPPED,8,31,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,8457.75,STOPPED,8,20,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8460.5,STOPPED,8,44,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8474.25,STOPPED,17,2,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,8495.5,STOPPED,8,11,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,8603.0,STOPPED,8,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,8652.75,STOPPED,8,14,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,8668.0,STOPPED,8,44,speed 44 km/h < 50 km/h,False
+2023_Monaco,baseline,8705.25,STOPPED,8,27,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,9032.75,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9079.75,STOPPED,8,24,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9091.5,STOPPED,8,23,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9112.25,STOPPED,8,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9129.25,STOPPED,8,1,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9134.5,STOPPED,8,4,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9142.5,STOPPED,8,77,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9149.75,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9167.0,STOPPED,8,31,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9169.5,STOPPED,8,63,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,9183.75,STOPPED,8,24,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9188.5,STOPPED,8,23,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9197.0,STOPPED,8,11,speed 35 km/h < 50 km/h,True
+2023_Monaco,baseline,9212.5,STOPPED,8,20,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9222.75,STOPPED,8,1,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9231.75,STOPPED,8,4,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,9232.75,STOPPED,8,2,speed 35 km/h < 50 km/h,True
+2023_Monaco,baseline,9234.25,STOPPED,8,81,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,9238.5,STOPPED,8,77,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9245.5,STOPPED,8,14,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9260.0,STOPPED,8,21,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,9262.25,STOPPED,8,31,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9264.0,STOPPED,8,44,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9265.25,STOPPED,8,63,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,9273.5,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9280.5,STOPPED,8,24,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,9282.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9293.25,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9295.5,STOPPED,8,27,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9312.75,STOPPED,8,20,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,9315.75,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9329.75,STOPPED,8,81,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9330.75,STOPPED,8,2,speed 35 km/h < 50 km/h,True
+2023_Monaco,baseline,9333.5,STOPPED,8,77,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9338.75,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9354.5,STOPPED,8,21,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9356.75,STOPPED,8,31,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9358.75,STOPPED,8,44,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9359.5,STOPPED,8,63,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9368.0,STOPPED,8,16,speed 36 km/h < 50 km/h,False
+2023_Monaco,baseline,9372.25,STOPPED,8,55,speed 35 km/h < 50 km/h,False
+2023_Monaco,baseline,9374.25,STOPPED,8,24,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,9377.0,STOPPED,8,23,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,9389.25,STOPPED,8,11,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,9390.75,STOPPED,8,27,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,9408.75,STOPPED,8,1,speed 43 km/h < 50 km/h,False
+2023_Monaco,baseline,9419.75,STOPPED,8,4,speed 41 km/h < 50 km/h,False
+2023_Monaco,baseline,9421.0,STOPPED,7,22,speed 23 km/h < 50 km/h,False
+2023_Monaco,baseline,9425.5,STOPPED,8,81,speed 37 km/h < 50 km/h,False
+2023_Monaco,baseline,9429.25,STOPPED,8,77,speed 40 km/h < 50 km/h,False
+2023_Monaco,baseline,9430.0,STOPPED,8,2,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,9431.75,STOPPED,8,14,speed 42 km/h < 50 km/h,False
+2023_Monaco,baseline,9450.25,STOPPED,8,31,speed 41 km/h < 50 km/h,False
+2023_Monaco,baseline,9451.5,STOPPED,8,21,speed 37 km/h < 50 km/h,False
+2023_Monaco,baseline,9452.0,STOPPED,8,44,speed 35 km/h < 50 km/h,False
+2023_Monaco,baseline,9453.5,STOPPED,8,63,speed 41 km/h < 50 km/h,False
+2023_Monaco,baseline,9462.75,STOPPED,8,16,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,9465.5,STOPPED,8,10,speed 41 km/h < 50 km/h,False
+2023_Monaco,baseline,9465.75,STOPPED,8,55,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,9468.25,STOPPED,8,24,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,9470.0,STOPPED,8,23,speed 39 km/h < 50 km/h,False
+2023_Monaco,baseline,9487.0,STOPPED,8,11,speed 35 km/h < 50 km/h,False
+2023_Monaco,baseline,9487.0,STOPPED,8,27,speed 38 km/h < 50 km/h,False
+2023_Monaco,baseline,9500.75,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9509.0,STOPPED,7,20,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9510.75,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9516.75,STOPPED,17,22,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,9516.75,STOPPED,8,81,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9521.25,STOPPED,8,77,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9525.0,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9525.5,STOPPED,8,2,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9541.75,STOPPED,8,31,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9544.75,STOPPED,8,44,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9546.5,STOPPED,8,63,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,9548.0,STOPPED,8,21,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9557.25,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9560.75,STOPPED,8,55,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9565.75,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9582.0,STOPPED,8,11,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9583.5,STOPPED,8,27,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9592.0,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9600.25,STOPPED,8,4,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9607.75,STOPPED,8,81,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9611.75,STOPPED,8,20,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,9612.75,STOPPED,8,77,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9615.75,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9616.75,STOPPED,8,2,speed 34 km/h < 50 km/h,True
+2023_Monaco,baseline,9631.75,STOPPED,8,31,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9633.5,STOPPED,8,44,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9636.75,STOPPED,8,63,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9639.5,STOPPED,8,21,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,9648.75,STOPPED,8,16,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9650.75,STOPPED,8,10,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9651.75,STOPPED,8,55,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9655.75,STOPPED,8,24,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9656.5,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9663.25,STOPPED,8,22,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9673.0,STOPPED,7,27,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,9679.0,STOPPED,8,11,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9681.25,STOPPED,8,1,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9688.25,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9696.25,STOPPED,8,81,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9704.0,STOPPED,8,77,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9706.5,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9721.75,STOPPED,8,31,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9724.0,STOPPED,8,44,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9727.75,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9730.75,STOPPED,8,21,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9738.0,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9740.75,STOPPED,8,10,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9741.25,STOPPED,8,55,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,9745.5,STOPPED,8,24,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9747.0,STOPPED,8,23,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9756.5,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9771.25,STOPPED,8,1,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9776.25,STOPPED,8,4,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9783.25,STOPPED,8,81,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9796.5,STOPPED,8,14,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9798.0,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9798.25,STOPPED,8,77,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9810.0,STOPPED,8,31,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,9812.75,STOPPED,8,44,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9815.0,STOPPED,8,20,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9817.0,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9820.0,STOPPED,8,21,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9826.75,STOPPED,8,16,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9827.75,STOPPED,8,2,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9830.0,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2023_Monaco,baseline,9831.0,STOPPED,8,55,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9834.0,STOPPED,8,24,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9836.25,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9847.75,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9859.0,STOPPED,8,1,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9861.5,STOPPED,8,4,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9871.75,STOPPED,8,81,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9873.0,STOPPED,8,27,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9885.25,STOPPED,8,14,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,9887.5,STOPPED,8,77,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9890.75,STOPPED,8,11,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,9897.5,STOPPED,8,31,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9898.75,STOPPED,8,44,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9905.75,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9909.75,STOPPED,8,21,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9916.0,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9918.5,STOPPED,8,10,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9919.75,STOPPED,8,55,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9920.25,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9922.0,STOPPED,8,24,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9925.25,STOPPED,8,23,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9937.25,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,9945.0,STOPPED,8,1,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9947.25,STOPPED,8,4,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,9958.5,STOPPED,8,81,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9965.0,STOPPED,8,27,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,9972.5,STOPPED,8,14,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,9974.0,STOPPED,17,20,speed 49 km/h < 50 km/h,True
+2023_Monaco,baseline,9974.0,STOPPED,8,77,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9979.0,STOPPED,8,11,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9983.5,STOPPED,8,31,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,9984.75,STOPPED,8,44,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,9992.75,STOPPED,8,63,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,9996.75,STOPPED,8,21,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,10002.75,STOPPED,8,16,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10005.25,STOPPED,8,10,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,10006.5,STOPPED,8,55,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10008.0,STOPPED,8,2,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,10012.5,STOPPED,8,24,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10016.75,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10025.75,STOPPED,8,22,speed 45 km/h < 50 km/h,True
+2023_Monaco,baseline,10030.5,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,10032.75,STOPPED,8,4,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10044.0,STOPPED,8,81,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10058.75,STOPPED,8,14,speed 44 km/h < 50 km/h,True
+2023_Monaco,baseline,10059.0,STOPPED,8,27,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10060.0,STOPPED,8,77,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10065.25,STOPPED,8,11,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10068.25,STOPPED,8,31,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10069.75,STOPPED,8,44,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10078.75,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10083.5,STOPPED,8,21,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,10089.25,STOPPED,8,16,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10091.75,STOPPED,8,10,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10092.5,STOPPED,8,55,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10096.5,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10100.0,STOPPED,8,24,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10105.0,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10113.75,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10115.75,STOPPED,8,1,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,10118.25,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10129.75,STOPPED,8,81,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,10144.0,STOPPED,8,14,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10146.75,STOPPED,8,77,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10152.5,STOPPED,8,27,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10153.25,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10153.5,STOPPED,8,31,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10154.0,STOPPED,8,44,speed 37 km/h < 50 km/h,True
+2023_Monaco,baseline,10164.5,STOPPED,8,63,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10169.75,STOPPED,8,21,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10175.75,STOPPED,8,16,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10177.25,STOPPED,8,10,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10178.0,STOPPED,8,55,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10183.25,STOPPED,8,2,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10186.0,STOPPED,8,24,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10191.75,STOPPED,8,23,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10201.75,STOPPED,8,1,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10203.25,STOPPED,8,22,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10204.25,STOPPED,8,4,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10215.25,STOPPED,8,81,speed 41 km/h < 50 km/h,True
+2023_Monaco,baseline,10229.25,STOPPED,8,14,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10230.75,STOPPED,8,77,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10239.25,STOPPED,8,31,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,10240.5,STOPPED,8,44,speed 43 km/h < 50 km/h,True
+2023_Monaco,baseline,10246.25,STOPPED,8,27,speed 39 km/h < 50 km/h,True
+2023_Monaco,baseline,10247.5,STOPPED,8,11,speed 36 km/h < 50 km/h,True
+2023_Monaco,baseline,10251.5,STOPPED,8,63,speed 40 km/h < 50 km/h,True
+2023_Monaco,baseline,10256.25,STOPPED,8,21,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10262.0,STOPPED,8,16,speed 38 km/h < 50 km/h,True
+2023_Monaco,baseline,10262.75,STOPPED,8,10,speed 42 km/h < 50 km/h,True
+2023_Monaco,baseline,10263.75,STOPPED,8,55,speed 38 km/h < 50 km/h,True
+2024_Canadian,detectors,353.25,SPIN,14,16,18 m off the racing line,True
+2024_Canadian,detectors,797.5,IMPACT,6,2,"lost 89 km/h in 1 s (89 to 0 km/h), with brakes on",False
+2024_Canadian,detectors,2432.0,IMPACT,4,2,"lost 83 km/h in 1 s (117 to 0 km/h), with brakes on",False
+2024_Canadian,detectors,2627.75,SPIN,1,27,"travelling 38 deg off the track direction, lost 37 km/h in 1 s",True
+2024_Canadian,detectors,4984.75,IMPACT,6,11,"lost 107 km/h in 1 s (107 to 0 km/h), with brakes on",False
+2024_Canadian,detectors,5065.5,STOPPED,6,55,"speed 0 km/h vs ref 124 km/h, on the racing line",False
+2024_Canadian,detectors,5067.75,STOPPED,6,23,"speed 0 km/h vs ref 166 km/h, on the racing line",False
+2024_Canadian,detectors,5067.75,MULTI,6,"23,55","cars 23, 55 in sectors 6-6 within 5 s",False
+2024_Canadian,detectors,5543.75,IMPACT,13,27,"lost 85 km/h in 1 s (152 to 72 km/h), without braking",True
+2024_Canadian,detectors,6277.5,IMPACT,9,22,"lost 99 km/h in 1 s (106 to 31 km/h), with brakes on",False
+2024_Canadian,baseline,269.5,STOPPED,2,10,speed 42 km/h < 50 km/h,False
+2024_Canadian,baseline,326.75,STOPPED,11,20,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,328.5,STOPPED,11,23,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,329.5,STOPPED,11,27,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,330.0,STOPPED,11,2,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,331.0,STOPPED,11,31,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,331.25,STOPPED,11,11,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,331.5,STOPPED,11,10,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,332.5,STOPPED,11,77,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,335.5,STOPPED,11,24,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,423.75,STOPPED,11,20,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,430.0,STOPPED,11,16,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,431.5,STOPPED,11,22,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,433.25,STOPPED,11,2,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,433.75,STOPPED,11,55,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,435.5,STOPPED,11,31,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,438.0,STOPPED,11,10,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,439.25,STOPPED,11,77,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,520.25,STOPPED,11,20,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,523.75,STOPPED,11,14,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,533.75,STOPPED,11,23,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,534.5,STOPPED,11,2,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,535.5,STOPPED,11,55,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,539.5,STOPPED,11,10,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,542.5,STOPPED,11,24,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,612.75,STOPPED,11,4,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,618.5,STOPPED,11,81,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,626.5,STOPPED,11,3,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,632.0,STOPPED,11,23,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,636.75,STOPPED,11,31,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,674.75,STOPPED,1,2,speed 34 km/h < 50 km/h,True
+2024_Canadian,baseline,724.0,STOPPED,11,3,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,730.5,STOPPED,11,23,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,731.25,STOPPED,11,55,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,735.5,STOPPED,11,31,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,797.75,STOPPED,6,2,speed 0 km/h < 50 km/h,False
+2024_Canadian,baseline,801.25,STOPPED,11,4,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,811.5,STOPPED,11,14,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,821.0,STOPPED,11,3,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,822.0,STOPPED,11,16,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,826.75,STOPPED,11,23,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,915.25,STOPPED,11,3,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,921.25,STOPPED,11,55,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,1014.75,STOPPED,11,55,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,1017.0,STOPPED,11,20,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,1107.25,STOPPED,11,55,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1118.25,STOPPED,11,77,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,1183.0,STOPPED,11,14,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1195.75,STOPPED,11,16,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,1199.0,STOPPED,11,55,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,1289.5,STOPPED,11,18,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1290.25,STOPPED,11,23,speed 38 km/h < 50 km/h,True
+2024_Canadian,baseline,1291.5,STOPPED,11,55,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1362.0,STOPPED,11,14,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1384.25,STOPPED,11,22,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1384.75,STOPPED,11,23,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,1386.25,STOPPED,11,20,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,1441.5,STOPPED,1,2,speed 36 km/h < 50 km/h,True
+2024_Canadian,baseline,1475.75,STOPPED,11,23,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,1476.5,STOPPED,11,55,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,1481.0,STOPPED,11,10,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,1566.75,STOPPED,11,55,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,1729.0,STOPPED,1,1,speed 39 km/h < 50 km/h,True
+2024_Canadian,baseline,1744.75,STOPPED,11,55,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2130.0,STOPPED,1,22,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,2131.25,STOPPED,1,55,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2132.0,STOPPED,11,81,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2179.25,STOPPED,11,23,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,2432.5,STOPPED,4,2,speed 0 km/h < 50 km/h,False
+2024_Canadian,baseline,2465.25,STOPPED,11,4,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2483.75,STOPPED,1,31,speed 41 km/h < 50 km/h,True
+2024_Canadian,baseline,2484.75,STOPPED,1,10,speed 37 km/h < 50 km/h,True
+2024_Canadian,baseline,2529.5,STOPPED,11,3,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2532.75,STOPPED,11,18,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,2544.75,STOPPED,11,16,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,2565.25,STOPPED,11,77,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2565.5,STOPPED,2,44,speed 41 km/h < 50 km/h,False
+2024_Canadian,baseline,2566.75,STOPPED,2,14,speed 44 km/h < 50 km/h,False
+2024_Canadian,baseline,2585.25,STOPPED,11,4,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,2598.5,STOPPED,1,31,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2606.0,STOPPED,11,63,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2628.5,STOPPED,11,44,speed 39 km/h < 50 km/h,True
+2024_Canadian,baseline,2635.0,STOPPED,11,14,speed 41 km/h < 50 km/h,True
+2024_Canadian,baseline,2642.75,STOPPED,11,3,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,2661.5,STOPPED,11,18,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2668.75,STOPPED,11,23,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2672.5,STOPPED,9,11,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2672.75,STOPPED,11,16,speed 41 km/h < 50 km/h,True
+2024_Canadian,baseline,2675.75,STOPPED,11,77,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,2677.5,STOPPED,11,55,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,2695.75,STOPPED,11,27,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,2725.25,STOPPED,11,1,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2727.5,STOPPED,11,63,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2728.0,STOPPED,1,20,speed 40 km/h < 50 km/h,True
+2024_Canadian,baseline,2728.25,STOPPED,11,4,speed 41 km/h < 50 km/h,True
+2024_Canadian,baseline,2730.5,STOPPED,11,81,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2747.75,STOPPED,11,14,speed 42 km/h < 50 km/h,True
+2024_Canadian,baseline,2764.0,STOPPED,11,18,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2775.25,STOPPED,11,23,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2781.0,STOPPED,11,16,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2784.0,STOPPED,11,55,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,2801.75,STOPPED,3,44,speed 47 km/h < 50 km/h,False
+2024_Canadian,baseline,2802.5,STOPPED,4,81,speed 48 km/h < 50 km/h,False
+2024_Canadian,baseline,2856.25,STOPPED,11,1,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,2858.5,STOPPED,11,4,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2864.25,STOPPED,11,14,speed 41 km/h < 50 km/h,True
+2024_Canadian,baseline,2870.75,STOPPED,11,18,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2879.0,STOPPED,11,3,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,2886.0,STOPPED,11,77,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2888.0,STOPPED,11,55,speed 42 km/h < 50 km/h,True
+2024_Canadian,baseline,2975.25,STOPPED,11,1,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2978.25,STOPPED,11,4,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,2982.25,STOPPED,11,14,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,2983.5,STOPPED,11,22,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,2985.5,STOPPED,11,18,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2987.25,STOPPED,11,31,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2987.75,STOPPED,11,3,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,2989.25,STOPPED,11,23,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,2991.25,STOPPED,11,77,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2992.0,STOPPED,11,55,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,2992.5,STOPPED,11,20,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,2993.25,STOPPED,11,10,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,3019.25,STOPPED,11,16,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,3097.0,STOPPED,11,31,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,3098.0,STOPPED,11,23,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,3098.0,STOPPED,11,77,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,3099.25,STOPPED,11,20,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,3100.5,STOPPED,11,11,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,3121.25,STOPPED,11,16,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,3178.25,STOPPED,11,1,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,3181.5,STOPPED,11,4,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,3188.5,STOPPED,11,23,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,3240.0,STOPPED,11,16,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,3272.0,STOPPED,11,4,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,3275.5,STOPPED,11,14,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,3284.0,STOPPED,11,10,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,4075.5,STOPPED,6,10,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,4085.0,STOPPED,1,4,speed 39 km/h < 50 km/h,False
+2024_Canadian,baseline,4241.0,STOPPED,11,23,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,4241.5,STOPPED,11,31,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,4250.75,STOPPED,11,27,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,4273.75,STOPPED,11,77,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,4411.5,STOPPED,11,81,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,4641.5,STOPPED,1,3,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,4985.0,STOPPED,6,11,speed 0 km/h < 50 km/h,False
+2024_Canadian,baseline,5063.5,STOPPED,6,55,speed 46 km/h < 50 km/h,False
+2024_Canadian,baseline,5067.25,STOPPED,6,23,speed 0 km/h < 50 km/h,False
+2024_Canadian,baseline,5123.0,STOPPED,6,44,speed 42 km/h < 50 km/h,False
+2024_Canadian,baseline,5188.0,STOPPED,11,18,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,5189.75,STOPPED,11,22,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,5253.0,STOPPED,6,14,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,5258.25,STOPPED,11,1,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5259.25,STOPPED,11,4,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5261.25,STOPPED,11,81,speed 42 km/h < 50 km/h,True
+2024_Canadian,baseline,5272.5,STOPPED,11,63,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,5281.25,STOPPED,11,44,speed 40 km/h < 50 km/h,True
+2024_Canadian,baseline,5354.25,STOPPED,6,18,speed 40 km/h < 50 km/h,True
+2024_Canadian,baseline,5356.0,STOPPED,6,22,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,5386.75,STOPPED,11,1,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,5387.75,STOPPED,11,4,speed 42 km/h < 50 km/h,True
+2024_Canadian,baseline,5389.75,STOPPED,11,81,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5403.25,STOPPED,11,3,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,5403.75,STOPPED,11,10,speed 42 km/h < 50 km/h,True
+2024_Canadian,baseline,5405.5,STOPPED,11,27,speed 47 km/h < 50 km/h,True
+2024_Canadian,baseline,5506.25,STOPPED,11,1,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,5506.5,STOPPED,11,4,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5513.25,STOPPED,11,44,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5519.0,STOPPED,11,10,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,5519.0,STOPPED,11,3,speed 45 km/h < 50 km/h,True
+2024_Canadian,baseline,5616.0,STOPPED,11,1,speed 42 km/h < 50 km/h,True
+2024_Canadian,baseline,5617.0,STOPPED,11,4,speed 36 km/h < 50 km/h,True
+2024_Canadian,baseline,5619.25,STOPPED,11,81,speed 41 km/h < 50 km/h,True
+2024_Canadian,baseline,5625.75,STOPPED,11,44,speed 48 km/h < 50 km/h,True
+2024_Canadian,baseline,5627.25,STOPPED,11,14,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,5628.25,STOPPED,11,18,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5631.0,STOPPED,11,3,speed 46 km/h < 50 km/h,True
+2024_Canadian,baseline,5631.5,STOPPED,11,31,speed 49 km/h < 50 km/h,True
+2024_Canadian,baseline,5632.0,STOPPED,11,10,speed 43 km/h < 50 km/h,True
+2024_Canadian,baseline,5633.5,STOPPED,11,27,speed 44 km/h < 50 km/h,True
+2024_Canadian,baseline,6277.75,STOPPED,9,22,speed 9 km/h < 50 km/h,False
+2024_Mexico_City,detectors,3379.25,IMPACT,3,22,"lost 207 km/h in 1 s (222 to 3 km/h), harder than braking",False
+2024_Mexico_City,detectors,3394.75,STOPPED,4,23,"speed 26 km/h vs ref 126 km/h, on the racing line",False
+2024_Mexico_City,detectors,3450.5,STOPPED,11,81,"speed 23 km/h vs ref 231 km/h, on the racing line",True
+2024_Mexico_City,detectors,3451.0,STOPPED,11,31,"speed 23 km/h vs ref 227 km/h, on the racing line",True
+2024_Mexico_City,detectors,3451.0,MULTI,11,"31,81","cars 31, 81 in sectors 11-11 within 5 s",True
+2024_Mexico_City,detectors,3546.25,STOPPED,4,24,"speed 25 km/h vs ref 207 km/h, on the racing line",False
+2024_Mexico_City,detectors,3547.0,STOPPED,4,81,"speed 29 km/h vs ref 203 km/h, on the racing line",False
+2024_Mexico_City,detectors,3547.0,MULTI,4,"24,81","cars 24, 81 in sectors 4-4 within 5 s",False
+2024_Mexico_City,detectors,3547.25,STOPPED,4,31,"speed 23 km/h vs ref 197 km/h, on the racing line",False
+2024_Mexico_City,detectors,3773.5,STOPPED,3,27,"speed 36 km/h vs ref 274 km/h, on the racing line",True
+2024_Mexico_City,detectors,3774.25,STOPPED,3,10,"speed 37 km/h vs ref 308 km/h, on the racing line",True
+2024_Mexico_City,detectors,3774.25,MULTI,3,"10,27","cars 10, 27 in sectors 3-3 within 5 s",True
+2024_Mexico_City,detectors,3779.5,STOPPED,3,30,"speed 40 km/h vs ref 274 km/h, on the racing line",True
+2024_Mexico_City,detectors,3780.0,STOPPED,3,18,"speed 22 km/h vs ref 274 km/h, on the racing line",True
+2024_Mexico_City,detectors,3905.25,STOPPED,3,18,"speed 41 km/h vs ref 347 km/h, on the racing line",True
+2024_Mexico_City,baseline,3379.75,STOPPED,3,22,speed 3 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3384.75,STOPPED,3,23,speed 43 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3429.25,STOPPED,11,24,speed 49 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3431.75,STOPPED,11,20,speed 43 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3431.75,STOPPED,11,63,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3432.25,STOPPED,11,10,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3433.25,STOPPED,11,27,speed 47 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3434.0,STOPPED,11,30,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3435.5,STOPPED,11,14,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3435.5,STOPPED,11,18,speed 43 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3436.75,STOPPED,11,11,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3437.5,STOPPED,11,43,speed 38 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3438.75,STOPPED,11,77,speed 37 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3441.75,STOPPED,11,81,speed 37 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3442.75,STOPPED,11,31,speed 40 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3500.25,STOPPED,3,63,speed 47 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3501.0,STOPPED,3,44,speed 45 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3502.75,STOPPED,3,20,speed 41 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3504.0,STOPPED,3,27,speed 44 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3504.5,STOPPED,4,1,speed 43 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3505.25,STOPPED,3,10,speed 36 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3506.0,STOPPED,4,55,speed 43 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3508.25,STOPPED,3,30,speed 36 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3509.5,STOPPED,3,16,speed 44 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3509.75,STOPPED,3,18,speed 41 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3515.0,STOPPED,3,14,speed 42 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3528.25,STOPPED,3,11,speed 40 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3530.25,STOPPED,4,43,speed 38 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3530.5,STOPPED,3,77,speed 47 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3533.25,STOPPED,4,24,speed 45 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3537.25,STOPPED,4,81,speed 39 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3539.25,STOPPED,4,31,speed 37 km/h < 50 km/h,False
+2024_Mexico_City,baseline,3571.75,STOPPED,11,16,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3589.75,STOPPED,14,1,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3608.75,STOPPED,14,18,speed 36 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3610.25,STOPPED,15,27,speed 49 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3611.5,STOPPED,15,30,speed 49 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3614.5,STOPPED,15,14,speed 47 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3642.25,STOPPED,3,10,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3651.75,STOPPED,3,43,speed 48 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3652.75,STOPPED,3,77,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3655.75,STOPPED,3,24,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3657.0,STOPPED,3,81,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3658.25,STOPPED,3,31,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3685.0,STOPPED,7,63,speed 41 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3686.25,STOPPED,7,16,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3686.75,STOPPED,7,20,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3724.75,STOPPED,14,1,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3751.25,STOPPED,14,81,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3771.75,STOPPED,3,63,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3772.75,STOPPED,3,27,speed 39 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3796.25,STOPPED,3,14,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3797.5,STOPPED,3,11,speed 48 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3809.25,STOPPED,4,31,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3819.25,STOPPED,7,44,speed 39 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3853.0,STOPPED,14,1,speed 40 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3866.75,STOPPED,14,63,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3871.75,STOPPED,14,30,speed 40 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3877.25,STOPPED,14,14,speed 48 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3878.25,STOPPED,14,11,speed 43 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3927.5,STOPPED,3,81,speed 48 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3931.5,STOPPED,4,43,speed 41 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3931.75,STOPPED,4,30,speed 49 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3933.5,STOPPED,4,24,speed 49 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3934.5,STOPPED,3,31,speed 41 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3949.25,STOPPED,4,77,speed 48 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3950.75,STOPPED,7,63,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3953.0,STOPPED,7,20,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3956.0,STOPPED,7,27,speed 43 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3983.75,STOPPED,14,1,speed 38 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3989.5,STOPPED,14,16,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,3998.75,STOPPED,14,30,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4003.5,STOPPED,14,43,speed 46 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4010.5,STOPPED,14,24,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4010.75,STOPPED,14,81,speed 48 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4061.5,STOPPED,7,63,speed 49 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4062.0,STOPPED,7,20,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4064.5,STOPPED,7,27,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4067.0,STOPPED,7,10,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4092.75,STOPPED,13,1,speed 41 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4093.75,STOPPED,13,55,speed 36 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4096.0,STOPPED,13,4,speed 42 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4096.75,STOPPED,13,16,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4100.0,STOPPED,13,44,speed 39 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4104.25,STOPPED,13,30,speed 32 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4106.0,STOPPED,13,18,speed 38 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4112.0,STOPPED,13,11,speed 44 km/h < 50 km/h,True
+2024_Mexico_City,baseline,4112.0,STOPPED,13,14,speed 45 km/h < 50 km/h,True
+2024_Mexico_City,baseline,5167.5,STOPPED,6,18,speed 38 km/h < 50 km/h,True
+2024_Mexico_City,baseline,5288.5,STOPPED,14,11,speed 47 km/h < 50 km/h,True
+2024_Qatar,detectors,3308.0,STOPPED,3,27,"speed 0 km/h vs ref 172 km/h, on the racing line",False
+2024_Qatar,detectors,3308.0,STOPPED,3,31,"speed 7 km/h vs ref 176 km/h, on the racing line",False
+2024_Qatar,detectors,3308.0,STOPPED,3,43,"speed 8 km/h vs ref 185 km/h, on the racing line",False
+2024_Qatar,detectors,3308.0,MULTI,3,"27,31","cars 27, 31 in sectors 3-3 within 5 s",False
+2024_Qatar,detectors,3325.0,IMPACT,6,18,"lost 100 km/h in 1 s (134 to 65 km/h), without braking",True
+2024_Qatar,detectors,3325.0,IMPACT,6,23,"lost 118 km/h in 1 s (154 to 52 km/h), with brakes on",True
+2024_Qatar,detectors,3325.0,MULTI,6,"18,23","cars 18, 23 in sectors 6-6 within 5 s",True
+2024_Qatar,detectors,3609.25,STOPPED,7,10,"speed 42 km/h vs ref 243 km/h, on the racing line",True
+2024_Qatar,detectors,3851.0,IMPACT,3,30,"lost 104 km/h in 1 s (117 to 0 km/h), with brakes on",False
+2024_Qatar,detectors,7087.25,IMPACT,15,11,"lost 84 km/h in 1 s (130 to 20 km/h), without braking",True
+2024_Qatar,detectors,7178.25,IMPACT,11,27,"lost 166 km/h in 1 s (222 to 67 km/h), with brakes on",False
+2024_Qatar,detectors,8689.0,STOPPED,2,23,"speed 80 km/h vs ref 291 km/h, on the racing line",True
+2024_Qatar,baseline,3307.5,STOPPED,3,27,speed 0 km/h < 50 km/h,False
+2024_Qatar,baseline,3307.5,STOPPED,3,31,speed 15 km/h < 50 km/h,False
+2024_Qatar,baseline,3307.5,STOPPED,3,43,speed 7 km/h < 50 km/h,False
+2024_Qatar,baseline,3326.25,STOPPED,6,18,speed 48 km/h < 50 km/h,True
+2024_Qatar,baseline,3326.25,STOPPED,6,23,speed 4 km/h < 50 km/h,True
+2024_Qatar,baseline,3358.0,STOPPED,12,77,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,3358.5,STOPPED,12,30,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,3360.0,STOPPED,12,44,speed 47 km/h < 50 km/h,True
+2024_Qatar,baseline,3360.75,STOPPED,12,14,speed 42 km/h < 50 km/h,True
+2024_Qatar,baseline,3361.5,STOPPED,12,22,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,3363.75,STOPPED,12,20,speed 39 km/h < 50 km/h,True
+2024_Qatar,baseline,3365.0,STOPPED,12,10,speed 37 km/h < 50 km/h,True
+2024_Qatar,baseline,3370.25,STOPPED,12,24,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,3473.5,STOPPED,8,44,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,3474.25,STOPPED,8,22,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,3510.0,STOPPED,12,10,speed 49 km/h < 50 km/h,True
+2024_Qatar,baseline,3510.75,STOPPED,12,77,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,3552.25,STOPPED,19,22,speed 43 km/h < 50 km/h,True
+2024_Qatar,baseline,3554.0,STOPPED,19,20,speed 42 km/h < 50 km/h,True
+2024_Qatar,baseline,3558.0,STOPPED,19,30,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,3563.0,STOPPED,19,18,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,3686.75,STOPPED,19,44,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,3688.25,STOPPED,18,23,speed 49 km/h < 50 km/h,True
+2024_Qatar,baseline,3689.5,STOPPED,19,20,speed 39 km/h < 50 km/h,True
+2024_Qatar,baseline,3690.75,STOPPED,19,22,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,3692.5,STOPPED,19,77,speed 42 km/h < 50 km/h,True
+2024_Qatar,baseline,3694.0,STOPPED,19,30,speed 42 km/h < 50 km/h,True
+2024_Qatar,baseline,3696.0,STOPPED,19,24,speed 41 km/h < 50 km/h,True
+2024_Qatar,baseline,3698.0,STOPPED,19,18,speed 41 km/h < 50 km/h,True
+2024_Qatar,baseline,3698.25,STOPPED,18,27,speed 41 km/h < 50 km/h,True
+2024_Qatar,baseline,3812.5,STOPPED,15,27,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,3851.25,STOPPED,3,30,speed 0 km/h < 50 km/h,False
+2024_Qatar,baseline,6553.25,STOPPED,8,1,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,6622.25,STOPPED,8,10,speed 49 km/h < 50 km/h,True
+2024_Qatar,baseline,6939.5,STOPPED,12,20,speed 43 km/h < 50 km/h,True
+2024_Qatar,baseline,6984.0,STOPPED,19,23,speed 47 km/h < 50 km/h,True
+2024_Qatar,baseline,6986.0,STOPPED,19,27,speed 38 km/h < 50 km/h,True
+2024_Qatar,baseline,6987.5,STOPPED,19,30,speed 39 km/h < 50 km/h,True
+2024_Qatar,baseline,7035.0,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,7036.0,STOPPED,8,11,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,7038.5,STOPPED,8,10,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,7048.75,STOPPED,8,20,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,7181.0,STOPPED,11,27,speed 5 km/h < 50 km/h,False
+2024_Qatar,baseline,7300.5,STOPPED,11,10,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,7302.25,STOPPED,11,55,speed 43 km/h < 50 km/h,True
+2024_Qatar,baseline,7302.5,STOPPED,11,63,speed 48 km/h < 50 km/h,True
+2024_Qatar,baseline,7304.75,STOPPED,11,14,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,7306.0,STOPPED,11,24,speed 46 km/h < 50 km/h,True
+2024_Qatar,baseline,7307.75,STOPPED,11,20,speed 46 km/h < 50 km/h,True
+2024_Qatar,baseline,7360.0,STOPPED,19,23,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,7362.0,STOPPED,19,44,speed 49 km/h < 50 km/h,True
+2024_Qatar,baseline,7413.0,STOPPED,8,16,speed 46 km/h < 50 km/h,True
+2024_Qatar,baseline,7414.0,STOPPED,8,81,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,7416.25,STOPPED,8,63,speed 43 km/h < 50 km/h,True
+2024_Qatar,baseline,7418.25,STOPPED,8,55,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,7419.0,STOPPED,8,10,speed 46 km/h < 50 km/h,True
+2024_Qatar,baseline,7419.5,STOPPED,8,14,speed 40 km/h < 50 km/h,True
+2024_Qatar,baseline,7420.0,STOPPED,8,24,speed 45 km/h < 50 km/h,True
+2024_Qatar,baseline,7472.5,STOPPED,16,1,speed 49 km/h < 50 km/h,True
+2024_Qatar,baseline,7473.0,STOPPED,16,4,speed 44 km/h < 50 km/h,True
+2024_Qatar,baseline,7473.25,STOPPED,15,16,speed 47 km/h < 50 km/h,True
+2024_Qatar,baseline,7488.75,STOPPED,16,10,speed 48 km/h < 50 km/h,True
+2024_São_Paulo,detectors,4392.25,STOPPED,10,11,"speed 7 km/h vs ref 91 km/h, on the racing line",False
+2024_São_Paulo,detectors,4646.25,STOPPED,9,50,"speed 26 km/h vs ref 128 km/h, on the racing line",False
+2024_São_Paulo,detectors,6465.5,STOPPED,2,30,"speed 0 km/h vs ref 116 km/h, on the racing line",False
+2024_São_Paulo,detectors,6578.25,IMPACT,2,27,"lost 99 km/h in 1 s (120 to 0 km/h), with brakes on",False
+2024_São_Paulo,detectors,8792.0,STOPPED,13,50,"speed 9 km/h vs ref 148 km/h, on the racing line",False
+2024_São_Paulo,detectors,9038.75,IMPACT,7,50,"lost 90 km/h in 1 s (128 to 0 km/h), with brakes on",False
+2024_São_Paulo,detectors,9303.75,IMPACT,8,55,"lost 98 km/h in 1 s (131 to 0 km/h), with brakes on",False
+2024_São_Paulo,detectors,9383.25,STOPPED,7,10,"speed 33 km/h vs ref 181 km/h, on the racing line",True
+2024_São_Paulo,detectors,9800.25,STOPPED,13,14,"speed 4 km/h vs ref 140 km/h, on the racing line",False
+2024_São_Paulo,baseline,4332.5,STOPPED,0,18,speed 0 km/h < 50 km/h,True
+2024_São_Paulo,baseline,4332.5,STOPPED,0,23,speed 0 km/h < 50 km/h,True
+2024_São_Paulo,baseline,4390.25,STOPPED,10,11,speed 22 km/h < 50 km/h,False
+2024_São_Paulo,baseline,4645.5,STOPPED,9,50,speed 25 km/h < 50 km/h,False
+2024_São_Paulo,baseline,5260.25,STOPPED,12,44,speed 41 km/h < 50 km/h,False
+2024_São_Paulo,baseline,6465.0,STOPPED,2,30,speed 0 km/h < 50 km/h,False
+2024_São_Paulo,baseline,6578.75,STOPPED,2,27,speed 0 km/h < 50 km/h,False
+2024_São_Paulo,baseline,6714.75,STOPPED,10,30,speed 39 km/h < 50 km/h,True
+2024_São_Paulo,baseline,6893.5,STOPPED,8,31,speed 35 km/h < 50 km/h,False
+2024_São_Paulo,baseline,6900.25,STOPPED,2,55,speed 42 km/h < 50 km/h,False
+2024_São_Paulo,baseline,6901.5,STOPPED,2,11,speed 38 km/h < 50 km/h,False
+2024_São_Paulo,baseline,8730.0,STOPPED,10,1,speed 41 km/h < 50 km/h,True
+2024_São_Paulo,baseline,8731.0,STOPPED,10,10,speed 38 km/h < 50 km/h,True
+2024_São_Paulo,baseline,8731.5,STOPPED,10,31,speed 37 km/h < 50 km/h,True
+2024_São_Paulo,baseline,8733.25,STOPPED,10,4,speed 40 km/h < 50 km/h,True
+2024_São_Paulo,baseline,8765.25,STOPPED,12,14,speed 38 km/h < 50 km/h,False
+2024_São_Paulo,baseline,8767.5,STOPPED,12,30,speed 40 km/h < 50 km/h,False
+2024_São_Paulo,baseline,8781.25,STOPPED,12,50,speed 4 km/h < 50 km/h,False
+2024_São_Paulo,baseline,8786.5,STOPPED,12,24,speed 30 km/h < 50 km/h,False
+2024_São_Paulo,baseline,9039.25,STOPPED,7,50,speed 2 km/h < 50 km/h,False
+2024_São_Paulo,baseline,9178.0,STOPPED,12,50,speed 42 km/h < 50 km/h,False
+2024_São_Paulo,baseline,9304.25,STOPPED,8,55,speed 0 km/h < 50 km/h,False
+2024_São_Paulo,baseline,9317.5,STOPPED,10,30,speed 41 km/h < 50 km/h,False
+2024_São_Paulo,baseline,9318.5,STOPPED,10,11,speed 39 km/h < 50 km/h,False
+2024_São_Paulo,baseline,9318.75,STOPPED,12,81,speed 42 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9380.5,STOPPED,7,1,speed 39 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9381.75,STOPPED,7,10,speed 36 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9395.0,STOPPED,8,16,speed 36 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9401.0,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9409.25,STOPPED,8,44,speed 37 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9511.25,STOPPED,8,10,speed 37 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9513.75,STOPPED,8,1,speed 46 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9514.25,STOPPED,8,63,speed 46 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9516.5,STOPPED,8,4,speed 48 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9517.75,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9520.5,STOPPED,8,81,speed 44 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9522.0,STOPPED,8,22,speed 39 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9524.0,STOPPED,8,44,speed 40 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9526.0,STOPPED,8,14,speed 45 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9526.75,STOPPED,8,30,speed 45 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9528.0,STOPPED,8,11,speed 43 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9531.5,STOPPED,8,77,speed 46 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9549.25,STOPPED,8,50,speed 45 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9657.5,STOPPED,10,31,speed 44 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9688.75,STOPPED,12,30,speed 44 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9689.25,STOPPED,12,11,speed 45 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9690.0,STOPPED,12,77,speed 42 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9690.25,STOPPED,12,24,speed 43 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9690.75,STOPPED,12,50,speed 42 km/h < 50 km/h,True
+2024_São_Paulo,baseline,9796.75,STOPPED,12,14,speed 42 km/h < 50 km/h,False
+2025_Australian,detectors,4308.5,IMPACT,8,7,"lost 143 km/h in 1 s (170 to 0 km/h), with brakes on",False
+2025_Australian,detectors,4385.75,IMPACT,20,55,"lost 114 km/h in 1 s (119 to 0 km/h), with brakes on",False
+2025_Australian,detectors,6079.75,IMPACT,6,12,"lost 107 km/h in 1 s (130 to 52 km/h), without braking",True
+2025_Australian,detectors,7642.25,IMPACT,9,14,"lost 116 km/h in 1 s (163 to 0 km/h), with brakes on",False
+2025_Australian,detectors,8180.25,STOPPED,20,16,"speed 31 km/h vs ref 259 km/h, on the racing line",True
+2025_Australian,detectors,8188.5,STOPPED,20,18,"speed 39 km/h vs ref 261 km/h, on the racing line",True
+2025_Australian,detectors,8188.75,STOPPED,20,12,"speed 43 km/h vs ref 267 km/h, on the racing line",True
+2025_Australian,detectors,8188.75,MULTI,20,"12,18","cars 12, 18 in sectors 20-20 within 5 s",True
+2025_Australian,detectors,8460.25,STOPPED,20,18,"speed 33 km/h vs ref 247 km/h, on the racing line",True
+2025_Australian,detectors,8590.25,STOPPED,20,18,"speed 31 km/h vs ref 233 km/h, on the racing line",True
+2025_Australian,detectors,8958.75,IMPACT,17,16,"lost 91 km/h in 1 s (95 to 21 km/h), without braking",False
+2025_Australian,detectors,8964.0,STOPPED,19,81,"speed 0 km/h vs ref 97 km/h, on the racing line",False
+2025_Australian,detectors,9040.75,IMPACT,18,87,"lost 123 km/h in 1 s (140 to 0 km/h), with brakes on",False
+2025_Australian,detectors,9076.75,STOPPED,19,30,"speed 6 km/h vs ref 122 km/h, on the racing line",True
+2025_Australian,detectors,9192.25,IMPACT,18,5,"lost 135 km/h in 1 s (192 to 75 km/h), without braking",False
+2025_Australian,detectors,9202.0,IMPACT,2,30,"lost 99 km/h in 1 s (112 to 0 km/h), with brakes on",False
+2025_Australian,baseline,4278.25,STOPPED,0,6,speed 0 km/h < 50 km/h,True
+2025_Australian,baseline,4309.0,STOPPED,8,7,speed 6 km/h < 50 km/h,False
+2025_Australian,baseline,4345.75,STOPPED,15,18,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,4346.25,STOPPED,15,14,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,4347.5,STOPPED,15,27,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4348.5,STOPPED,15,12,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4349.25,STOPPED,15,5,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,4350.0,STOPPED,15,31,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,4375.25,STOPPED,19,16,speed 48 km/h < 50 km/h,False
+2025_Australian,baseline,4386.25,STOPPED,20,55,speed 0 km/h < 50 km/h,False
+2025_Australian,baseline,4435.25,STOPPED,8,63,speed 44 km/h < 50 km/h,False
+2025_Australian,baseline,4438.75,STOPPED,8,16,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4441.0,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4443.0,STOPPED,8,44,speed 45 km/h < 50 km/h,True
+2025_Australian,baseline,4444.25,STOPPED,8,10,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4449.75,STOPPED,8,18,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4453.5,STOPPED,8,5,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,4457.75,STOPPED,8,30,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,4521.0,STOPPED,19,1,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,4533.25,STOPPED,19,10,speed 38 km/h < 50 km/h,True
+2025_Australian,baseline,4535.75,STOPPED,19,14,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4537.25,STOPPED,19,18,speed 39 km/h < 50 km/h,True
+2025_Australian,baseline,4538.75,STOPPED,19,27,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,4539.75,STOPPED,19,12,speed 40 km/h < 50 km/h,True
+2025_Australian,baseline,4541.5,STOPPED,19,5,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,4542.5,STOPPED,19,31,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,4610.25,STOPPED,8,16,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,4613.0,STOPPED,8,23,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4614.0,STOPPED,8,44,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,4681.75,STOPPED,19,1,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,4698.0,STOPPED,19,14,speed 45 km/h < 50 km/h,True
+2025_Australian,baseline,4699.0,STOPPED,19,18,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,4700.75,STOPPED,19,27,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,4701.75,STOPPED,19,12,speed 45 km/h < 50 km/h,True
+2025_Australian,baseline,4704.5,STOPPED,19,31,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,4841.25,STOPPED,19,1,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,4850.0,STOPPED,19,44,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,4851.5,STOPPED,19,10,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,4994.5,STOPPED,19,1,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,5137.0,STOPPED,19,16,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,5140.5,STOPPED,19,22,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,5142.5,STOPPED,19,44,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,5158.75,STOPPED,20,31,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,5159.0,STOPPED,20,12,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,5160.25,STOPPED,20,87,speed 35 km/h < 50 km/h,True
+2025_Australian,baseline,5160.5,STOPPED,20,5,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,5161.25,STOPPED,20,30,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,6081.5,STOPPED,6,12,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,6186.5,STOPPED,17,1,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,7642.75,STOPPED,9,14,speed 0 km/h < 50 km/h,False
+2025_Australian,baseline,7671.0,STOPPED,5,31,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,7674.0,STOPPED,5,87,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,7876.75,STOPPED,19,87,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,7877.75,STOPPED,19,30,speed 37 km/h < 50 km/h,True
+2025_Australian,baseline,8083.75,STOPPED,10,1,speed 40 km/h < 50 km/h,True
+2025_Australian,baseline,8119.75,STOPPED,14,16,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,8165.75,STOPPED,19,22,speed 40 km/h < 50 km/h,True
+2025_Australian,baseline,8167.25,STOPPED,19,23,speed 45 km/h < 50 km/h,True
+2025_Australian,baseline,8167.75,STOPPED,19,44,speed 40 km/h < 50 km/h,True
+2025_Australian,baseline,8168.75,STOPPED,19,10,speed 38 km/h < 50 km/h,True
+2025_Australian,baseline,8170.25,STOPPED,19,12,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,8171.5,STOPPED,19,18,speed 35 km/h < 50 km/h,True
+2025_Australian,baseline,8174.25,STOPPED,19,27,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,8241.75,STOPPED,9,16,speed 47 km/h < 50 km/h,False
+2025_Australian,baseline,8242.5,STOPPED,9,22,speed 46 km/h < 50 km/h,False
+2025_Australian,baseline,8244.0,STOPPED,9,23,speed 49 km/h < 50 km/h,False
+2025_Australian,baseline,8246.5,STOPPED,9,10,speed 48 km/h < 50 km/h,False
+2025_Australian,baseline,8327.75,STOPPED,20,18,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,8456.75,STOPPED,20,18,speed 41 km/h < 50 km/h,True
+2025_Australian,baseline,8458.25,STOPPED,20,12,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,8461.25,STOPPED,20,27,speed 39 km/h < 50 km/h,True
+2025_Australian,baseline,8587.5,STOPPED,20,18,speed 41 km/h < 50 km/h,True
+2025_Australian,baseline,8959.0,STOPPED,17,16,speed 41 km/h < 50 km/h,False
+2025_Australian,baseline,8963.0,STOPPED,19,81,speed 0 km/h < 50 km/h,False
+2025_Australian,baseline,9041.25,STOPPED,18,87,speed 0 km/h < 50 km/h,False
+2025_Australian,baseline,9062.75,STOPPED,19,22,speed 49 km/h < 50 km/h,False
+2025_Australian,baseline,9075.5,STOPPED,19,30,speed 11 km/h < 50 km/h,True
+2025_Australian,baseline,9194.25,STOPPED,18,5,speed 0 km/h < 50 km/h,False
+2025_Australian,baseline,9202.5,STOPPED,2,30,speed 0 km/h < 50 km/h,False
+2025_Australian,baseline,9238.5,STOPPED,19,31,speed 37 km/h < 50 km/h,False
+2025_Australian,baseline,9273.5,STOPPED,19,81,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,9276.5,STOPPED,19,4,speed 45 km/h < 50 km/h,True
+2025_Australian,baseline,9292.25,STOPPED,19,16,speed 49 km/h < 50 km/h,True
+2025_Australian,baseline,9293.75,STOPPED,19,63,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,9298.5,STOPPED,19,22,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,9299.5,STOPPED,19,12,speed 41 km/h < 50 km/h,True
+2025_Australian,baseline,9299.5,STOPPED,19,23,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,9299.5,STOPPED,19,87,speed 36 km/h < 50 km/h,True
+2025_Australian,baseline,9301.0,STOPPED,19,18,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,9301.75,STOPPED,19,27,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,9302.75,STOPPED,19,10,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,9385.0,STOPPED,19,31,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,9406.0,STOPPED,17,10,speed 46 km/h < 50 km/h,True
+2025_Australian,baseline,9408.0,STOPPED,19,1,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,9409.0,STOPPED,19,4,speed 43 km/h < 50 km/h,True
+2025_Australian,baseline,9411.0,STOPPED,19,63,speed 44 km/h < 50 km/h,True
+2025_Australian,baseline,9412.0,STOPPED,19,23,speed 42 km/h < 50 km/h,True
+2025_Australian,baseline,9412.5,STOPPED,19,87,speed 37 km/h < 50 km/h,True
+2025_Australian,baseline,9413.25,STOPPED,19,12,speed 38 km/h < 50 km/h,True
+2025_Australian,baseline,9414.5,STOPPED,19,18,speed 39 km/h < 50 km/h,True
+2025_Australian,baseline,9415.5,STOPPED,18,27,speed 40 km/h < 50 km/h,True
+2025_Australian,baseline,9492.25,STOPPED,19,31,speed 45 km/h < 50 km/h,True
+2025_Australian,baseline,9561.75,STOPPED,19,87,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,9567.0,STOPPED,19,10,speed 48 km/h < 50 km/h,True
+2025_Australian,baseline,9569.5,STOPPED,19,22,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,9570.0,STOPPED,19,16,speed 47 km/h < 50 km/h,True
+2025_Australian,baseline,9713.0,STOPPED,19,81,speed 48 km/h < 50 km/h,True
+2025_Azerbaijan,detectors,3500.5,IMPACT,7,81,"lost 83 km/h in 1 s (91 to 2 km/h), with brakes on",False
+2025_Azerbaijan,detectors,3660.5,STOPPED,7,10,"speed 29 km/h vs ref 244 km/h, on the racing line",True
+2025_Azerbaijan,detectors,5461.25,IMPACT,7,43,"lost 80 km/h in 1 s (80 to 0 km/h), with brakes on",False
+2025_Azerbaijan,baseline,3500.75,STOPPED,7,81,speed 0 km/h < 50 km/h,False
+2025_Azerbaijan,baseline,3537.75,STOPPED,15,14,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3537.75,STOPPED,16,16,speed 45 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3537.75,STOPPED,15,18,speed 39 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3537.75,STOPPED,16,44,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3538.5,STOPPED,15,5,speed 40 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3543.5,STOPPED,16,43,speed 47 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3546.75,STOPPED,16,87,speed 47 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3549.75,STOPPED,15,23,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3554.75,STOPPED,16,31,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3639.0,STOPPED,7,1,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3640.5,STOPPED,7,30,speed 49 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3640.5,STOPPED,7,55,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3643.5,STOPPED,7,12,speed 45 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3644.5,STOPPED,7,63,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3646.75,STOPPED,7,22,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3649.25,STOPPED,7,6,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3650.5,STOPPED,7,4,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3653.25,STOPPED,7,44,speed 47 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3654.0,STOPPED,7,16,speed 45 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3654.0,STOPPED,7,5,speed 42 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3654.75,STOPPED,7,14,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3655.25,STOPPED,7,18,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3656.75,STOPPED,7,43,speed 38 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3658.25,STOPPED,7,87,speed 38 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3659.0,STOPPED,7,10,speed 32 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3662.75,STOPPED,7,27,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3665.25,STOPPED,7,31,speed 48 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3671.25,STOPPED,7,23,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3771.0,STOPPED,3,4,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3771.25,STOPPED,3,16,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3775.0,STOPPED,3,44,speed 39 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3777.0,STOPPED,3,14,speed 46 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3777.75,STOPPED,3,5,speed 39 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3779.5,STOPPED,3,18,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3781.25,STOPPED,3,43,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3782.0,STOPPED,3,87,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3785.0,STOPPED,3,10,speed 39 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3785.75,STOPPED,3,27,speed 40 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3787.5,STOPPED,3,23,speed 40 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3801.25,STOPPED,7,1,speed 47 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3802.75,STOPPED,7,55,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3804.5,STOPPED,7,30,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3806.25,STOPPED,7,12,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3809.25,STOPPED,7,22,speed 48 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3812.5,STOPPED,7,6,speed 49 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3930.25,STOPPED,2,87,speed 45 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3933.0,STOPPED,2,27,speed 45 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3964.5,STOPPED,7,12,speed 45 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3968.5,STOPPED,8,22,speed 40 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3970.75,STOPPED,8,6,speed 43 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3971.25,STOPPED,8,4,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3972.75,STOPPED,8,16,speed 40 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3974.25,STOPPED,8,44,speed 40 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3975.5,STOPPED,8,14,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3976.25,STOPPED,8,5,speed 41 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3978.0,STOPPED,8,18,speed 39 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3978.75,STOPPED,8,43,speed 37 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3981.5,STOPPED,8,10,speed 29 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3983.25,STOPPED,8,23,speed 38 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,3984.75,STOPPED,8,31,speed 35 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,4026.75,STOPPED,17,55,speed 42 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,4027.75,STOPPED,17,30,speed 47 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,4028.5,STOPPED,17,12,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,5222.0,STOPPED,9,44,speed 44 km/h < 50 km/h,True
+2025_Azerbaijan,baseline,5461.75,STOPPED,7,43,speed 0 km/h < 50 km/h,False
+2025_Belgian,detectors,8365.25,STOPPED,9,55,"speed 37 km/h vs ref 216 km/h, on the racing line",True
+2025_Belgian,detectors,8415.25,STOPPED,16,43,"speed 38 km/h vs ref 288 km/h, on the racing line",True
+2025_Belgian,detectors,8415.25,STOPPED,15,44,"speed 33 km/h vs ref 283 km/h, on the racing line",True
+2025_Belgian,detectors,8415.25,MULTI,15,"43,44","cars 43, 44 in sectors 15-16 within 5 s",True
+2025_Belgian,detectors,8415.75,MULTI,16,"43,44,55","cars 43, 44, 55 in sectors 15-16 within 5 s",True
+2025_Belgian,detectors,8416.25,STOPPED,16,18,"speed 35 km/h vs ref 290 km/h, on the racing line",True
+2025_Belgian,detectors,8417.25,IMPACT,16,12,"lost 90 km/h in 1 s (117 to 26 km/h), with brakes on",True
+2025_Belgian,detectors,8420.25,IMPACT,16,14,"lost 137 km/h in 1 s (173 to 36 km/h), without braking",True
+2025_Belgian,detectors,8618.0,STOPPED,19,12,"speed 56 km/h vs ref 311 km/h, on the racing line",True
+2025_Belgian,detectors,8640.5,STOPPED,3,5,"speed 41 km/h vs ref 290 km/h, on the racing line",True
+2025_Belgian,baseline,8251.75,STOPPED,20,16,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8252.25,STOPPED,20,1,speed 39 km/h < 50 km/h,True
+2025_Belgian,baseline,8253.0,STOPPED,20,23,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8257.0,STOPPED,20,63,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8262.0,STOPPED,20,22,speed 45 km/h < 50 km/h,True
+2025_Belgian,baseline,8267.25,STOPPED,1,4,speed 45 km/h < 50 km/h,True
+2025_Belgian,baseline,8282.25,STOPPED,2,6,speed 46 km/h < 50 km/h,True
+2025_Belgian,baseline,8287.0,STOPPED,1,5,speed 39 km/h < 50 km/h,True
+2025_Belgian,baseline,8290.75,STOPPED,2,87,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8296.25,STOPPED,2,27,speed 47 km/h < 50 km/h,True
+2025_Belgian,baseline,8296.5,STOPPED,2,43,speed 46 km/h < 50 km/h,True
+2025_Belgian,baseline,8296.5,STOPPED,1,55,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8297.5,STOPPED,2,18,speed 42 km/h < 50 km/h,True
+2025_Belgian,baseline,8298.0,STOPPED,1,44,speed 39 km/h < 50 km/h,True
+2025_Belgian,baseline,8300.25,STOPPED,1,12,speed 38 km/h < 50 km/h,True
+2025_Belgian,baseline,8305.0,STOPPED,2,14,speed 41 km/h < 50 km/h,True
+2025_Belgian,baseline,8352.5,STOPPED,9,5,speed 42 km/h < 50 km/h,True
+2025_Belgian,baseline,8353.0,STOPPED,9,87,speed 43 km/h < 50 km/h,True
+2025_Belgian,baseline,8354.0,STOPPED,9,31,speed 40 km/h < 50 km/h,True
+2025_Belgian,baseline,8355.25,STOPPED,9,10,speed 41 km/h < 50 km/h,True
+2025_Belgian,baseline,8359.0,STOPPED,9,27,speed 47 km/h < 50 km/h,True
+2025_Belgian,baseline,8359.75,STOPPED,9,43,speed 43 km/h < 50 km/h,True
+2025_Belgian,baseline,8361.25,STOPPED,9,18,speed 40 km/h < 50 km/h,True
+2025_Belgian,baseline,8363.0,STOPPED,9,55,speed 39 km/h < 50 km/h,True
+2025_Belgian,baseline,8364.25,STOPPED,9,44,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8366.25,STOPPED,9,12,speed 45 km/h < 50 km/h,True
+2025_Belgian,baseline,8368.75,STOPPED,9,14,speed 49 km/h < 50 km/h,True
+2025_Belgian,baseline,8436.25,STOPPED,20,22,speed 42 km/h < 50 km/h,True
+2025_Belgian,baseline,8599.0,STOPPED,20,1,speed 44 km/h < 50 km/h,True
+2025_Belgian,baseline,8640.0,STOPPED,3,5,speed 40 km/h < 50 km/h,True
+2025_Belgian,baseline,8642.75,STOPPED,1,44,speed 45 km/h < 50 km/h,True
+2025_Belgian,baseline,8647.75,STOPPED,2,12,speed 42 km/h < 50 km/h,True
+2025_Belgian,baseline,9159.0,STOPPED,20,12,speed 41 km/h < 50 km/h,True
+2025_British,detectors,3402.0,IMPACT,5,30,"lost 145 km/h in 1 s (211 to 76 km/h), with brakes on",False
+2025_British,detectors,3790.25,IMPACT,2,5,"lost 144 km/h in 1 s (193 to 5 km/h), with brakes on",False
+2025_British,detectors,3890.5,STOPPED,10,5,"speed 63 km/h vs ref 299 km/h, on the racing line",False
+2025_British,detectors,5475.5,STOPPED,13,4,"speed 43 km/h vs ref 308 km/h, on the racing line",True
+2025_British,detectors,5596.75,IMPACT,10,6,"lost 180 km/h in 1 s (218 to 0 km/h), harder than braking",False
+2025_British,detectors,6112.0,IMPACT,14,1,"lost 154 km/h in 1 s (171 to 0 km/h), with brakes on",True
+2025_British,detectors,6176.5,IMPACT,7,87,"lost 82 km/h in 1 s (118 to 77 km/h), without braking",False
+2025_British,detectors,7995.0,IMPACT,11,63,"lost 211 km/h in 1 s (237 to 0 km/h), harder than braking",False
+2025_British,detectors,8307.0,IMPACT,11,87,"lost 194 km/h in 1 s (273 to 37 km/h), harder than braking",False
+2025_British,detectors,8380.0,IMPACT,7,87,"lost 109 km/h in 1 s (137 to 8 km/h), with brakes on",False
+2025_British,detectors,8380.25,IMPACT,7,31,"lost 90 km/h in 1 s (140 to 68 km/h), without braking",False
+2025_British,detectors,8380.25,MULTI,7,"31,87","cars 31, 87 in sectors 7-7 within 5 s",False
+2025_British,detectors,8432.25,STOPPED,14,16,"speed 45 km/h vs ref 250 km/h, on the racing line",False
+2025_British,baseline,3411.75,STOPPED,5,30,speed 45 km/h < 50 km/h,False
+2025_British,baseline,3494.0,STOPPED,3,81,speed 48 km/h < 50 km/h,True
+2025_British,baseline,3494.5,STOPPED,3,4,speed 47 km/h < 50 km/h,True
+2025_British,baseline,3494.75,STOPPED,3,44,speed 42 km/h < 50 km/h,True
+2025_British,baseline,3495.0,STOPPED,3,10,speed 47 km/h < 50 km/h,True
+2025_British,baseline,3498.5,STOPPED,4,1,speed 49 km/h < 50 km/h,True
+2025_British,baseline,3640.0,STOPPED,4,4,speed 47 km/h < 50 km/h,True
+2025_British,baseline,3790.75,STOPPED,2,5,speed 0 km/h < 50 km/h,False
+2025_British,baseline,3894.0,STOPPED,10,5,speed 42 km/h < 50 km/h,False
+2025_British,baseline,3965.5,STOPPED,15,18,speed 43 km/h < 50 km/h,True
+2025_British,baseline,4037.25,STOPPED,4,87,speed 43 km/h < 50 km/h,True
+2025_British,baseline,4139.5,STOPPED,4,31,speed 40 km/h < 50 km/h,True
+2025_British,baseline,4175.5,STOPPED,4,87,speed 49 km/h < 50 km/h,True
+2025_British,baseline,4898.75,STOPPED,4,81,speed 39 km/h < 50 km/h,True
+2025_British,baseline,4901.5,STOPPED,15,23,speed 46 km/h < 50 km/h,True
+2025_British,baseline,4915.25,STOPPED,4,1,speed 41 km/h < 50 km/h,True
+2025_British,baseline,4917.25,STOPPED,4,4,speed 42 km/h < 50 km/h,True
+2025_British,baseline,4999.25,STOPPED,15,81,speed 37 km/h < 50 km/h,True
+2025_British,baseline,5169.25,STOPPED,15,1,speed 49 km/h < 50 km/h,True
+2025_British,baseline,5181.5,STOPPED,15,23,speed 49 km/h < 50 km/h,True
+2025_British,baseline,5184.0,STOPPED,15,16,speed 46 km/h < 50 km/h,True
+2025_British,baseline,5185.5,STOPPED,15,12,speed 45 km/h < 50 km/h,True
+2025_British,baseline,5213.5,STOPPED,4,81,speed 44 km/h < 50 km/h,True
+2025_British,baseline,5215.75,STOPPED,4,4,speed 43 km/h < 50 km/h,True
+2025_British,baseline,5217.25,STOPPED,4,10,speed 39 km/h < 50 km/h,True
+2025_British,baseline,5217.25,STOPPED,4,18,speed 41 km/h < 50 km/h,True
+2025_British,baseline,5219.25,STOPPED,4,27,speed 49 km/h < 50 km/h,True
+2025_British,baseline,5221.0,STOPPED,4,31,speed 43 km/h < 50 km/h,True
+2025_British,baseline,5222.5,STOPPED,4,44,speed 49 km/h < 50 km/h,True
+2025_British,baseline,5225.75,STOPPED,4,55,speed 42 km/h < 50 km/h,True
+2025_British,baseline,5406.5,STOPPED,5,87,speed 43 km/h < 50 km/h,True
+2025_British,baseline,5471.5,STOPPED,13,1,speed 44 km/h < 50 km/h,True
+2025_British,baseline,5474.25,STOPPED,13,4,speed 42 km/h < 50 km/h,True
+2025_British,baseline,5476.75,STOPPED,13,27,speed 46 km/h < 50 km/h,True
+2025_British,baseline,5479.0,STOPPED,13,10,speed 42 km/h < 50 km/h,True
+2025_British,baseline,5481.5,STOPPED,13,31,speed 43 km/h < 50 km/h,True
+2025_British,baseline,5482.75,STOPPED,13,44,speed 48 km/h < 50 km/h,True
+2025_British,baseline,5486.75,STOPPED,13,55,speed 45 km/h < 50 km/h,True
+2025_British,baseline,5487.75,STOPPED,13,23,speed 45 km/h < 50 km/h,True
+2025_British,baseline,5597.25,STOPPED,10,6,speed 0 km/h < 50 km/h,False
+2025_British,baseline,5685.25,STOPPED,4,55,speed 44 km/h < 50 km/h,True
+2025_British,baseline,5686.5,STOPPED,4,23,speed 38 km/h < 50 km/h,True
+2025_British,baseline,5832.0,STOPPED,4,81,speed 46 km/h < 50 km/h,True
+2025_British,baseline,5833.25,STOPPED,4,1,speed 40 km/h < 50 km/h,True
+2025_British,baseline,5886.25,STOPPED,8,87,speed 47 km/h < 50 km/h,True
+2025_British,baseline,5888.25,STOPPED,8,12,speed 47 km/h < 50 km/h,True
+2025_British,baseline,5968.25,STOPPED,16,44,speed 48 km/h < 50 km/h,True
+2025_British,baseline,5973.75,STOPPED,16,55,speed 46 km/h < 50 km/h,True
+2025_British,baseline,5975.25,STOPPED,16,16,speed 43 km/h < 50 km/h,True
+2025_British,baseline,5978.25,STOPPED,16,22,speed 49 km/h < 50 km/h,True
+2025_British,baseline,5979.5,STOPPED,16,31,speed 45 km/h < 50 km/h,True
+2025_British,baseline,6006.5,STOPPED,4,23,speed 48 km/h < 50 km/h,True
+2025_British,baseline,6017.25,STOPPED,5,87,speed 37 km/h < 50 km/h,True
+2025_British,baseline,6091.5,STOPPED,13,1,speed 37 km/h < 50 km/h,True
+2025_British,baseline,6178.0,STOPPED,7,87,speed 38 km/h < 50 km/h,False
+2025_British,baseline,8380.5,STOPPED,7,87,speed 9 km/h < 50 km/h,False
+2025_British,baseline,8382.0,STOPPED,7,31,speed 0 km/h < 50 km/h,False
+2025_British,baseline,8433.25,STOPPED,14,16,speed 42 km/h < 50 km/h,False
+2025_Dutch,detectors,5099.75,STOPPED,5,44,"speed 17 km/h vs ref 182 km/h, on the racing line",False
+2025_Dutch,detectors,8604.0,STOPPED,12,4,"speed 21 km/h vs ref 170 km/h, on the racing line",False
+2025_Dutch,baseline,5099.25,STOPPED,5,44,speed 18 km/h < 50 km/h,False
+2025_Dutch,baseline,5121.5,STOPPED,0,22,speed 41 km/h < 50 km/h,True
+2025_Dutch,baseline,5261.25,STOPPED,13,55,speed 40 km/h < 50 km/h,True
+2025_Dutch,baseline,5370.75,STOPPED,16,63,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,5374.5,STOPPED,15,16,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,5478.0,STOPPED,15,4,speed 45 km/h < 50 km/h,True
+2025_Dutch,baseline,5478.0,STOPPED,15,81,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,5479.5,STOPPED,15,1,speed 40 km/h < 50 km/h,True
+2025_Dutch,baseline,5480.75,STOPPED,15,6,speed 41 km/h < 50 km/h,True
+2025_Dutch,baseline,5482.5,STOPPED,15,63,speed 35 km/h < 50 km/h,True
+2025_Dutch,baseline,5483.5,STOPPED,15,16,speed 33 km/h < 50 km/h,True
+2025_Dutch,baseline,5484.75,STOPPED,15,30,speed 35 km/h < 50 km/h,True
+2025_Dutch,baseline,5485.0,STOPPED,15,55,speed 39 km/h < 50 km/h,True
+2025_Dutch,baseline,5485.75,STOPPED,15,31,speed 39 km/h < 50 km/h,True
+2025_Dutch,baseline,5486.0,STOPPED,15,23,speed 38 km/h < 50 km/h,True
+2025_Dutch,baseline,5488.0,STOPPED,15,12,speed 45 km/h < 50 km/h,True
+2025_Dutch,baseline,5488.75,STOPPED,15,18,speed 48 km/h < 50 km/h,True
+2025_Dutch,baseline,5489.25,STOPPED,15,87,speed 49 km/h < 50 km/h,True
+2025_Dutch,baseline,5491.0,STOPPED,15,22,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,5495.0,STOPPED,15,14,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,5874.75,STOPPED,13,10,speed 44 km/h < 50 km/h,False
+2025_Dutch,baseline,5875.0,STOPPED,13,5,speed 45 km/h < 50 km/h,False
+2025_Dutch,baseline,5876.0,STOPPED,16,16,speed 47 km/h < 50 km/h,False
+2025_Dutch,baseline,5877.0,STOPPED,15,55,speed 45 km/h < 50 km/h,False
+2025_Dutch,baseline,7540.75,STOPPED,2,5,speed 47 km/h < 50 km/h,True
+2025_Dutch,baseline,7612.0,STOPPED,5,1,speed 39 km/h < 50 km/h,False
+2025_Dutch,baseline,7716.5,STOPPED,5,1,speed 44 km/h < 50 km/h,False
+2025_Dutch,baseline,7839.25,STOPPED,5,4,speed 48 km/h < 50 km/h,True
+2025_Dutch,baseline,7840.5,STOPPED,5,1,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,7849.0,STOPPED,6,23,speed 47 km/h < 50 km/h,True
+2025_Dutch,baseline,7853.25,STOPPED,5,14,speed 48 km/h < 50 km/h,True
+2025_Dutch,baseline,7910.0,STOPPED,15,63,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,8022.5,STOPPED,15,81,speed 41 km/h < 50 km/h,True
+2025_Dutch,baseline,8023.0,STOPPED,15,4,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,8023.25,STOPPED,15,1,speed 47 km/h < 50 km/h,True
+2025_Dutch,baseline,8025.25,STOPPED,15,6,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,8025.75,STOPPED,15,63,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,8026.25,STOPPED,15,23,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,8027.5,STOPPED,15,12,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,8028.5,STOPPED,15,10,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,8029.0,STOPPED,15,14,speed 40 km/h < 50 km/h,True
+2025_Dutch,baseline,8029.25,STOPPED,15,5,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,8030.5,STOPPED,15,87,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,8032.75,STOPPED,15,18,speed 39 km/h < 50 km/h,True
+2025_Dutch,baseline,8033.75,STOPPED,15,22,speed 39 km/h < 50 km/h,True
+2025_Dutch,baseline,8035.0,STOPPED,15,31,speed 45 km/h < 50 km/h,True
+2025_Dutch,baseline,8035.25,STOPPED,15,43,speed 47 km/h < 50 km/h,True
+2025_Dutch,baseline,8603.75,STOPPED,12,4,speed 27 km/h < 50 km/h,False
+2025_Dutch,baseline,8663.5,STOPPED,13,55,speed 49 km/h < 50 km/h,False
+2025_Dutch,baseline,8847.5,STOPPED,12,10,speed 48 km/h < 50 km/h,True
+2025_Dutch,baseline,8849.0,STOPPED,12,31,speed 48 km/h < 50 km/h,True
+2025_Dutch,baseline,8978.75,STOPPED,15,1,speed 49 km/h < 50 km/h,True
+2025_Dutch,baseline,8979.5,STOPPED,15,81,speed 42 km/h < 50 km/h,True
+2025_Dutch,baseline,8981.25,STOPPED,15,6,speed 42 km/h < 50 km/h,True
+2025_Dutch,baseline,8983.75,STOPPED,15,12,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,8983.75,STOPPED,15,63,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,8984.75,STOPPED,15,87,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,8985.0,STOPPED,15,23,speed 43 km/h < 50 km/h,True
+2025_Dutch,baseline,8987.75,STOPPED,15,14,speed 39 km/h < 50 km/h,True
+2025_Dutch,baseline,8988.25,STOPPED,15,18,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,8988.75,STOPPED,15,43,speed 46 km/h < 50 km/h,True
+2025_Dutch,baseline,8989.0,STOPPED,15,10,speed 42 km/h < 50 km/h,True
+2025_Dutch,baseline,8989.75,STOPPED,15,27,speed 45 km/h < 50 km/h,True
+2025_Dutch,baseline,8991.0,STOPPED,15,22,speed 49 km/h < 50 km/h,True
+2025_Dutch,baseline,8993.75,STOPPED,15,31,speed 39 km/h < 50 km/h,True
+2025_Dutch,baseline,8996.75,STOPPED,15,30,speed 49 km/h < 50 km/h,True
+2025_Dutch,baseline,8997.25,STOPPED,15,5,speed 44 km/h < 50 km/h,True
+2025_Dutch,baseline,8998.25,STOPPED,15,55,speed 44 km/h < 50 km/h,True
+2025_Miami,detectors,3453.25,STOPPED,2,30,"speed 2 km/h vs ref 120 km/h, on the racing line",False
+2025_Miami,detectors,3533.5,STOPPED,11,7,"speed 91 km/h vs ref 331 km/h, on the racing line",True
+2025_Miami,detectors,3650.5,IMPACT,1,81,"lost 83 km/h in 1 s (203 to 119 km/h), without braking",True
+2025_Miami,detectors,3863.5,IMPACT,17,14,"lost 181 km/h in 1 s (336 to 111 km/h), harder than braking",True
+2025_Miami,detectors,4304.0,STOPPED,13,14,"speed 11 km/h vs ref 133 km/h, on the racing line",True
+2025_Miami,detectors,6052.5,STOPPED,6,87,"speed 49 km/h vs ref 250 km/h, on the racing line",False
+2025_Miami,detectors,6476.5,STOPPED,16,5,"speed 50 km/h vs ref 292 km/h, on the racing line",False
+2025_Miami,baseline,3452.75,STOPPED,2,30,speed 3 km/h < 50 km/h,False
+2025_Miami,baseline,3550.5,STOPPED,12,7,speed 43 km/h < 50 km/h,False
+2025_Miami,baseline,3582.5,STOPPED,12,1,speed 43 km/h < 50 km/h,False
+2025_Miami,baseline,3585.0,STOPPED,13,12,speed 47 km/h < 50 km/h,False
+2025_Miami,baseline,3595.25,STOPPED,13,23,speed 43 km/h < 50 km/h,False
+2025_Miami,baseline,3597.0,STOPPED,13,4,speed 42 km/h < 50 km/h,False
+2025_Miami,baseline,3600.0,STOPPED,13,55,speed 48 km/h < 50 km/h,False
+2025_Miami,baseline,3602.0,STOPPED,13,16,speed 38 km/h < 50 km/h,False
+2025_Miami,baseline,3604.5,STOPPED,13,31,speed 35 km/h < 50 km/h,False
+2025_Miami,baseline,3606.0,STOPPED,13,6,speed 38 km/h < 50 km/h,False
+2025_Miami,baseline,3606.5,STOPPED,13,44,speed 34 km/h < 50 km/h,False
+2025_Miami,baseline,3607.75,STOPPED,13,5,speed 39 km/h < 50 km/h,False
+2025_Miami,baseline,3609.25,STOPPED,13,27,speed 44 km/h < 50 km/h,False
+2025_Miami,baseline,3610.5,STOPPED,13,18,speed 39 km/h < 50 km/h,False
+2025_Miami,baseline,3611.25,STOPPED,13,87,speed 40 km/h < 50 km/h,False
+2025_Miami,baseline,3613.0,STOPPED,13,14,speed 44 km/h < 50 km/h,False
+2025_Miami,baseline,3613.5,STOPPED,13,10,speed 39 km/h < 50 km/h,False
+2025_Miami,baseline,3622.5,STOPPED,13,30,speed 38 km/h < 50 km/h,False
+2025_Miami,baseline,3717.0,STOPPED,13,1,speed 42 km/h < 50 km/h,False
+2025_Miami,baseline,3719.25,STOPPED,13,12,speed 45 km/h < 50 km/h,False
+2025_Miami,baseline,3723.25,STOPPED,13,23,speed 42 km/h < 50 km/h,False
+2025_Miami,baseline,3724.25,STOPPED,13,4,speed 41 km/h < 50 km/h,False
+2025_Miami,baseline,3726.25,STOPPED,13,55,speed 43 km/h < 50 km/h,False
+2025_Miami,baseline,3727.75,STOPPED,13,16,speed 42 km/h < 50 km/h,False
+2025_Miami,baseline,3728.25,STOPPED,13,22,speed 39 km/h < 50 km/h,False
+2025_Miami,baseline,3729.25,STOPPED,13,31,speed 39 km/h < 50 km/h,False
+2025_Miami,baseline,3730.0,STOPPED,13,44,speed 46 km/h < 50 km/h,False
+2025_Miami,baseline,3730.25,STOPPED,13,6,speed 46 km/h < 50 km/h,False
+2025_Miami,baseline,3731.25,STOPPED,13,5,speed 47 km/h < 50 km/h,False
+2025_Miami,baseline,3732.0,STOPPED,13,27,speed 45 km/h < 50 km/h,False
+2025_Miami,baseline,3733.0,STOPPED,13,18,speed 47 km/h < 50 km/h,False
+2025_Miami,baseline,3734.25,STOPPED,13,14,speed 45 km/h < 50 km/h,False
+2025_Miami,baseline,3734.75,STOPPED,13,10,speed 37 km/h < 50 km/h,False
+2025_Miami,baseline,3760.5,STOPPED,18,81,speed 44 km/h < 50 km/h,True
+2025_Miami,baseline,4301.25,STOPPED,13,14,speed 41 km/h < 50 km/h,True
+2025_Miami,baseline,6053.5,STOPPED,6,87,speed 47 km/h < 50 km/h,False
+2025_Miami,baseline,6105.0,STOPPED,15,18,speed 42 km/h < 50 km/h,False
+2025_Miami,baseline,6109.25,STOPPED,18,27,speed 45 km/h < 50 km/h,False
+2025_Miami,baseline,6138.0,STOPPED,15,81,speed 37 km/h < 50 km/h,False
+2025_Miami,baseline,6209.0,STOPPED,15,22,speed 47 km/h < 50 km/h,True
+2025_Miami,baseline,6209.5,STOPPED,15,44,speed 36 km/h < 50 km/h,True
+2025_Miami,baseline,6210.5,STOPPED,15,10,speed 49 km/h < 50 km/h,True
+2025_Miami,baseline,6212.75,STOPPED,18,16,speed 44 km/h < 50 km/h,True
+2025_Miami,baseline,6219.0,STOPPED,16,31,speed 46 km/h < 50 km/h,True
+2025_Miami,baseline,6234.0,STOPPED,16,18,speed 46 km/h < 50 km/h,True
+2025_Miami,baseline,6234.5,STOPPED,16,14,speed 48 km/h < 50 km/h,True
+2025_Miami,baseline,6477.75,STOPPED,16,5,speed 22 km/h < 50 km/h,False
+2025_Miami,baseline,6526.25,STOPPED,19,31,speed 49 km/h < 50 km/h,False
+2025_Miami,baseline,6526.5,STOPPED,12,30,speed 38 km/h < 50 km/h,False
+2025_Miami,baseline,6618.5,STOPPED,18,1,speed 42 km/h < 50 km/h,True
+2026_Australian,detectors,4663.25,STOPPED,13,6,"speed 73 km/h vs ref 288 km/h, on the racing line",False
+2026_Australian,detectors,4847.0,IMPACT,3,31,"lost 105 km/h in 1 s (207 to 102 km/h), without braking",True
+2026_Australian,detectors,5290.75,STOPPED,18,77,"speed 49 km/h vs ref 214 km/h, on the racing line",True
+2026_Australian,detectors,5565.0,IMPACT,5,44,"lost 87 km/h in 1 s (238 to 119 km/h), with brakes on",True
+2026_Australian,detectors,6615.25,IMPACT,17,63,"lost 98 km/h in 1 s (212 to 112 km/h), without braking",False
+2026_Australian,detectors,7221.25,IMPACT,5,41,"lost 202 km/h in 1 s (301 to 83 km/h), harder than braking",True
+2026_Australian,detectors,7637.25,IMPACT,4,3,"lost 187 km/h in 1 s (291 to 94 km/h), harder than braking",True
+2026_Australian,baseline,3757.5,STOPPED,0,81,speed 0 km/h < 50 km/h,True
+2026_Australian,baseline,4668.0,STOPPED,13,6,speed 28 km/h < 50 km/h,False
+2026_Australian,baseline,4898.25,STOPPED,19,44,speed 40 km/h < 50 km/h,True
+2026_Australian,baseline,5291.75,STOPPED,18,77,speed 49 km/h < 50 km/h,True
+2026_Australian,baseline,7988.0,STOPPED,19,55,speed 35 km/h < 50 km/h,True
+2026_Belgian,detectors,3395.75,IMPACT,7,63,"lost 88 km/h in 1 s (128 to 13 km/h), without braking",False
+2026_Belgian,detectors,3449.5,STOPPED,15,31,"speed 30 km/h vs ref 181 km/h, on the racing line",False
+2026_Belgian,detectors,8444.5,STOPPED,1,12,"speed 71 km/h vs ref 270 km/h, on the racing line",True
+2026_Belgian,baseline,3396.25,STOPPED,7,63,speed 0 km/h < 50 km/h,False
+2026_Belgian,baseline,3448.5,STOPPED,14,31,speed 25 km/h < 50 km/h,False
+2026_Belgian,baseline,3505.5,STOPPED,1,1,speed 41 km/h < 50 km/h,True
+2026_Belgian,baseline,3509.75,STOPPED,1,10,speed 47 km/h < 50 km/h,True
+2026_Belgian,baseline,3799.5,STOPPED,20,3,speed 44 km/h < 50 km/h,True
+2026_Belgian,baseline,3803.0,STOPPED,20,44,speed 44 km/h < 50 km/h,True
+2026_Belgian,baseline,3805.25,STOPPED,20,30,speed 48 km/h < 50 km/h,True
+2026_Belgian,baseline,5726.0,STOPPED,20,14,speed 35 km/h < 50 km/h,False
+2026_Belgian,baseline,5774.25,STOPPED,20,44,speed 41 km/h < 50 km/h,False
+2026_Belgian,baseline,5791.75,STOPPED,20,3,speed 46 km/h < 50 km/h,True
+2026_British,detectors,3381.5,IMPACT,7,87,"lost 93 km/h in 1 s (138 to 16 km/h), with brakes on",False
+2026_British,detectors,3384.5,STOPPED,7,23,"speed 21 km/h vs ref 170 km/h, on the racing line",False
+2026_British,detectors,3384.5,MULTI,7,"23,87","cars 23, 87 in sectors 7-7 within 5 s",False
+2026_British,detectors,3430.75,IMPACT,15,63,"lost 126 km/h in 1 s (231 to 100 km/h), without braking",True
+2026_British,detectors,3489.75,IMPACT,8,27,"lost 125 km/h in 1 s (135 to 45 km/h), with brakes on",False
+2026_British,detectors,6916.75,STOPPED,10,27,"speed 43 km/h vs ref 281 km/h, on the racing line",False
+2026_British,detectors,7814.75,IMPACT,14,3,"lost 148 km/h in 1 s (217 to 0 km/h), with brakes on",False
+2026_British,baseline,3382.0,STOPPED,7,87,speed 44 km/h < 50 km/h,False
+2026_British,baseline,3384.0,STOPPED,7,23,speed 19 km/h < 50 km/h,False
+2026_British,baseline,3491.75,STOPPED,8,27,speed 6 km/h < 50 km/h,False
+2026_British,baseline,5367.0,STOPPED,3,18,speed 45 km/h < 50 km/h,False
+2026_British,baseline,6917.25,STOPPED,10,27,speed 33 km/h < 50 km/h,False
+2026_British,baseline,6990.5,STOPPED,4,81,speed 47 km/h < 50 km/h,True
+2026_British,baseline,7815.5,STOPPED,14,3,speed 5 km/h < 50 km/h,False
+2026_British,baseline,7841.0,STOPPED,3,44,speed 45 km/h < 50 km/h,True
+2026_Canadian,detectors,4055.5,SPIN,1,77,"travelling 42 deg off the track direction, lost 34 km/h in 1 s",True
+2026_Canadian,detectors,5401.0,SPIN,1,27,"travelling 36 deg off the track direction, lost 43 km/h in 1 s",True
+2026_Canadian,detectors,5406.25,SPIN,1,14,"travelling 40 deg off the track direction, lost 45 km/h in 1 s",True
+2026_Canadian,detectors,6864.5,STOPPED,11,1,"speed 15 km/h vs ref 139 km/h, on the racing line",False
+2026_Canadian,detectors,7273.25,STOPPED,1,77,"speed 41 km/h vs ref 166 km/h, on the racing line",False
+2026_Canadian,detectors,7925.25,IMPACT,11,87,"lost 112 km/h in 1 s (194 to 77 km/h), with brakes on",True
+2026_Canadian,detectors,7939.0,IMPACT,14,16,"lost 86 km/h in 1 s (133 to 9 km/h), with brakes on",True
+2026_Canadian,detectors,8518.0,STOPPED,1,27,"speed 1 km/h vs ref 138 km/h, on the racing line",False
+2026_Canadian,baseline,3823.5,STOPPED,11,77,speed 47 km/h < 50 km/h,True
+2026_Canadian,baseline,4250.0,STOPPED,11,27,speed 42 km/h < 50 km/h,True
+2026_Canadian,baseline,5035.5,STOPPED,11,1,speed 46 km/h < 50 km/h,True
+2026_Canadian,baseline,5179.75,STOPPED,11,77,speed 43 km/h < 50 km/h,False
+2026_Canadian,baseline,6076.0,STOPPED,1,3,speed 45 km/h < 50 km/h,True
+2026_Canadian,baseline,6138.0,STOPPED,11,18,speed 42 km/h < 50 km/h,True
+2026_Canadian,baseline,6153.25,STOPPED,2,43,speed 46 km/h < 50 km/h,True
+2026_Canadian,baseline,6174.0,STOPPED,1,1,speed 42 km/h < 50 km/h,True
+2026_Canadian,baseline,6186.5,STOPPED,2,55,speed 40 km/h < 50 km/h,True
+2026_Canadian,baseline,6861.25,STOPPED,11,1,speed 42 km/h < 50 km/h,False
+2026_Canadian,baseline,7273.25,STOPPED,1,77,speed 41 km/h < 50 km/h,False
+2026_Canadian,baseline,7301.25,STOPPED,1,87,speed 34 km/h < 50 km/h,False
+2026_Canadian,baseline,7337.0,STOPPED,11,3,speed 46 km/h < 50 km/h,False
+2026_Canadian,baseline,7346.75,STOPPED,11,31,speed 41 km/h < 50 km/h,False
+2026_Canadian,baseline,7818.75,STOPPED,11,31,speed 37 km/h < 50 km/h,False
+2026_Canadian,baseline,7822.5,STOPPED,11,55,speed 37 km/h < 50 km/h,False
+2026_Canadian,baseline,7823.75,STOPPED,11,87,speed 44 km/h < 50 km/h,False
+2026_Canadian,baseline,7833.75,STOPPED,1,44,speed 44 km/h < 50 km/h,False
+2026_Canadian,baseline,7843.5,STOPPED,11,27,speed 45 km/h < 50 km/h,False
+2026_Canadian,baseline,7881.25,STOPPED,11,12,speed 41 km/h < 50 km/h,True
+2026_Canadian,baseline,7891.0,STOPPED,11,3,speed 41 km/h < 50 km/h,True
+2026_Canadian,baseline,7901.25,STOPPED,11,18,speed 43 km/h < 50 km/h,True
+2026_Canadian,baseline,7910.0,STOPPED,11,16,speed 47 km/h < 50 km/h,True
+2026_Canadian,baseline,7923.0,STOPPED,11,55,speed 48 km/h < 50 km/h,True
+2026_Canadian,baseline,7925.75,STOPPED,11,31,speed 34 km/h < 50 km/h,True
+2026_Canadian,baseline,7928.5,STOPPED,11,87,speed 42 km/h < 50 km/h,True
+2026_Canadian,baseline,7932.5,STOPPED,7,77,speed 48 km/h < 50 km/h,True
+2026_Canadian,baseline,8517.5,STOPPED,1,27,speed 4 km/h < 50 km/h,False
+2026_Canadian,baseline,9033.25,STOPPED,11,18,speed 38 km/h < 50 km/h,True
+2026_Dutch,detectors,3492.25,IMPACT,19,3,"lost 158 km/h in 1 s (171 to 0 km/h), with brakes on",False
+2026_Dutch,detectors,3493.5,IMPACT,18,5,"lost 99 km/h in 1 s (197 to 62 km/h), without braking",False
+2026_Dutch,detectors,3493.5,MULTI,18,"3,5","cars 3, 5 in sectors 18-19 within 5 s",False
+2026_Dutch,detectors,3496.5,MULTI,19,"3,5","cars 3, 5 in sectors 19-19 within 5 s",False
+2026_Dutch,detectors,5269.25,STOPPED,16,1,"speed 34 km/h vs ref 175 km/h, on the racing line",True
+2026_Dutch,detectors,5276.25,STOPPED,16,12,"speed 38 km/h vs ref 206 km/h, on the racing line",True
+2026_Dutch,detectors,5276.25,STOPPED,16,63,"speed 33 km/h vs ref 184 km/h, on the racing line",True
+2026_Dutch,detectors,5276.25,MULTI,16,"12,63","cars 12, 63 in sectors 16-16 within 5 s",True
+2026_Dutch,detectors,5276.75,STOPPED,16,16,"speed 31 km/h vs ref 175 km/h, on the racing line",True
+2026_Dutch,detectors,5277.0,STOPPED,16,81,"speed 23 km/h vs ref 150 km/h, on the racing line",True
+2026_Dutch,detectors,5277.5,STOPPED,16,44,"speed 28 km/h vs ref 140 km/h, on the racing line",True
+2026_Dutch,detectors,5282.75,STOPPED,16,30,"speed 18 km/h vs ref 165 km/h, on the racing line",True
+2026_Dutch,detectors,5283.75,STOPPED,16,41,"speed 18 km/h vs ref 150 km/h, on the racing line",True
+2026_Dutch,detectors,5288.0,STOPPED,16,10,"speed 21 km/h vs ref 165 km/h, on the racing line",True
+2026_Dutch,detectors,5308.75,MULTI,19,"12,16","cars 12, 16 in sectors 19-19 within 5 s",True
+2026_Dutch,detectors,5323.25,MULTI,1,"1,12","cars 1, 12 in sectors 1-1 within 5 s",True
+2026_Dutch,detectors,5427.75,STOPPED,19,11,"speed 0 km/h vs ref 310 km/h, on the racing line",True
+2026_Dutch,detectors,5427.75,STOPPED,1,14,"speed 26 km/h vs ref 310 km/h, on the racing line",True
+2026_Dutch,detectors,5427.75,STOPPED,1,23,"speed 54 km/h vs ref 316 km/h, on the racing line",True
+2026_Dutch,detectors,5427.75,STOPPED,1,31,"speed 48 km/h vs ref 316 km/h, on the racing line",True
+2026_Dutch,detectors,5427.75,STOPPED,1,5,"speed 31 km/h vs ref 309 km/h, on the racing line",True
+2026_Dutch,detectors,5427.75,MULTI,1,"11,14","cars 11, 14 in sectors 1-19 within 5 s",True
+2026_Dutch,detectors,5429.25,STOPPED,1,18,"speed 42 km/h vs ref 308 km/h, on the racing line",True
+2026_Dutch,detectors,5429.25,STOPPED,1,77,"speed 39 km/h vs ref 313 km/h, on the racing line",True
+2026_Dutch,detectors,5430.5,STOPPED,1,55,"speed 42 km/h vs ref 308 km/h, on the racing line",True
+2026_Dutch,detectors,5480.0,STOPPED,16,12,"speed 41 km/h vs ref 235 km/h, on the racing line",True
+2026_Dutch,detectors,5518.5,STOPPED,1,1,"speed 2 km/h vs ref 310 km/h, on the racing line",True
+2026_Dutch,detectors,5520.75,MULTI,1,"1,12","cars 1, 12 in sectors 1-1 within 5 s",True
+2026_Dutch,detectors,5524.0,STOPPED,1,63,"speed 0 km/h vs ref 310 km/h, on the racing line",True
+2026_Dutch,detectors,5527.25,STOPPED,1,16,"speed 0 km/h vs ref 309 km/h, on the racing line",True
+2026_Dutch,detectors,5528.25,STOPPED,1,81,"speed 0 km/h vs ref 309 km/h, on the racing line",True
+2026_Dutch,detectors,5530.75,STOPPED,1,44,"speed 0 km/h vs ref 308 km/h, on the racing line",True
+2026_Dutch,detectors,5532.75,STOPPED,1,30,"speed 0 km/h vs ref 313 km/h, on the racing line",True
+2026_Dutch,detectors,5533.75,STOPPED,1,41,"speed 5 km/h vs ref 314 km/h, on the racing line",True
+2026_Dutch,detectors,8181.0,IMPACT,10,14,"lost 93 km/h in 1 s (198 to 111 km/h), without braking",True
+2026_Dutch,detectors,9435.75,STOPPED,5,31,"speed 30 km/h vs ref 151 km/h, on the racing line",False
+2026_Dutch,baseline,3492.75,STOPPED,19,3,speed 2 km/h < 50 km/h,False
+2026_Dutch,baseline,5262.0,STOPPED,15,12,speed 44 km/h < 50 km/h,True
+2026_Dutch,baseline,5263.75,STOPPED,15,63,speed 44 km/h < 50 km/h,True
+2026_Dutch,baseline,5266.5,STOPPED,15,16,speed 37 km/h < 50 km/h,False
+2026_Dutch,baseline,5267.0,STOPPED,16,1,speed 42 km/h < 50 km/h,True
+2026_Dutch,baseline,5268.0,STOPPED,15,81,speed 46 km/h < 50 km/h,False
+2026_Dutch,baseline,5270.5,STOPPED,15,44,speed 42 km/h < 50 km/h,False
+2026_Dutch,baseline,5279.75,STOPPED,16,30,speed 34 km/h < 50 km/h,True
+2026_Dutch,baseline,5281.25,STOPPED,16,41,speed 34 km/h < 50 km/h,True
+2026_Dutch,baseline,5286.0,STOPPED,16,10,speed 30 km/h < 50 km/h,True
+2026_Dutch,baseline,5287.0,STOPPED,15,43,speed 39 km/h < 50 km/h,False
+2026_Dutch,baseline,5298.25,STOPPED,16,27,speed 47 km/h < 50 km/h,True
+2026_Dutch,baseline,5314.75,STOPPED,19,22,speed 41 km/h < 50 km/h,True
+2026_Dutch,baseline,5319.5,STOPPED,19,23,speed 44 km/h < 50 km/h,True
+2026_Dutch,baseline,5320.75,STOPPED,18,31,speed 37 km/h < 50 km/h,True
+2026_Dutch,baseline,5324.75,STOPPED,0,14,speed 42 km/h < 50 km/h,True
+2026_Dutch,baseline,5335.25,STOPPED,19,5,speed 37 km/h < 50 km/h,True
+2026_Dutch,baseline,5427.25,STOPPED,19,11,speed 0 km/h < 50 km/h,True
+2026_Dutch,baseline,5429.25,STOPPED,1,77,speed 39 km/h < 50 km/h,True
+2026_Dutch,baseline,5429.75,STOPPED,1,18,speed 39 km/h < 50 km/h,True
+2026_Dutch,baseline,5431.0,STOPPED,1,55,speed 40 km/h < 50 km/h,True
+2026_Dutch,baseline,5471.5,STOPPED,15,12,speed 45 km/h < 50 km/h,True
+2026_Dutch,baseline,5472.5,STOPPED,15,63,speed 45 km/h < 50 km/h,True
+2026_Dutch,baseline,5474.25,STOPPED,15,16,speed 49 km/h < 50 km/h,True
+2026_Dutch,baseline,5475.75,STOPPED,15,81,speed 44 km/h < 50 km/h,True
+2026_Dutch,baseline,5513.0,STOPPED,19,44,speed 43 km/h < 50 km/h,True
+2026_Dutch,baseline,5514.0,STOPPED,19,30,speed 36 km/h < 50 km/h,True
+2026_Dutch,baseline,5516.0,STOPPED,19,41,speed 40 km/h < 50 km/h,True
+2026_Dutch,baseline,5517.0,STOPPED,1,1,speed 14 km/h < 50 km/h,True
+2026_Dutch,baseline,5519.0,STOPPED,19,10,speed 43 km/h < 50 km/h,True
+2026_Dutch,baseline,5520.0,STOPPED,19,22,speed 42 km/h < 50 km/h,True
+2026_Dutch,baseline,5520.25,STOPPED,19,43,speed 46 km/h < 50 km/h,True
+2026_Dutch,baseline,5524.75,STOPPED,19,23,speed 47 km/h < 50 km/h,True
+2026_Dutch,baseline,5524.75,STOPPED,19,27,speed 45 km/h < 50 km/h,True
+2026_Dutch,baseline,5525.5,STOPPED,19,31,speed 48 km/h < 50 km/h,True
+2026_Dutch,baseline,5527.5,STOPPED,18,14,speed 44 km/h < 50 km/h,True
+2026_Dutch,baseline,5530.25,STOPPED,19,5,speed 42 km/h < 50 km/h,True
+2026_Dutch,baseline,5532.75,STOPPED,18,18,speed 42 km/h < 50 km/h,True
+2026_Dutch,baseline,5532.75,STOPPED,18,55,speed 40 km/h < 50 km/h,True
+2026_Dutch,baseline,5535.25,STOPPED,19,77,speed 38 km/h < 50 km/h,True
+2026_Dutch,baseline,5536.5,STOPPED,18,11,speed 39 km/h < 50 km/h,True
+2026_Dutch,baseline,9433.75,STOPPED,5,31,speed 40 km/h < 50 km/h,False
+2026_Dutch,baseline,10430.75,STOPPED,2,23,speed 33 km/h < 50 km/h,True
+2026_Dutch,baseline,10431.0,STOPPED,2,55,speed 39 km/h < 50 km/h,True
+2026_Italian,detectors,3456.5,IMPACT,7,23,"lost 218 km/h in 1 s (300 to 99 km/h), harder than braking",True
+2026_Italian,detectors,3540.0,IMPACT,7,43,"lost 195 km/h in 1 s (292 to 103 km/h), harder than braking",True
+2026_Italian,detectors,3548.75,IMPACT,7,23,"lost 206 km/h in 1 s (293 to 103 km/h), harder than braking",True
+2026_Italian,detectors,3589.25,IMPACT,16,16,"lost 138 km/h in 1 s (234 to 6 km/h), without braking",False
+2026_Italian,detectors,3605.0,IMPACT,3,43,"lost 230 km/h in 1 s (337 to 96 km/h), harder than braking",True
+2026_Italian,detectors,3605.75,IMPACT,3,81,"lost 236 km/h in 1 s (323 to 77 km/h), harder than braking",True
+2026_Italian,detectors,3605.75,MULTI,3,"43,81","cars 43, 81 in sectors 3-3 within 5 s",True
+2026_Italian,detectors,5674.5,STOPPED,1,63,"speed 51 km/h vs ref 318 km/h, on the racing line",True
+2026_Italian,detectors,5675.75,STOPPED,1,3,"speed 38 km/h vs ref 288 km/h, on the racing line",True
+2026_Italian,detectors,5675.75,MULTI,1,"3,63","cars 3, 63 in sectors 1-1 within 5 s",True
+2026_Italian,detectors,5676.25,STOPPED,1,10,"speed 53 km/h vs ref 316 km/h, on the racing line",True
+2026_Italian,detectors,5695.75,STOPPED,1,43,"speed 4 km/h vs ref 331 km/h, on the racing line",True
+2026_Italian,detectors,5700.0,STOPPED,1,81,"speed 2 km/h vs ref 331 km/h, on the racing line",True
+2026_Italian,detectors,5703.5,STOPPED,1,1,"speed 3 km/h vs ref 330 km/h, on the racing line",True
+2026_Italian,detectors,5705.5,STOPPED,1,41,"speed 4 km/h vs ref 332 km/h, on the racing line",True
+2026_Italian,detectors,5709.75,STOPPED,1,44,"speed 0 km/h vs ref 332 km/h, on the racing line",True
+2026_Italian,detectors,5710.25,STOPPED,1,87,"speed 6 km/h vs ref 330 km/h, on the racing line",True
+2026_Italian,detectors,5712.0,STOPPED,1,31,"speed 0 km/h vs ref 329 km/h, on the racing line",True
+2026_Italian,detectors,5876.25,STOPPED,1,63,"speed 51 km/h vs ref 324 km/h, on the racing line",True
+2026_Italian,detectors,5877.0,STOPPED,1,3,"speed 29 km/h vs ref 305 km/h, on the racing line",True
+2026_Italian,detectors,5877.0,MULTI,1,"3,63","cars 3, 63 in sectors 1-1 within 5 s",True
+2026_Italian,detectors,5878.25,STOPPED,1,10,"speed 52 km/h vs ref 324 km/h, on the racing line",True
+2026_Italian,detectors,5879.0,STOPPED,1,43,"speed 45 km/h vs ref 305 km/h, on the racing line",True
+2026_Italian,detectors,5899.25,STOPPED,1,81,"speed 0 km/h vs ref 331 km/h, on the racing line",True
+2026_Italian,detectors,5900.25,STOPPED,1,1,"speed 0 km/h vs ref 330 km/h, on the racing line",True
+2026_Italian,detectors,5902.5,STOPPED,1,41,"speed 3 km/h vs ref 332 km/h, on the racing line",True
+2026_Italian,detectors,5905.5,STOPPED,1,44,"speed 0 km/h vs ref 332 km/h, on the racing line",True
+2026_Italian,detectors,5905.5,STOPPED,1,87,"speed 6 km/h vs ref 330 km/h, on the racing line",True
+2026_Italian,detectors,5908.0,STOPPED,1,31,"speed 3 km/h vs ref 329 km/h, on the racing line",True
+2026_Italian,detectors,5983.75,IMPACT,7,43,"lost 225 km/h in 1 s (298 to 73 km/h), harder than braking",False
+2026_Italian,detectors,6050.5,IMPACT,3,81,"lost 234 km/h in 1 s (322 to 80 km/h), harder than braking",True
+2026_Italian,detectors,6058.75,IMPACT,2,14,"lost 237 km/h in 1 s (310 to 71 km/h), harder than braking",True
+2026_Italian,detectors,6077.75,IMPACT,7,43,"lost 196 km/h in 1 s (295 to 103 km/h), harder than braking",True
+2026_Italian,detectors,6137.0,IMPACT,2,81,"lost 201 km/h in 1 s (323 to 99 km/h), harder than braking",True
+2026_Italian,detectors,6147.0,IMPACT,2,14,"lost 211 km/h in 1 s (313 to 94 km/h), harder than braking",True
+2026_Italian,detectors,6157.75,IMPACT,7,10,"lost 188 km/h in 1 s (294 to 117 km/h), harder than braking",True
+2026_Italian,detectors,6222.75,IMPACT,3,81,"lost 182 km/h in 1 s (323 to 124 km/h), harder than braking",True
+2026_Italian,detectors,6235.0,IMPACT,2,14,"lost 219 km/h in 1 s (318 to 91 km/h), harder than braking",True
+2026_Italian,detectors,6431.0,IMPACT,7,43,"lost 196 km/h in 1 s (307 to 122 km/h), harder than braking",True
+2026_Italian,detectors,6655.25,IMPACT,2,81,"lost 254 km/h in 1 s (330 to 74 km/h), harder than braking",True
+2026_Italian,detectors,6763.75,IMPACT,7,10,"lost 199 km/h in 1 s (309 to 113 km/h), harder than braking",True
+2026_Italian,detectors,6957.75,IMPACT,7,23,"lost 182 km/h in 1 s (299 to 117 km/h), harder than braking",True
+2026_Italian,detectors,7129.25,IMPACT,7,43,"lost 180 km/h in 1 s (295 to 122 km/h), harder than braking",True
+2026_Italian,detectors,7172.25,IMPACT,2,81,"lost 180 km/h in 1 s (316 to 100 km/h), harder than braking",True
+2026_Italian,detectors,7215.5,IMPACT,7,43,"lost 186 km/h in 1 s (294 to 110 km/h), harder than braking",True
+2026_Italian,detectors,7286.25,IMPACT,7,10,"lost 186 km/h in 1 s (298 to 120 km/h), harder than braking",True
+2026_Italian,detectors,7301.5,IMPACT,7,43,"lost 192 km/h in 1 s (294 to 105 km/h), harder than braking",True
+2026_Italian,detectors,7372.25,IMPACT,7,10,"lost 232 km/h in 1 s (313 to 91 km/h), harder than braking",True
+2026_Italian,detectors,7391.0,IMPACT,7,55,"lost 204 km/h in 1 s (309 to 106 km/h), harder than braking",True
+2026_Italian,detectors,7479.0,IMPACT,7,55,"lost 190 km/h in 1 s (303 to 121 km/h), harder than braking",True
+2026_Italian,detectors,7852.25,STOPPED,3,18,"speed 9 km/h vs ref 80 km/h, on the racing line",False
+2026_Italian,detectors,8110.75,IMPACT,7,43,"lost 187 km/h in 1 s (288 to 104 km/h), harder than braking",True
+2026_Italian,detectors,8157.0,IMPACT,3,1,"lost 236 km/h in 1 s (319 to 77 km/h), harder than braking",True
+2026_Italian,detectors,8369.25,IMPACT,7,43,"lost 187 km/h in 1 s (290 to 107 km/h), harder than braking",True
+2026_Italian,detectors,9009.25,IMPACT,3,81,"lost 243 km/h in 1 s (328 to 71 km/h), harder than braking",True
+2026_Italian,detectors,9096.0,IMPACT,3,81,"lost 239 km/h in 1 s (314 to 74 km/h), harder than braking",True
+2026_Italian,detectors,9266.25,IMPACT,3,81,"lost 202 km/h in 1 s (321 to 99 km/h), harder than braking",True
+2026_Italian,detectors,9315.0,IMPACT,7,43,"lost 186 km/h in 1 s (289 to 115 km/h), harder than braking",True
+2026_Italian,detectors,9401.25,IMPACT,7,43,"lost 180 km/h in 1 s (289 to 119 km/h), harder than braking",True
+2026_Italian,detectors,9717.0,IMPACT,7,23,"lost 190 km/h in 1 s (311 to 139 km/h), harder than braking",True
+2026_Italian,detectors,9830.0,IMPACT,7,43,"lost 184 km/h in 1 s (289 to 113 km/h), harder than braking",True
+2026_Italian,detectors,9950.5,IMPACT,2,81,"lost 201 km/h in 1 s (321 to 90 km/h), harder than braking",True
+2026_Italian,detectors,10036.5,IMPACT,3,81,"lost 228 km/h in 1 s (319 to 84 km/h), harder than braking",True
+2026_Italian,baseline,3590.0,STOPPED,16,16,speed 8 km/h < 50 km/h,False
+2026_Italian,baseline,3617.5,STOPPED,3,11,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,3619.5,STOPPED,3,23,speed 45 km/h < 50 km/h,True
+2026_Italian,baseline,3621.0,STOPPED,3,18,speed 46 km/h < 50 km/h,True
+2026_Italian,baseline,3621.0,STOPPED,3,30,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,3621.25,STOPPED,3,55,speed 46 km/h < 50 km/h,True
+2026_Italian,baseline,3622.5,STOPPED,3,14,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,5675.5,STOPPED,1,3,speed 32 km/h < 50 km/h,True
+2026_Italian,baseline,5685.0,STOPPED,1,63,speed 25 km/h < 50 km/h,True
+2026_Italian,baseline,5685.5,STOPPED,1,10,speed 30 km/h < 50 km/h,True
+2026_Italian,baseline,5688.25,STOPPED,1,1,speed 41 km/h < 50 km/h,True
+2026_Italian,baseline,5689.75,STOPPED,17,87,speed 49 km/h < 50 km/h,True
+2026_Italian,baseline,5690.5,STOPPED,1,44,speed 42 km/h < 50 km/h,True
+2026_Italian,baseline,5693.0,STOPPED,17,31,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,5693.25,STOPPED,1,41,speed 45 km/h < 50 km/h,True
+2026_Italian,baseline,5693.25,STOPPED,1,43,speed 33 km/h < 50 km/h,True
+2026_Italian,baseline,5694.5,STOPPED,17,5,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,5696.75,STOPPED,17,12,speed 41 km/h < 50 km/h,True
+2026_Italian,baseline,5698.0,STOPPED,1,81,speed 28 km/h < 50 km/h,True
+2026_Italian,baseline,5698.75,STOPPED,17,27,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,5701.75,STOPPED,17,22,speed 45 km/h < 50 km/h,True
+2026_Italian,baseline,5703.75,STOPPED,17,55,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,5704.75,STOPPED,17,30,speed 33 km/h < 50 km/h,True
+2026_Italian,baseline,5706.75,STOPPED,17,11,speed 42 km/h < 50 km/h,True
+2026_Italian,baseline,5784.75,STOPPED,1,14,speed 49 km/h < 50 km/h,True
+2026_Italian,baseline,5807.75,STOPPED,3,23,speed 46 km/h < 50 km/h,True
+2026_Italian,baseline,5812.5,STOPPED,3,77,speed 48 km/h < 50 km/h,True
+2026_Italian,baseline,5812.75,STOPPED,3,18,speed 46 km/h < 50 km/h,True
+2026_Italian,baseline,5876.75,STOPPED,1,3,speed 29 km/h < 50 km/h,True
+2026_Italian,baseline,5879.5,STOPPED,1,43,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,5881.0,STOPPED,1,10,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,5883.5,STOPPED,1,81,speed 49 km/h < 50 km/h,True
+2026_Italian,baseline,5883.75,STOPPED,1,63,speed 25 km/h < 50 km/h,True
+2026_Italian,baseline,5887.0,STOPPED,1,41,speed 45 km/h < 50 km/h,True
+2026_Italian,baseline,5890.25,STOPPED,1,44,speed 46 km/h < 50 km/h,True
+2026_Italian,baseline,5891.75,STOPPED,1,87,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,5892.0,STOPPED,1,1,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,5893.25,STOPPED,1,31,speed 43 km/h < 50 km/h,True
+2026_Italian,baseline,5900.25,STOPPED,1,12,speed 42 km/h < 50 km/h,True
+2026_Italian,baseline,5905.0,STOPPED,1,5,speed 30 km/h < 50 km/h,True
+2026_Italian,baseline,5907.0,STOPPED,1,30,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,5907.25,STOPPED,1,55,speed 45 km/h < 50 km/h,True
+2026_Italian,baseline,5908.0,STOPPED,17,11,speed 48 km/h < 50 km/h,True
+2026_Italian,baseline,5910.0,STOPPED,17,23,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,7176.75,STOPPED,3,10,speed 44 km/h < 50 km/h,True
+2026_Italian,baseline,7850.0,STOPPED,3,18,speed 31 km/h < 50 km/h,False
+2026_Italian,baseline,7878.25,STOPPED,3,41,speed 44 km/h < 50 km/h,False
+2026_Italian,baseline,7902.25,STOPPED,3,87,speed 40 km/h < 50 km/h,False
+2026_Italian,baseline,7903.5,STOPPED,3,43,speed 42 km/h < 50 km/h,False
+2026_Italian,baseline,7929.5,STOPPED,3,31,speed 37 km/h < 50 km/h,False
+2026_Italian,baseline,7930.25,STOPPED,3,30,speed 47 km/h < 50 km/h,False
+2026_Italian,baseline,7966.75,STOPPED,3,11,speed 48 km/h < 50 km/h,True
+2026_Italian,baseline,9665.5,STOPPED,3,77,speed 37 km/h < 50 km/h,True
+2026_Italian,baseline,9680.75,STOPPED,3,63,speed 49 km/h < 50 km/h,True
+2026_Italian,baseline,9683.5,STOPPED,3,12,speed 49 km/h < 50 km/h,True
+2026_Miami,detectors,3827.0,IMPACT,17,6,"lost 83 km/h in 1 s (194 to 101 km/h), with brakes on",True
+2026_Miami,detectors,3887.5,IMPACT,11,6,"lost 106 km/h in 1 s (212 to 100 km/h), with brakes on",True
+2026_Miami,detectors,3921.75,STOPPED,18,10,"speed 10 km/h vs ref 70 km/h, on the racing line",False
+2026_Miami,detectors,3924.0,STOPPED,18,30,"speed 20 km/h vs ref 80 km/h, on the racing line",False
+2026_Miami,detectors,3924.0,MULTI,18,"10,30","cars 10, 30 in sectors 18-18 within 5 s",False
+2026_Miami,detectors,4215.5,STOPPED,16,27,"speed 52 km/h vs ref 331 km/h, on the racing line",False
+2026_Miami,detectors,4755.25,STOPPED,18,10,"speed 10 km/h vs ref 71 km/h, on the racing line",True
+2026_Miami,detectors,5149.0,STOPPED,18,18,"speed 13 km/h vs ref 80 km/h, on the racing line",False
+2026_Miami,detectors,6928.75,IMPACT,17,77,"lost 84 km/h in 1 s (168 to 72 km/h), without braking",True
+2026_Miami,detectors,8991.0,IMPACT,4,16,"lost 87 km/h in 1 s (140 to 7 km/h), without braking",False
+2026_Miami,detectors,9049.5,STOPPED,1,12,"speed 71 km/h vs ref 288 km/h, on the racing line",True
+2026_Miami,baseline,3516.25,STOPPED,15,6,speed 35 km/h < 50 km/h,True
+2026_Miami,baseline,3516.25,STOPPED,15,77,speed 40 km/h < 50 km/h,True
+2026_Miami,baseline,3537.25,STOPPED,18,55,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,3901.25,STOPPED,15,6,speed 5 km/h < 50 km/h,False
+2026_Miami,baseline,3919.75,STOPPED,18,30,speed 26 km/h < 50 km/h,False
+2026_Miami,baseline,3921.25,STOPPED,18,10,speed 10 km/h < 50 km/h,False
+2026_Miami,baseline,3939.5,STOPPED,2,31,speed 43 km/h < 50 km/h,True
+2026_Miami,baseline,3964.5,STOPPED,18,27,speed 41 km/h < 50 km/h,False
+2026_Miami,baseline,3993.25,STOPPED,15,16,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,3995.0,STOPPED,15,1,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,3997.0,STOPPED,15,63,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4001.0,STOPPED,16,12,speed 41 km/h < 50 km/h,True
+2026_Miami,baseline,4003.25,STOPPED,16,81,speed 38 km/h < 50 km/h,True
+2026_Miami,baseline,4004.0,STOPPED,15,44,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4004.5,STOPPED,15,3,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4006.0,STOPPED,15,43,speed 42 km/h < 50 km/h,True
+2026_Miami,baseline,4013.5,STOPPED,15,55,speed 40 km/h < 50 km/h,True
+2026_Miami,baseline,4015.25,STOPPED,15,87,speed 40 km/h < 50 km/h,True
+2026_Miami,baseline,4017.25,STOPPED,15,31,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4030.0,STOPPED,15,77,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4031.5,STOPPED,16,18,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4048.75,STOPPED,18,23,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,4126.0,STOPPED,15,16,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4127.25,STOPPED,15,1,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4127.5,STOPPED,15,12,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4130.5,STOPPED,15,63,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4131.0,STOPPED,15,81,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4133.25,STOPPED,15,44,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4136.0,STOPPED,15,43,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4139.25,STOPPED,15,55,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4140.25,STOPPED,15,87,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4140.75,STOPPED,15,31,speed 38 km/h < 50 km/h,False
+2026_Miami,baseline,4144.25,STOPPED,16,23,speed 48 km/h < 50 km/h,False
+2026_Miami,baseline,4158.75,STOPPED,16,3,speed 40 km/h < 50 km/h,False
+2026_Miami,baseline,4161.0,STOPPED,16,14,speed 42 km/h < 50 km/h,False
+2026_Miami,baseline,4165.5,STOPPED,15,77,speed 41 km/h < 50 km/h,False
+2026_Miami,baseline,4250.25,STOPPED,17,27,speed 48 km/h < 50 km/h,False
+2026_Miami,baseline,4271.0,STOPPED,15,16,speed 49 km/h < 50 km/h,True
+2026_Miami,baseline,4272.75,STOPPED,15,12,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4273.25,STOPPED,15,1,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4282.0,STOPPED,16,63,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4282.5,STOPPED,15,44,speed 48 km/h < 50 km/h,True
+2026_Miami,baseline,4283.25,STOPPED,15,55,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4284.0,STOPPED,16,81,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4284.75,STOPPED,15,87,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4285.75,STOPPED,15,31,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4287.25,STOPPED,16,43,speed 49 km/h < 50 km/h,True
+2026_Miami,baseline,4288.25,STOPPED,15,41,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4288.75,STOPPED,16,23,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4292.5,STOPPED,15,18,speed 43 km/h < 50 km/h,True
+2026_Miami,baseline,4294.25,STOPPED,15,3,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4294.75,STOPPED,15,77,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4296.25,STOPPED,15,14,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4297.75,STOPPED,16,5,speed 49 km/h < 50 km/h,True
+2026_Miami,baseline,4412.5,STOPPED,15,16,speed 46 km/h < 50 km/h,False
+2026_Miami,baseline,4414.75,STOPPED,15,1,speed 42 km/h < 50 km/h,False
+2026_Miami,baseline,4415.25,STOPPED,15,12,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4418.25,STOPPED,15,63,speed 45 km/h < 50 km/h,False
+2026_Miami,baseline,4420.25,STOPPED,15,81,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4421.25,STOPPED,15,44,speed 44 km/h < 50 km/h,False
+2026_Miami,baseline,4422.0,STOPPED,15,43,speed 45 km/h < 50 km/h,False
+2026_Miami,baseline,4422.75,STOPPED,15,55,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4423.5,STOPPED,15,23,speed 44 km/h < 50 km/h,False
+2026_Miami,baseline,4424.5,STOPPED,15,87,speed 46 km/h < 50 km/h,False
+2026_Miami,baseline,4425.25,STOPPED,15,31,speed 45 km/h < 50 km/h,False
+2026_Miami,baseline,4426.5,STOPPED,15,41,speed 46 km/h < 50 km/h,False
+2026_Miami,baseline,4429.0,STOPPED,15,11,speed 39 km/h < 50 km/h,False
+2026_Miami,baseline,4430.75,STOPPED,15,5,speed 34 km/h < 50 km/h,False
+2026_Miami,baseline,4431.5,STOPPED,15,18,speed 36 km/h < 50 km/h,False
+2026_Miami,baseline,4433.25,STOPPED,15,3,speed 36 km/h < 50 km/h,False
+2026_Miami,baseline,4433.5,STOPPED,15,14,speed 44 km/h < 50 km/h,False
+2026_Miami,baseline,4435.75,STOPPED,15,77,speed 39 km/h < 50 km/h,True
+2026_Miami,baseline,4563.75,STOPPED,15,1,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,4568.0,STOPPED,16,16,speed 48 km/h < 50 km/h,False
+2026_Miami,baseline,4568.5,STOPPED,15,12,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,4569.0,STOPPED,15,81,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,4569.75,STOPPED,15,63,speed 45 km/h < 50 km/h,False
+2026_Miami,baseline,4571.75,STOPPED,15,44,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,4573.25,STOPPED,16,43,speed 44 km/h < 50 km/h,False
+2026_Miami,baseline,4574.0,STOPPED,15,23,speed 46 km/h < 50 km/h,False
+2026_Miami,baseline,4574.0,STOPPED,15,87,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4574.75,STOPPED,15,31,speed 41 km/h < 50 km/h,False
+2026_Miami,baseline,4575.0,STOPPED,15,55,speed 45 km/h < 50 km/h,False
+2026_Miami,baseline,4576.0,STOPPED,15,41,speed 39 km/h < 50 km/h,False
+2026_Miami,baseline,4577.5,STOPPED,15,11,speed 40 km/h < 50 km/h,False
+2026_Miami,baseline,4577.75,STOPPED,15,3,speed 43 km/h < 50 km/h,False
+2026_Miami,baseline,4578.5,STOPPED,15,5,speed 38 km/h < 50 km/h,False
+2026_Miami,baseline,4580.0,STOPPED,15,18,speed 36 km/h < 50 km/h,False
+2026_Miami,baseline,4582.25,STOPPED,15,14,speed 46 km/h < 50 km/h,False
+2026_Miami,baseline,4582.75,STOPPED,15,77,speed 47 km/h < 50 km/h,False
+2026_Miami,baseline,4743.5,STOPPED,17,55,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4743.75,STOPPED,17,11,speed 41 km/h < 50 km/h,True
+2026_Miami,baseline,4744.0,STOPPED,17,87,speed 42 km/h < 50 km/h,True
+2026_Miami,baseline,4744.25,STOPPED,17,31,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4744.25,STOPPED,17,5,speed 36 km/h < 50 km/h,True
+2026_Miami,baseline,4744.5,STOPPED,17,41,speed 42 km/h < 50 km/h,True
+2026_Miami,baseline,4745.0,STOPPED,17,12,speed 48 km/h < 50 km/h,True
+2026_Miami,baseline,4745.0,STOPPED,17,18,speed 35 km/h < 50 km/h,True
+2026_Miami,baseline,4745.25,STOPPED,17,44,speed 44 km/h < 50 km/h,True
+2026_Miami,baseline,4745.25,STOPPED,17,81,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4745.5,STOPPED,17,3,speed 42 km/h < 50 km/h,True
+2026_Miami,baseline,4745.5,STOPPED,17,43,speed 48 km/h < 50 km/h,True
+2026_Miami,baseline,4746.0,STOPPED,17,1,speed 49 km/h < 50 km/h,True
+2026_Miami,baseline,4746.0,STOPPED,17,14,speed 46 km/h < 50 km/h,True
+2026_Miami,baseline,4746.0,STOPPED,17,23,speed 45 km/h < 50 km/h,True
+2026_Miami,baseline,4746.0,STOPPED,17,63,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,4747.25,STOPPED,17,77,speed 33 km/h < 50 km/h,True
+2026_Miami,baseline,4747.75,STOPPED,18,16,speed 47 km/h < 50 km/h,True
+2026_Miami,baseline,5147.25,STOPPED,18,18,speed 36 km/h < 50 km/h,False
