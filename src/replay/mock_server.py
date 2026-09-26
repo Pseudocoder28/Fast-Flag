@@ -10,6 +10,7 @@ Endpoints:
   GET /track         track map for the loaded race
   GET /official      all official events for the loaded race
   GET /status        current replay time, speed, clients
+  GET /races         races available to load (the fixture race only)
   /                  the dashboard/ folder
 """
 
@@ -144,6 +145,10 @@ def create_app(no_recs: bool = False, loop: bool = True, autoplay: bool = True) 
     @app.get("/status")
     async def status() -> dict:
         return replay.status()
+
+    @app.get("/races")
+    async def races() -> list[str]:
+        return [replay.track["race"]]
 
     @app.get("/track")
     async def track() -> dict:
