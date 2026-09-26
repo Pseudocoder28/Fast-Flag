@@ -84,7 +84,10 @@ def recommendations(envelopes: list[dict]) -> tuple[list[dict] | None, str]:
     for env in envelopes:
         handler = {"tick": rc.on_tick, "detection": rc.on_detection, "risk": rc.on_risk}.get(env["kind"])
         if handler:
-            recs.extend(handler(env["data"]) or [])
+            out = handler(env["data"])
+            if isinstance(out, tuple):      # on_tick on b-work returns (recs, did_reset), not just recs
+                out = out[0]
+            recs.extend(out or [])
     return sorted(recs, key=lambda r: r["t"]), "src.racecontrol.engine.RaceControl"
 
 
