@@ -191,7 +191,8 @@ def evaluate(rid: str, out_dir: Path, allow_holdout: bool, label: str = "", scop
         charts.append(f"latency_{rid}.png")
     found, rec_source = crashes(rid, allow_holdout=allow_holdout)
     for c in found:
-        plot_crash(c, out_dir / f"case_{rid}_car{c['car']}.png")
+        plot_crash(c, out_dir / f"case_{rid}_car{c['car']}.png", scope_note=scope_note or label,
+                   source=f"holdout_{rid}.json")
         charts.append(f"case_{rid}_car{c['car']}.png")
     card = race_scorecard(rid, suite_for=production_suite, allow_holdout=allow_holdout)
     off, ours = tables([card])

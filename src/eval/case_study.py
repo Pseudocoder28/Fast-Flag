@@ -247,10 +247,12 @@ WINDOW_STYLE = {"W1": ("#b8b6b0", "W1 onset to our first alert"), "W2": (ORANGE,
                 "context:": ("#d6d4ce", "context: official yellow to official escalation")}
 
 
-def plot(c: dict, path: Path) -> None:
+def plot(c: dict, path: Path, scope_note: str = OUT_OF_SAMPLE, source: str = "case_studies.json") -> None:
     """Timeline chart. Top strip: one bar per window (they can overlap in time). Below:
     every car passing the crash site, once, at its speed as % of its own normal speed
-    there; blue and named if it passed inside W1 to W3, grey if only after the yellow."""
+    there; blue and named if it passed inside W1 to W3, grey if only after the yellow.
+    scope_note and source default to the 2021 case study wording (the A7 holdout run
+    passes its own)."""
     tl, t0 = c["timeline"], c["timeline"]["onset"]
     rel = lambda t: t - t0  # noqa: E731
     rec = tl["our_escalation_recommendation"]
@@ -280,14 +282,22 @@ def plot(c: dict, path: Path) -> None:
     ax.axhline(106, color=GRID, lw=1, zorder=1)
     ax.axhline(100, color=GRID, lw=1, zorder=1)
     ax.text(x_max, 101, "normal speed at this point", ha="right", va="bottom", fontsize=7.5, color=INK2)
-    level, last_x, max_level = 0, -1e9, 0
+    xu = (x_max + 5) / (11 * (0.98 - 0.08))            # data units per inch, from the figure layout below
+    rows: list[list[tuple[float, float]]] = []          # label extents already placed, per row
+    max_level = 0
     for label, t in events:
         x = rel(t)
-        level = level + 1 if x - last_x < 0.07 * (x_max + 5) else 0
-        last_x, max_level = x, max(max_level, level)
-        ax.plot([x, x], [-4, 106], color=INK2, lw=0.8, zorder=1)
+        text = f"{label} {x:+.1f} s"
         right = x > 0.8 * x_max
-        ax.annotate(f"{label} {x:+.1f} s", (x, 0), xycoords=("data", "axes fraction"),
+        w = (0.07 * len(text) + 0.1) * xu
+        span = (x - w, x) if right else (x, x + w)
+        level = next((i for i, row in enumerate(rows) if all(span[1] < a or span[0] > b for a, b in row)), len(rows))
+        if level == len(rows):
+            rows.append([])
+        rows[level].append(span)
+        max_level = max(max_level, level)
+        ax.plot([x, x], [-4, 106], color=INK2, lw=0.8, zorder=1)
+        ax.annotate(text, (x, 0), xycoords=("data", "axes fraction"),
                     xytext=(-3 if right else 3, -14 - 12 * level), textcoords="offset points",
                     ha="right" if right else "left", va="top", fontsize=7.5, color=INK)
     story_w = [w for w in c["windows"] if not w["name"].startswith("context")]
@@ -301,7 +311,6 @@ def plot(c: dict, path: Path) -> None:
            if p["pct_of_own_normal"] is not None]
     for x, y, _ in pts:
         ax.scatter(x, y, s=64, color=BLUE, edgecolors=SURFACE, linewidths=2, zorder=4)
-    xu = (x_max + 5) / (11 * (0.98 - 0.08))            # data units per inch, from the figure layout below
     yu = (143 + 4) / (6.4 * (0.87 - 0.27))
     for x, y, text, ha in place_labels(pts, xu, yu, grey):
         ax.text(x, y, text, ha=ha, va="center", fontsize=7.5, color=INK, zorder=5)
@@ -327,8 +336,8 @@ def plot(c: dict, path: Path) -> None:
     fig.text(0.01, 0.945, "Replay of historical FastF1 data. Each dot is a car passing the spot where the crashed car "
              "came to rest (once): blue and named if it passed inside W1 to W3, grey if only after the official "
              "yellow." + pending, fontsize=8.5, color=INK2, va="top", wrap=True)
-    fig.text(0.01, 0.012, f"{COUNTERFACTUAL}\n{OUT_OF_SAMPLE}\nWindows can overlap: a car passing between our "
-             "escalation and the official yellow counts in W2 and W3. Every car, time and speed is in case_studies.json.",
+    fig.text(0.01, 0.012, f"{COUNTERFACTUAL}\n{scope_note}\nWindows can overlap: a car passing between our "
+             f"escalation and the official yellow counts in W2 and W3. Every car, time and speed is in {source}.",
              fontsize=7.5, color=INK2, va="bottom")
     fig.subplots_adjust(left=0.08, right=0.98, top=0.87, bottom=0.27)
     fig.savefig(path, facecolor=SURFACE)
