@@ -80,8 +80,9 @@ def test_recommendation_picks_the_escalation_rec_with_its_confidence() -> None:
 
 def test_text_sections() -> None:
     inc = incident()
-    assert exposure_lines(inc)[0] == "Each second of delay averaged 0.03 cars (2 in 60 s)"
+    assert exposure_lines(inc)[0] == "Each second of delay averaged 0.03 cars (2 cars in 60 s)"
     assert "By the official SC (+37.7 s): 2 cars" in exposure_lines(inc)
+    assert "By our SC (+5.0 s): 0 cars" in exposure_lines(inc)
     assert evidence_lines(inc)[0].startswith("+1.0 s IMPACT sev 1.00: lost 216 km/h")
     assert official_lines(inc) == ["+3.7 s DOUBLE YELLOW IN TRACK SECTOR 21", "+37.7 s SAFETY CAR DEPLOYED"]
     inc["markers"]["official_escalation"] = None
@@ -124,3 +125,21 @@ def test_png_card_writes_a_file(tmp_path: Path) -> None:
 def test_cards_render_from_a_json_round_trip(tmp_path: Path) -> None:
     inc = json.loads(json.dumps(incident()))
     assert "Cost of delay" in html_card(inc, DOC)
+
+
+def test_a_stale_clear_is_never_our_recommendation() -> None:
+    # 2023 Monaco STR: the only rec in the window was the CLEAR of an earlier incident, 4.75 s before the onset
+    inc = incident(recommendations=[{"t_after_onset": -4.75, "flag": "CLEAR", "confidence": 0.95,
+                                     "reason": "no flagged car remains in sector", "message": "CLEAR IN TRACK SECTOR 5"}])
+    inc["markers"]["our_escalation"] = None
+    assert recommendation(inc) is None
+    assert "our recommendation" not in [e["name"] for e in events(inc)]
+    assert "no recommendation from our race control engine" in html_card(inc, DOC)
+
+
+def test_an_alert_on_another_car_names_that_car() -> None:
+    inc = incident(detections=[{"t_after_onset": 28.25, "type": "ANOMALY", "severity": 0.37, "drivers": ["81"],
+                                "evidence": "anomaly score 0.76 (threshold 0.75)"}])
+    inc["markers"]["our_first_alert"].update(type="ANOMALY", drivers=["81"], on_onset_car=False)
+    assert evidence_lines(inc)[0].startswith("+28.2 s ANOMALY (car 81, same sector) sev 0.37")
+    assert any(e["what"] == "ANOMALY (car 81, same sector)" for e in events(inc))

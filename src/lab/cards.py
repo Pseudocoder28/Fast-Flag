@@ -22,6 +22,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.gridspec import GridSpec  # noqa: E402
+from matplotlib.ticker import MaxNLocator  # noqa: E402
+
+from src.eval.latency_by_type import ALERT_BEFORE_S  # noqa: E402
+from src.lab.delay_cost import alert_cars_note, n_cars  # noqa: E402
 
 IN_PATH = Path("docs/lab/delay_cost.json")
 OUT_DIR = Path("docs/lab/cards")
@@ -42,11 +46,12 @@ def events(inc: dict) -> list[dict]:
     m = inc["markers"]
     out = [{"name": "onset", "t": 0.0, "what": ""}]
     if m["our_first_alert"]:
-        out.append({"name": "our first alert", "t": m["our_first_alert"]["t_after_onset"], "what": m["our_first_alert"]["type"]})
+        a = m["our_first_alert"]
+        out.append({"name": "our first alert", "t": a["t_after_onset"], "what": a["type"] + alert_cars_note(a)})
     if m["our_escalation"]:
         out.append({"name": "our recommendation", "t": m["our_escalation"]["t_after_onset"], "what": m["our_escalation"]["flag"]})
-    elif inc.get("recommendations"):
-        r = inc["recommendations"][0]
+    elif first_flag_rec(inc):
+        r = first_flag_rec(inc)
         out.append({"name": "our recommendation", "t": r["t_after_onset"], "what": r["flag"]})
     if m["official_yellow"] is not None:
         out.append({"name": "official yellow", "t": m["official_yellow"], "what": ""})
@@ -64,20 +69,27 @@ def recommendation(inc: dict) -> dict | None:
                     and abs(r["t_after_onset"] - m["our_escalation"]["t_after_onset"]) < 0.01), None)
         return esc or {"t_after_onset": m["our_escalation"]["t_after_onset"], "flag": m["our_escalation"]["flag"],
                        "confidence": None, "reason": m["our_escalation"].get("reason", "")}
-    return recs[0] if recs else None
+    return first_flag_rec(inc)
+
+
+def first_flag_rec(inc: dict) -> dict | None:
+    """Our first YELLOW or DOUBLE_YELLOW for this crash, never a CLEAR and never before the
+    alert window (a CLEAR from an earlier incident in the sector is not our call for this one)."""
+    return next((r for r in inc.get("recommendations") or [] if r["flag"] in ("YELLOW", "DOUBLE_YELLOW")
+                 and r["t_after_onset"] >= -ALERT_BEFORE_S), None)
 
 
 def exposure_lines(inc: dict) -> list[str]:
     m, n60 = inc["markers"], inc["curve"][-1]
-    lines = [f"Each second of delay averaged {n60 / inc['max_delay_s']:.2f} cars ({n60} in {inc['max_delay_s']:.0f} s)"]
+    lines = [f"Each second of delay averaged {n60 / inc['max_delay_s']:.2f} cars ({n_cars(n60)} in {inc['max_delay_s']:.0f} s)"]
     if m["our_escalation"]:
         lines.append(f"By our {m['our_escalation']['flag']} ({m['our_escalation']['t_after_onset']:+.1f} s): "
-                     f"{m['our_escalation']['cars_by_then']} cars")
+                     f"{n_cars(m['our_escalation']['cars_by_then'])}")
     if m["official_yellow"] is not None:
-        lines.append(f"By the official yellow ({m['official_yellow']:+.1f} s): {m['cars_by_official_yellow']} cars")
+        lines.append(f"By the official yellow ({m['official_yellow']:+.1f} s): {n_cars(m['cars_by_official_yellow'])}")
     if m["official_escalation"]:
         o = m["official_escalation"]
-        lines.append(f"By the official {o['flag']} ({o['t_after_onset']:+.1f} s): {o['cars_by_then']} cars")
+        lines.append(f"By the official {o['flag']} ({o['t_after_onset']:+.1f} s): {n_cars(o['cars_by_then'])}")
     else:
         lines.append("No official escalation for this incident")
     return lines
@@ -87,11 +99,15 @@ def evidence_lines(inc: dict) -> list[str]:
     dets = inc.get("detections") or []
     if not dets and inc["markers"]["our_first_alert"]:
         a = inc["markers"]["our_first_alert"]
-        dets = [{"t_after_onset": a["t_after_onset"], "type": a["type"], "severity": None, "evidence": a["evidence"]}]
+        dets = [{"t_after_onset": a["t_after_onset"], "type": a["type"], "severity": None, "evidence": a["evidence"],
+                 "drivers": a.get("drivers", [])}]
+    crash_cars = set(inc.get("cars_involved") or [inc["car"]])
     out = []
     for d in dets[:MAX_EVIDENCE]:
         sev = f" sev {d['severity']:.2f}" if d.get("severity") is not None else ""
-        out.append(f"{d['t_after_onset']:+.1f} s {d['type']}{sev}: {d['evidence']}")
+        drivers = d.get("drivers") or []
+        other = f" (car {', '.join(drivers)}, same sector)" if drivers and not crash_cars & set(drivers) else ""
+        out.append(f"{d['t_after_onset']:+.1f} s {d['type']}{other}{sev}: {d['evidence']}")
     return out or ["no detection within the alert window"]
 
 
@@ -148,16 +164,20 @@ def svg_timeline(inc: dict, w: int, h: int) -> str:
     ev = events(inc)
     t_max = max(10.0, max(e["t"] for e in ev) * 1.08)
     x0, x1, y = 20, w - 20, h // 2 + 2
-    parts = [f'<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke="{GRID}" stroke-width="4"/>']
+    lines = [f'<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke="{GRID}" stroke-width="4"/>']
+    labels = []
     for e, (side, level) in zip(ev, label_levels(ev, t_max, 0.18 * t_max)):
         x = scale(e["t"], 0, t_max, x0, x1)
         color, _ = EVENT_STYLE[e["name"]]
         ty = y - 12 - 14 * level if side > 0 else y + 20 + 14 * level
         anchor = "start" if x < x0 + 0.12 * (x1 - x0) else ("end" if x > x1 - 0.12 * (x1 - x0) else "middle")
-        parts.append(f'<circle cx="{x:.1f}" cy="{y}" r="6" fill="{color}" stroke="{SURFACE}" stroke-width="2"/>')
-        if level:
-            parts.append(f'<line x1="{x:.1f}" y1="{y}" x2="{x:.1f}" y2="{ty - (10 if side > 0 else -4)}" stroke="{color}" stroke-width="1"/>')
-        parts.append(f'<text x="{x:.1f}" y="{ty}" font-size="12" fill="{color}" text-anchor="{anchor}">{html.escape(label_of(e))}</text>')
+        if level:        # the leader stops short of its own glyphs; labels are drawn on top with a halo
+            lines.append(f'<line x1="{x:.1f}" y1="{y}" x2="{x:.1f}" y2="{ty + 3 if side > 0 else ty - 12}" '
+                         f'stroke="{color}" stroke-width="1"/>')
+        lines.append(f'<circle cx="{x:.1f}" cy="{y}" r="6" fill="{color}" stroke="{SURFACE}" stroke-width="2"/>')
+        labels.append(f'<text x="{x:.1f}" y="{ty}" font-size="12" fill="{color}" text-anchor="{anchor}" '
+                      f'stroke="{SURFACE}" stroke-width="4" paint-order="stroke">{html.escape(label_of(e))}</text>')
+    parts = lines + labels
     return f'<svg viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="system-ui, sans-serif">{"".join(parts)}</svg>'
 
 
@@ -173,15 +193,14 @@ def svg_trace(inc: dict, w: int, h: int) -> str:
     sx = lambda t: scale(t, t_lo, t_hi, left, right)  # noqa: E731
     sy = lambda v: scale(v, 0, v_max, bottom, top)  # noqa: E731
     parts = [f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="{GRID}"/>',
-             f'<line x1="{sx(0):.1f}" y1="{top}" x2="{sx(0):.1f}" y2="{bottom}" stroke="{INK}" stroke-dasharray="3 3"/>',
-             f'<text x="{sx(0) + 4:.1f}" y="{bottom - 5}" font-size="11" fill="{INK2}">onset</text>']
+             f'<line x1="{sx(0):.1f}" y1="{top + 16}" x2="{sx(0):.1f}" y2="{bottom}" stroke="{INK}" stroke-dasharray="3 3"/>']
     for v in (100, 200, 300):
         if v < v_max:
             parts.append(f'<line x1="{left}" y1="{sy(v):.1f}" x2="{right}" y2="{sy(v):.1f}" stroke="{GRID}"/>')
             parts.append(f'<text x="{left - 4}" y="{sy(v) + 4:.1f}" font-size="10" fill="{INK3}" text-anchor="end">{v}</text>')
     for t in range(int(t_lo // 10) * 10, int(t_hi) + 1, 10):
         if t_lo <= t <= t_hi:
-            parts.append(f'<text x="{sx(t):.1f}" y="{bottom + 14}" font-size="10" fill="{INK3}" text-anchor="middle">{t:+d}</text>')
+            parts.append(f'<text x="{sx(t):.1f}" y="{bottom + 14}" font-size="10" fill="{INK3}" text-anchor="middle">{"0 onset" if t == 0 else f"{t:+d}"}</text>')
     for series, color, width, dash in ((own, INK3, 1.5, ' stroke-dasharray="4 3"'), (sp, BLUE, 2.2, "")):
         pts = " ".join(f"{sx(t):.1f},{sy(v):.1f}" for t, v in zip(ts, series) if v is not None)
         if pts:
@@ -301,8 +320,10 @@ def png_card(inc: dict, doc: dict, path: Path) -> None:
         color, _ = EVENT_STYLE[e["name"]]
         ax.scatter([e["t"]], [0], s=60, color=color, edgecolors=SURFACE, linewidths=1.5, zorder=3)
         ha = "left" if e["t"] < 0.12 * t_max else ("right" if e["t"] > 0.88 * t_max else "center")
+        # level-0 labels sit above the raised labels' leaders, on a surface-coloured box
         ax.annotate(label_of(e), (e["t"], 0), xytext=(0, side * (8 + 10 * level)), textcoords="offset points",
-                    ha=ha, va="bottom" if side > 0 else "top", fontsize=7, color=color,
+                    ha=ha, va="bottom" if side > 0 else "top", fontsize=7, color=color, zorder=6 - level,
+                    bbox={"boxstyle": "square,pad=0.1", "fc": SURFACE, "ec": "none"},
                     arrowprops={"arrowstyle": "-", "color": color, "lw": 0.6} if level else None)
     ax.set_xlim(-t_max * 0.02, t_max)
     ax.set_ylim(-1, 1)
@@ -339,9 +360,9 @@ def png_card(inc: dict, doc: dict, path: Path) -> None:
         conf = f" ({rec['confidence']:.2f})" if rec.get("confidence") is not None else ""
         ax.text(0, 0.86, f" {rec['flag']} ", fontsize=10, weight="bold", color="#000", va="top", transform=ax.transAxes,
                 bbox={"boxstyle": "round,pad=0.25", "fc": FLAG_COLOR.get(rec["flag"], GRID), "ec": "none"})
-        ax.text(0.28, 0.86, f"{rec['t_after_onset']:+.1f} s{conf}", fontsize=8, color=INK2, va="top", transform=ax.transAxes,
-                family="monospace")
-        ax.text(0, 0.66, wrap(rec.get("reason", ""), 70), fontsize=7.5, color=INK, va="top", transform=ax.transAxes)
+        ax.text(0, 0.70, f"{rec['t_after_onset']:+.1f} s after onset{conf}", fontsize=8, color=INK2, va="top",
+                transform=ax.transAxes, family="monospace")      # its own line: a long flag name never covers it
+        ax.text(0, 0.57, wrap(rec.get("reason", ""), 70), fontsize=7.5, color=INK, va="top", transform=ax.transAxes)
     else:
         ax.text(0, 0.86, "no recommendation from our race control engine", fontsize=7.5, color=INK, va="top",
                 transform=ax.transAxes)
@@ -359,7 +380,8 @@ def png_card(inc: dict, doc: dict, path: Path) -> None:
             color, dash = EVENT_STYLE[e["name"]]
             ax.axvline(e["t"], color=color, lw=1.2, ls="--" if dash == "dashed" else "-")
     ax.set_xlim(0, inc["max_delay_s"])
-    ax.set_ylim(0, max(max(inc["curve"]), 1) * 1.2)
+    ax.set_ylim(0, max(max(inc["curve"]), 1) + 1)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_title("COST OF DELAY: CARS PAST AT RACING SPEED VS FLAG DELAY (s)", loc="left", fontsize=7.5, color=INK2)
     style_axes(ax)
 

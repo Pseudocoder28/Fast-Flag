@@ -3,6 +3,7 @@ line on synthetic passes, without loading any race data. Run: pytest tests/test_
 
 from __future__ import annotations
 
+import pandas as pd
 import pytest
 
 from src.ingest.holdout import HoldoutError
@@ -14,8 +15,10 @@ from src.lab.delay_cost import (
     cars_by,
     curve,
     delays,
+    group_crashes,
     png_name,
     race_incidents,
+    rec_cars,
     summary_line,
 )
 
@@ -95,3 +98,48 @@ def test_holdout_races_are_refused_before_any_data_is_read() -> None:
         with pytest.raises(HoldoutError):
             race_incidents(rid)
     assert not any(r.startswith("2026") for r in CASE_RACES)
+
+
+# --- crashes, not official incidents -----------------------------------------------
+
+def test_a_car_that_laps_round_is_counted_once() -> None:
+    laps = [p("10", 0.6, 95.0), p("10", 85.4, 97.0), p("14", 2.0, 90.0)]
+    assert cars_by(laps, 100.0) == 2
+    assert curve(laps)[-1] == 2
+
+
+def test_rec_cars_reads_sources_and_the_reason() -> None:
+    by_id = {"det-1": {"drivers": ["55", "23"]}}
+    assert rec_cars({"source_detections": ["det-1", "gone"], "reason": "multi-car incident"}, by_id) == {"55", "23"}
+    assert rec_cars({"source_detections": [], "reason": "car 27 stopped on track for 3.0 s"}, by_id) == {"27"}
+    assert rec_cars({"source_detections": [], "reason": "no flagged car remains in sector"}, by_id) == set()
+
+
+class Inc:
+    """Stand-in for src.eval.incidents.Incident."""
+
+    def __init__(self, t: float, sectors: set[int], messages: list[dict]) -> None:
+        self.t, self.sectors, self.messages = t, sectors, messages
+
+
+def onsets_frame(rows: list[tuple[str, float, int]]) -> pd.DataFrame:
+    return pd.DataFrame([{"drv": d, "t": t, "dist": 100.0, "msector": s, "speed": 50.0, "own_ref": 250.0}
+                         for d, t, s in rows])
+
+
+def test_a_new_car_inside_an_earlier_window_is_a_new_crash() -> None:
+    # 2024 Canadian: Perez at 4984.0, then Sainz and Albon at 5062.5 in the next official incident
+    ons = onsets_frame([("11", 4984.0, 6), ("55", 5062.5, 5), ("23", 5064.25, 5)])
+    first = Inc(4985.0, {6}, [{"t": 4985.0, "flag": "YELLOW"}])
+    second = Inc(5064.0, {5, 6}, [{"t": 5064.0, "flag": "YELLOW"}, {"t": 5093.0, "flag": "SC"}])
+    crashes = group_crashes([first, second], ons, 20)
+    assert [(c.onset["drv"], c.cars) for c in crashes] == [("11", {"11"}), ("55", {"55", "23"})]
+    assert crashes[1].incidents == [second], "the SC belongs to the second crash"
+
+
+def test_a_re_flag_is_merged_not_dropped() -> None:
+    ons = onsets_frame([("6", 4654.5, 13), ("6", 4656.75, 13)])
+    first = Inc(4681.38, set(), [{"t": 4681.38, "flag": "SC"}])
+    again = Inc(4689.38, {13}, [{"t": 4689.38, "flag": "YELLOW"}, {"t": 4692.38, "flag": "DOUBLE_YELLOW"}])
+    crashes = group_crashes([first, again], ons, 20)
+    assert len(crashes) == 1 and crashes[0].incidents == [first, again]

@@ -1,14 +1,20 @@
 """Delay-cost curve: how many cars pass a crash site at racing speed for every second
 a flag is delayed (training races plus the 2021 Azerbaijan crashes, never a holdout).
 
-For each official incident with an identifiable onset (the onset rule and the
-onset-car selection are imported from src.eval.onset and src.eval.latency_by_type,
-not copied) the curve counts, for every delay d from 0 to 60 s in 0.5 s steps, the
-cars that passed the crash location (where the onset car came to rest, src.eval.case_study)
-between the onset and onset + d at 80% or more of their own normal speed at that point
-(the median of their previous 3 clean laps). Vertical markers: our first alert, our
-escalation recommendation (VSC, SC or RED from the race control engine), the official
-yellow and the official escalation.
+For each crash with an identifiable onset (the onset rule and the onset-car windows are
+imported from src.eval.onset and src.eval.latency_by_type, not copied) the curve counts,
+for every delay d from 0 to 60 s in 0.5 s steps, the distinct cars that passed the crash
+location (where the onset car came to rest on track, src.eval.case_study) between the
+onset and onset + d at 80% or more of their own normal speed at that point (the median of
+their previous 3 clean laps). Vertical markers: our first alert, our escalation
+recommendation (VSC, SC or RED from the race control engine, caused by a car of this
+crash), the official yellow and the official escalation.
+
+Crashes, not official incidents: race control often flags one crash in several official
+incidents (a re-flag, a later escalation). Those are merged into one crash with all their
+messages. An official incident whose onset candidates include a car not yet part of an
+earlier crash is a new crash, even inside the earlier crash's 120 s window (group_crashes).
+For incidents with only track-wide flags, alerts must match the onset car's sector.
 
 Counterfactual: no model of driver reactions. The cars are counted as they actually
 drove; a flag shown at delay d would have changed what they did after it.
@@ -24,7 +30,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import matplotlib
@@ -32,15 +40,19 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from matplotlib.ticker import MaxNLocator  # noqa: E402
 
 from src.detect.anomaly import attach_scores, train as train_anomaly  # noqa: E402
 from src.detect.detectors import DetectorSuite  # noqa: E402
 from src.detect.pipeline import load_config  # noqa: E402
-from src.eval.case_study import COUNTERFACTUAL, OUT_OF_SAMPLE, driver_names, passes, recommendations, rest_position  # noqa: E402
-from src.eval.incidents import build_incidents, race_files, suspended_times  # noqa: E402
+from src.eval.case_study import (COUNTERFACTUAL, OUT_OF_SAMPLE, REST_KMH, REST_WITHIN_S, driver_names,  # noqa: E402
+                                 passes, recommendations, rest_position)
+from src.eval.incidents import INCIDENT_FLAGS, build_incidents, race_files, suspended_times  # noqa: E402
 from src.eval.latency_by_type import ALERT_AFTER_S, ALERT_BEFORE_S, ONSET_AFTER_S, ONSET_BEFORE_S, in_sectors  # noqa: E402
 from src.eval.onset import RULE, add_own_ratio, onsets  # noqa: E402
 from src.ingest.holdout import assert_not_holdout  # noqa: E402
+from src.ingest.sectors import sector_matches  # noqa: E402
 from src.replay.engine import Engine, RaceData, available_races, race_dir  # noqa: E402
 
 OUT_DIR = Path("docs/lab")
@@ -54,6 +66,7 @@ TRACE_BEFORE_S, TRACE_AFTER_S = 15.0, 45.0      # the onset car's speed trace ke
 MAX_LISTED = 8                                  # detections and recommendations kept per incident
 NOTE = "Replay of historical FastF1 data. Counterfactual: no model of driver reactions."
 DPI = 110
+LABEL_ROW = 0.075                               # height of one marker label row, as a share of the axes
 
 SURFACE, INK, INK2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 BLUE, ORANGE, GOLD = "#2a78d6", "#eb6834", "#b8960c"
@@ -84,20 +97,33 @@ def delays(max_delay_s: float = MAX_DELAY_S, step_s: float = STEP_S) -> list[flo
     return [round(float(d), 2) for d in np.arange(0.0, max_delay_s + step_s / 2, step_s)]
 
 
+def first_racing_passes(pass_list: list[dict], share: float = RACING_SHARE) -> list[float]:
+    """Per car, the time of its first pass at racing speed, sorted. A car that laps round and
+    passes again is one car. A pass with no own reference (no clean lap yet) cannot be judged
+    and is not counted."""
+    first: dict[str, float] = {}
+    for p in pass_list:
+        if p["pct_of_own_normal"] is not None and p["pct_of_own_normal"] >= 100 * share:
+            first[p["car"]] = min(first.get(p["car"], np.inf), p["t_after_onset"])
+    return sorted(first.values())
+
+
 def curve(pass_list: list[dict], share: float = RACING_SHARE, max_delay_s: float = MAX_DELAY_S,
           step_s: float = STEP_S) -> list[int]:
-    """Cars that passed at racing speed within d seconds of the onset, for each delay d.
-    A pass with no own reference (no clean lap yet) cannot be judged and is not counted."""
-    racing = sorted(p["t_after_onset"] for p in pass_list
-                    if p["pct_of_own_normal"] is not None and p["pct_of_own_normal"] >= 100 * share)
+    """Cars that passed at racing speed within d seconds of the onset, for each delay d."""
+    racing = first_racing_passes(pass_list, share)
     return [int(np.searchsorted(racing, d, side="right")) for d in delays(max_delay_s, step_s)]
 
 
 def cars_by(pass_list: list[dict], t_after_onset: float | None, share: float = RACING_SHARE) -> int | None:
+    """Distinct cars past at racing speed by this time after the onset."""
     if t_after_onset is None:
         return None
-    return sum(1 for p in pass_list if p["pct_of_own_normal"] is not None
-               and p["pct_of_own_normal"] >= 100 * share and p["t_after_onset"] <= t_after_onset)
+    return int(np.searchsorted(first_racing_passes(pass_list, share), t_after_onset, side="right"))
+
+
+def n_cars(n: int | None) -> str:
+    return f"{n} car" if n == 1 else f"{n} cars"
 
 
 def summary_line(inc: dict) -> str:
@@ -105,18 +131,19 @@ def summary_line(inc: dict) -> str:
     m, n60 = inc["markers"], inc["curve"][-1]
     rate = n60 / inc["max_delay_s"]
     parts = [f"{inc['race'].replace('_', ' ')}, {inc['driver']} (car {inc['car']}) at {inc['onset_t']:.1f} s: "
-             f"each second of delay here averaged {rate:.2f} cars ({n60} cars passed at racing speed in the "
+             f"each second of delay here averaged {rate:.2f} cars ({n_cars(n60)} passed at racing speed in the "
              f"{inc['max_delay_s']:.0f} s after onset)"]
     if m["our_first_alert"]:
-        parts.append(f"our first alert {m['our_first_alert']['t_after_onset']:+.1f} s")
+        a = m["our_first_alert"]
+        parts.append(f"our first alert {a['t_after_onset']:+.1f} s{alert_cars_note(a)}")
     if m["our_escalation"]:
         e = m["our_escalation"]
-        parts.append(f"our {e['flag']} {e['t_after_onset']:+.1f} s ({e['cars_by_then']} cars by then)")
+        parts.append(f"our {e['flag']} {e['t_after_onset']:+.1f} s ({n_cars(e['cars_by_then'])} by then)")
     if m["official_yellow"] is not None:
-        parts.append(f"official yellow {m['official_yellow']:+.1f} s ({m['cars_by_official_yellow']} cars by then)")
+        parts.append(f"official yellow {m['official_yellow']:+.1f} s ({n_cars(m['cars_by_official_yellow'])} by then)")
     if m["official_escalation"]:
         o = m["official_escalation"]
-        parts.append(f"official {o['flag']} {o['t_after_onset']:+.1f} s ({o['cars_by_then']} cars by then)")
+        parts.append(f"official {o['flag']} {o['t_after_onset']:+.1f} s ({n_cars(o['cars_by_then'])} by then)")
     else:
         parts.append("no official escalation")
     return "; ".join(parts) + "."
@@ -134,33 +161,79 @@ def race_incidents(rid: str) -> list[dict]:
     dets, recs = run_engine(race)
     names = driver_names(race)
     incidents, _ = build_incidents(official, meta, suspended_times(race.frame), n)
-    out, seen = [], set()
+    by_id = {d["id"]: d for d in dets}
+    return [incident(rid, c, frame, dets, recs, by_id, names, n, length) for c in group_crashes(incidents, ons, n)]
+
+
+@dataclass
+class Crash:
+    """One crash: its onset, the onset cars, and every official incident about it."""
+    onset: pd.Series
+    cars: set[str]
+    incidents: list = field(default_factory=list)
+
+    @property
+    def t0(self) -> float:
+        return float(self.onset["t"])
+
+
+def group_crashes(incidents: list, ons: pd.DataFrame, n: int) -> list[Crash]:
+    """Official incidents to crashes. The candidate onsets of an incident are the onset-rule
+    hits in the 120 s before its first message, in a matching sector (as in
+    src.eval.latency_by_type). A candidate already claimed by an earlier crash (same car, onset
+    within those 120 s) is that crash; the first unclaimed candidate starts a new crash with the
+    unclaimed candidates as its cars. An incident with only claimed candidates is a re-flag: its
+    messages are merged into the crash of its first candidate, never dropped."""
+    crashes: list[Crash] = []
     for inc in incidents:
         cand = ons[(ons["t"] >= inc.t - ONSET_BEFORE_S) & (ons["t"] <= inc.t + ONSET_AFTER_S)]
         cand = cand[cand["msector"].apply(lambda m: in_sectors(m, inc, n))]
         if cand.empty:
             continue
-        onset = cand.iloc[0]
-        key = (str(onset["drv"]), float(onset["t"]))
-        if key in seen:                     # a re-flag of the same crash is the same curve
-            continue
-        seen.add(key)
-        out.append(incident(rid, inc, onset, set(cand["drv"]), frame, dets, recs, names, n, length))
-    return out
+        owners = [claimed_by(crashes, str(c["drv"]), float(c["t"])) for _, c in cand.iterrows()]
+        fresh = [c for (_, c), o in zip(cand.iterrows(), owners) if o is None]
+        if fresh:
+            crashes.append(Crash(fresh[0], {str(c["drv"]) for c in fresh}, [inc]))
+        else:
+            owners[0].incidents.append(inc)
+    return crashes
 
 
-def incident(rid: str, inc, onset, cars: set[str], frame, dets: list[dict], recs: list[dict],
+def claimed_by(crashes: list[Crash], drv: str, t: float) -> Crash | None:
+    return next((c for c in crashes if drv in c.cars and 0 <= t - c.t0 <= ONSET_BEFORE_S), None)
+
+
+def rec_cars(rec: dict, by_id: dict[str, dict]) -> set[str]:
+    """Cars behind a recommendation: the drivers of its source detections, plus 'car N' in its
+    reason (a global escalation from a sustained stop carries no source detections)."""
+    cars = {str(d) for i in rec.get("source_detections", []) if i in by_id for d in by_id[i]["drivers"]}
+    return cars | set(re.findall(r"\bcar (\d+)",str(rec.get("reason", ""))))
+
+
+def rest_position_on_track(frame: pd.DataFrame, drv: str, onset: pd.Series) -> float:
+    """Where the onset car came to rest: src.eval.case_study.rest_position, but a stop in the
+    pit lane (a damaged car driven to its box) is not the crash site: then the onset position."""
+    after = frame[(frame["drv"] == drv) & (frame["t"] >= onset["t"]) & (frame["t"] <= onset["t"] + REST_WITHIN_S)]
+    stopped = after[(after["speed"] < REST_KMH) & after["dist"].notna()]
+    if len(stopped) and not bool(stopped["in_pit"].iloc[0]):
+        return rest_position(frame, drv, onset)
+    return float(onset["dist"])
+
+
+def incident(rid: str, crash: Crash, frame, dets: list[dict], recs: list[dict], by_id: dict[str, dict],
              names: dict[str, str], n: int, length: float) -> dict:
-    t0 = float(onset["t"])
+    onset, cars, t0 = crash.onset, crash.cars, crash.t0
     rel = lambda t: round(float(t) - t0, 2)  # noqa: E731
-    crash_dist = rest_position(frame, onset["drv"], onset)
-    match = lambda m: in_sectors(int(m), inc, n)  # noqa: E731
-    alert = next((d for d in dets if t0 - ALERT_BEFORE_S <= d["t"] <= t0 + ALERT_AFTER_S
-                  and (cars & set(d["drivers"]) or match(d["msector"]))), None)
-    esc = next((r for r in recs if r["flag"] in ESCALATIONS and t0 - ALERT_BEFORE_S <= r["t"] <= t0 + ALERT_AFTER_S
-                and match(r["msector"])), None)
-    yellow = min((m["t"] for m in inc.messages if m["flag"] in SECTOR_FLAGS), default=None)
-    off_esc = min((m for m in inc.messages if m["flag"] in ESCALATIONS), key=lambda m: m["t"], default=None)
+    crash_dist = rest_position_on_track(frame, onset["drv"], onset)
+    messages = sorted((m for inc in crash.incidents for m in inc.messages), key=lambda m: m["t"])
+    sectors = {s for inc in crash.incidents for s in inc.sectors} or {int(onset["msector"])}
+    match = lambda m: any(sector_matches(int(m), s, n) for s in sectors)  # noqa: E731
+    in_window = lambda t: t0 - ALERT_BEFORE_S <= t <= t0 + ALERT_AFTER_S  # noqa: E731
+    alert = next((d for d in dets if in_window(d["t"]) and (cars & set(d["drivers"]) or match(d["msector"]))), None)
+    ours = [r for r in recs if in_window(r["t"]) and rec_cars(r, by_id) & cars]     # caused by this crash's cars
+    esc = next((r for r in ours if r["flag"] in ESCALATIONS), None)
+    yellow = min((m["t"] for m in messages if m["flag"] in SECTOR_FLAGS), default=None)
+    off_esc = min((m for m in messages if m["flag"] in ESCALATIONS), key=lambda m: m["t"], default=None)
     # passes are listed up to the last marker (an official escalation can come minutes later), the curve stops at 60 s
     horizon = max([MAX_DELAY_S] + [t - t0 + 1 for t in (yellow, off_esc and off_esc["t"], alert and alert["t"],
                                                           esc and esc["t"]) if t is not None])
@@ -169,6 +242,7 @@ def incident(rid: str, inc, onset, cars: set[str], frame, dets: list[dict], recs
                   "own_normal_kmh": p["own_normal_kmh"], "pct_of_own_normal": p["pct_of_own_normal"]} for p in raw]
     markers = {
         "our_first_alert": ({"t_after_onset": rel(alert["t"]), "type": alert["type"], "evidence": alert["evidence"],
+                             "drivers": list(alert["drivers"]), "on_onset_car": bool(cars & set(alert["drivers"])),
                              "cars_by_then": cars_by(pass_list, rel(alert["t"]))} if alert else None),
         "our_escalation": ({"t_after_onset": rel(esc["t"]), "flag": esc["flag"], "reason": esc["reason"],
                             "cars_by_then": cars_by(pass_list, rel(esc["t"]))} if esc else None),
@@ -180,11 +254,12 @@ def incident(rid: str, inc, onset, cars: set[str], frame, dets: list[dict], recs
     car = frame[frame["drv"] == str(onset["drv"])].sort_values("t")
     win = car[(car["t"] >= t0 - TRACE_BEFORE_S) & (car["t"] <= t0 + TRACE_AFTER_S)]
     at = car[(car["t"] - t0).abs() < 0.13]
-    in_window = lambda t: t0 - ALERT_BEFORE_S <= t <= t0 + ALERT_AFTER_S  # noqa: E731
     rec = {"race": rid, "car": str(onset["drv"]), "driver": names.get(str(onset["drv"]), str(onset["drv"])),
            "cars_involved": sorted(cars), "onset_t": round(t0, 2), "msector": int(onset["msector"]),
            "lap": int(at["lap"].iloc[0]) if len(at) else None,
-           "crash_location_m": round(crash_dist, 1), "official_top_flag": inc.top_flag,
+           "crash_location_m": round(crash_dist, 1),
+           "official_top_flag": max((m["flag"] for m in messages), key=INCIDENT_FLAGS.index),
+           "official_incidents_merged": len(crash.incidents),
            "max_delay_s": MAX_DELAY_S, "step_s": STEP_S, "racing_share": RACING_SHARE,
            "markers": markers, "curve": curve(pass_list), "passes": pass_list, "passes_until_s": round(horizon, 2),
            "passes_without_reference": sum(1 for p in pass_list if p["pct_of_own_normal"] is None
@@ -198,10 +273,9 @@ def incident(rid: str, inc, onset, cars: set[str], frame, dets: list[dict], recs
                            "drivers": list(d["drivers"]), "evidence": d["evidence"]} for d in dets
                           if in_window(d["t"]) and (cars & set(d["drivers"]) or match(d["msector"]))][:MAX_LISTED],
            "recommendations": [{"t_after_onset": rel(r["t"]), "flag": r["flag"], "confidence": r["confidence"],
-                                "reason": r["reason"], "message": r["message"]} for r in recs
-                               if in_window(r["t"]) and match(r["msector"])][:MAX_LISTED],
+                                "reason": r["reason"], "message": r["message"]} for r in ours][:MAX_LISTED],
            "official_messages": [{"t_after_onset": rel(m["t"]), "flag": m["flag"], "message": m["message"]}
-                                 for m in inc.messages]}
+                                 for m in messages]}
     rec["summary"] = summary_line(rec)
     rec["png"] = png_name(rec)
     return rec
@@ -217,6 +291,14 @@ def png_name(inc: dict) -> str:
 
 # ---- chart
 
+def alert_cars_note(alert: dict) -> str:
+    """' (car 81, same sector)' when our first alert was on a car other than the onset cars."""
+    if alert.get("on_onset_car", True):
+        return ""
+    cars = ", ".join(alert.get("drivers", []))
+    return f" (car{'s' if len(alert.get('drivers', [])) > 1 else ''} {cars}, same sector)"
+
+
 def plot(inc: dict, path: Path) -> None:
     x, y = delays(inc["max_delay_s"], inc["step_s"]), inc["curve"]
     fig, ax = plt.subplots(figsize=(9, 5), dpi=DPI)
@@ -227,29 +309,32 @@ def plot(inc: dict, path: Path) -> None:
     m = inc["markers"]
     marks = []
     if m["our_first_alert"]:
-        marks.append(("our first alert", m["our_first_alert"]["t_after_onset"], m["our_first_alert"]["type"]))
+        a = m["our_first_alert"]
+        marks.append(("our first alert", a["t_after_onset"], a["type"] + alert_cars_note(a)))
     if m["our_escalation"]:
         marks.append(("our escalation", m["our_escalation"]["t_after_onset"], m["our_escalation"]["flag"]))
     if m["official_yellow"] is not None:
         marks.append(("official yellow", m["official_yellow"], ""))
     if m["official_escalation"]:
         marks.append(("official escalation", m["official_escalation"]["t_after_onset"], m["official_escalation"]["flag"]))
-    off_chart, level, last_x = [], 0, -1e9
-    top = max(max(y), 1)
+    off_chart, on_chart = [], []
     for name, t, what in sorted(marks, key=lambda k: k[1]):
         label = f"{name} {what} {t:+.1f} s".replace("  ", " ")
-        if t > inc["max_delay_s"] or t < 0:
-            off_chart.append(label)
-            continue
+        (on_chart if 0 <= t <= inc["max_delay_s"] else off_chart).append((name, t, label))
+    # labels live in a headroom strip above the curve, one row each, right-aligned near the right edge
+    rows = len(on_chart)
+    data_top = 1 - LABEL_ROW * rows - 0.04
+    ax.set_xlim(0, inc["max_delay_s"])
+    ax.set_ylim(0, max(max(y), 1) / data_top + 0.2)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    for row, (name, t, label) in enumerate(on_chart):
         color, ls = MARKER_STYLE[name]
         ax.axvline(t, color=color, ls=ls, lw=1.4, zorder=4)
-        level = level + 1 if t - last_x < 0.09 * inc["max_delay_s"] else 0
-        last_x = t
-        ax.annotate(label, (t, top), xytext=(4, -4 - 12 * level), textcoords="offset points", ha="left", va="top",
-                    fontsize=8, color=color, zorder=5,
-                    bbox={"boxstyle": "round,pad=0.15", "fc": SURFACE, "ec": "none", "alpha": 0.85})
-    ax.set_xlim(0, inc["max_delay_s"])
-    ax.set_ylim(0, top * 1.25 + 0.5)
+        right = t > 0.7 * inc["max_delay_s"]
+        ax.annotate(label, (t, 0.985 - LABEL_ROW * row), xycoords=("data", "axes fraction"),
+                    xytext=(-4 if right else 4, 0), textcoords="offset points", ha="right" if right else "left",
+                    va="top", fontsize=8, color=color, zorder=6,
+                    bbox={"boxstyle": "round,pad=0.15", "fc": SURFACE, "ec": "none", "alpha": 1.0})
     ax.set_xlabel("Flag delay after the crash onset (seconds)", fontsize=9.5, color=INK2)
     ax.set_ylabel("Cars past the crash site at racing speed\n(80% or more of their own normal speed there)",
                   fontsize=8.5, color=INK2)
@@ -263,7 +348,8 @@ def plot(inc: dict, path: Path) -> None:
     fig.text(0.01, 0.985, f"{inc['race'].replace('_', ' ')}: {inc['driver']} (car {inc['car']}) crash, "
              f"the cost of every second of flag delay", fontsize=12.5, weight="bold", color=INK, va="top")
     fig.text(0.01, 0.94, f"{NOTE} Each second of delay here averaged {rate:.2f} cars "
-             f"({y[-1]} cars in {inc['max_delay_s']:.0f} s)." + (f" Off the chart: {', '.join(off_chart)}." if off_chart else ""),
+             f"({n_cars(y[-1])} in {inc['max_delay_s']:.0f} s)."
+             + (f" Off the chart: {', '.join(lab for _, _, lab in off_chart)}." if off_chart else ""),
              fontsize=8.5, color=INK2, va="top", wrap=True)
     foot = f"Onset: {RULE}."
     if inc["race"] in CASE_RACES:
@@ -286,11 +372,12 @@ def write_outputs(incidents: list[dict], out_dir: Path, races: list[str]) -> Non
            "incidents": incidents}
     (out_dir / "delay_cost.json").write_text(json.dumps(doc, indent=2), encoding="utf-8")
     lines = ["# Delay-cost curves", "", f"{NOTE} {COUNTERFACTUAL}", "",
-             f"Generated by `python -m src.lab.delay_cost` over {len(races)} races ({len(incidents)} incidents with an "
-             f"identifiable onset). Onset rule: {RULE}.", "",
-             "For each delay d (0 to 60 s, 0.5 s steps): cars that passed the spot where the onset car came to rest "
+             f"Generated by `python -m src.lab.delay_cost` over {len(races)} races ({len(incidents)} crashes with an "
+             f"identifiable onset; official incidents about the same crash are merged). Onset rule: {RULE}.", "",
+             "For each delay d (0 to 60 s, 0.5 s steps): distinct cars that passed the spot where the onset car came to rest "
              f"between the onset and onset + d at {RACING_SHARE:.0%} or more of their own normal speed there "
-             "(median of their previous 3 clean laps). Markers: our first alert, our escalation recommendation, "
+             "(median of their previous 3 clean laps). Markers: our first alert, our escalation recommendation "
+             "(only one caused by a car of this crash), "
              "the official yellow and the official escalation. 2021 Azerbaijan is a case study, out of sample twice: "
              + OUT_OF_SAMPLE, "", "## Summary, one line per incident", ""]
     lines += [f"- {inc['summary']}" for inc in incidents]

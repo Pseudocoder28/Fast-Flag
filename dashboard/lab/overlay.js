@@ -4,7 +4,9 @@
 // and consumes the existing envelopes only (tick, detection, rec, official).
 //
 // Strictly causal: everything on screen comes from envelopes already received,
-// and every clock runs on replay time from the ticks, never on the wall clock.
+// and every clock runs on replay time from the ticks, never on the wall clock. The only
+// wall-clock timers are the websocket reconnect, the banner slide-out and a GET /status
+// poll that resets the overlay when another race is loaded; none of them is displayed.
 //
 // - Every rec at YELLOW or above slides in a lower-third banner.
 // - Exposure Clock: when our rec reaches VSC, SC or RED before the official message
@@ -14,7 +16,9 @@
 
 const WS_URL = `ws://${location.host}/stream`;
 const RESET_JUMP_S = 2.0;          // same rule as the race control engine and the dashboard
-const CONFIRM_WINDOW_S = 120.0;    // an official message confirms a flag we raised within this long before it
+const CONFIRM_WINDOW_S = 120.0;    // an official message and our raise this far apart are about different things
+const MIN_LEAD_S = 0.05;          // below the displayed resolution: not a lead
+const STATUS_POLL_MS = 3000;       // how often GET /status is checked for a race switch
 const RACING_SHARE = 0.8;          // racing speed: at least this share of the car's own speed here last lap
 const RACING_FALLBACK_KMH = 120;   // ... or, with no previous lap yet, at least this fast
 const BIN_M = 50;                  // per-car speed memory along the lap
@@ -99,9 +103,10 @@ const S = {
   field: new Map(),           // bin -> recent speeds of every car there (field reference)
   level: new Map(),           // scope (sector number or TRACK) -> current rank
   episode: new Map(),         // scope -> [{t, rank}] raises of the current episode
-  official: new Map(),        // scope -> [{t, rank}] official messages seen
+  official: new Map(),        // scope -> [{t, rank}] official flags still in force
   cause: new Map(),           // sector -> {cars, type} last known cause
-  banners: new Map(),         // scope -> {el, rec, rank}
+  banners: new Map(),         // scope -> {el, rec, cause, scope}, oldest first
+  race: null,                 // race id and start time from GET /status, to reset on a race switch
   clock: null,
 };
 
@@ -126,7 +131,18 @@ function resetAll() {
   hideClock();
 }
 
-// --- episodes and lead times (same rules as src/lab/voice.py) ------------------------
+// --- our episodes and the official feed ------------------------------------------------
+//
+// Ours: per scope (a sector, or TRACK for VSC, SC and RED) the current level and the raises
+// of the open episode, from CLEAR up and back. Official: per scope, the official flags still in
+// force. An official CLEAR for a sector closes that sector, an official TRACK CLEAR closes
+// everything, so an earlier incident's messages never speak for a new one.
+//
+// Lead texts compare like with like: a sector banner against official messages for a matching
+// sector (the same one, 2 downstream or 1 upstream), a track banner against track-wide ones,
+// each at least the banner's level, measured from the first time this episode reached that
+// level. A re-sent rec (the engine re-sends a flag when the ANOMALY detector corroborates it)
+// never moves that time.
 
 function raiseScope(scope, t, rank) {
   const cur = S.level.get(scope) || 0;
@@ -137,47 +153,38 @@ function raiseScope(scope, t, rank) {
   }
 }
 
-function scopesMatching(scope) {
-  if (scope === TRACK) return [TRACK];
-  const out = [];
-  for (const s of S.episode.keys()) if (s !== TRACK && sectorMatches(s, scope, S.nSectors)) out.push(s);
-  return out;
+function ourFirstAt(scope, rank) {
+  const raise = (S.episode.get(scope) || []).find((r) => r.rank >= rank);
+  return raise ? raise.t : null;
 }
 
-function ourFirst(rank, scope, tOfficial) {
-  // when we first raised at least this level for a matching scope, within the confirm window
-  let best = null;
-  for (const s of scopesMatching(scope)) {
-    for (const r of S.episode.get(s) || []) {
-      if (r.rank >= rank && r.t >= tOfficial - CONFIRM_WINDOW_S && (best === null || r.t < best)) best = r.t;
-    }
-  }
-  return best;
+function officialsFor(scope, rank) {
+  // official messages still in force for this scope, at least this level
+  const keys = scope === TRACK ? [TRACK]
+    : [...S.official.keys()].filter((s) => s !== TRACK && sectorMatches(scope, s, S.nSectors));
+  return keys.flatMap((s) => S.official.get(s) || []).filter((o) => o.rank >= rank);
 }
 
-function officialScopes(scope) {
-  // official messages that cover this scope: track-wide ones cover every sector
-  if (scope === TRACK) return [TRACK];
-  return [...S.official.keys()].filter((s) => s === TRACK || sectorMatches(scope, s, S.nSectors));
-}
-
-function officialFirst(rank, scope, tRec) {
-  // the earliest official message of at least this level for this scope in the window before our rec
-  let best = null;
-  for (const s of officialScopes(scope)) {
-    for (const o of S.official.get(s) || []) {
-      if (o.rank >= rank && o.t <= tRec && o.t >= tRec - CONFIRM_WINDOW_S && (best === null || o.t < best)) best = o.t;
-    }
-  }
-  return best;
+function leadFor(scope, rank) {
+  const ours = ourFirstAt(scope, rank);
+  if (ours === null) return { cls: "wait", text: "WAITING FOR RACE CONTROL" };
+  const offs = officialsFor(scope, rank).filter((o) => Math.abs(o.t - ours) <= CONFIRM_WINDOW_S);
+  if (!offs.length) return { cls: "wait", text: "WAITING FOR RACE CONTROL" };
+  const d = Math.min(...offs.map((o) => o.t)) - ours;
+  if (d <= -MIN_LEAD_S) return { cls: "behind", text: `RACE CONTROL FIRST BY ${(-d).toFixed(1)} s` };
+  if (d < MIN_LEAD_S) return { cls: "wait", text: "LEVEL WITH RACE CONTROL" };
+  return { cls: "ahead", text: `FAST FLAG AHEAD BY ${d.toFixed(1)} s` };
 }
 
 function causeOf(rec, msector) {
+  // cars and type behind a rec: the type of its last physical detection (ANOMALY only when
+  // nothing else corroborates); a rec without sources keeps the sector's last known cause
   const dets = (rec.source_detections || []).map((id) => S.detections.get(id)).filter(Boolean);
   if (dets.length) {
     const cars = [...new Set(dets.flatMap((d) => (d.drivers || []).map(String)))].sort((a, b) => carNum(a) - carNum(b));
-    const last = dets[dets.length - 1];
-    const type = TYPE_TEXT[last.type] ? last.type : null;
+    const types = dets.map((d) => d.type).filter((x) => Object.hasOwn(TYPE_TEXT, x));
+    const physical = types.filter((x) => x !== "ANOMALY");
+    const type = (physical.length ? physical : types).at(-1) ?? null;
     S.cause.set(msector, { cars, type });
     return { cars, type };
   }
@@ -186,33 +193,12 @@ function causeOf(rec, msector) {
 
 // --- banners ---------------------------------------------------------------------
 
-function leadHtml(rec, cause) {
-  const scope = GLOBAL_FLAGS.has(rec.flag) ? TRACK : rec.msector;
-  const rank = RANK[rec.flag];
-  const rc = officialFirst(rank, scope, rec.t);
-  if (rc !== null) return { cls: "behind", text: `RACE CONTROL FIRST BY ${(rec.t - rc).toFixed(1)} s` };
-  const ours = ourFirst(rank, scope, rec.t);
-  const off = latestOfficialAfter(rank, scope, ours);
-  if (off !== null) return { cls: "ahead", text: `FAST FLAG AHEAD BY ${(off - ours).toFixed(1)} s` };
-  return { cls: "wait", text: "WAITING FOR RACE CONTROL" };
-}
-
-function latestOfficialAfter(rank, scope, ours) {
-  // an official message of at least this level that arrived after our first raise
-  if (ours === null) return null;
-  let best = null;
-  for (const s of officialScopes(scope)) {
-    for (const o of S.official.get(s) || []) if (o.rank >= rank && o.t >= ours && (best === null || o.t < best)) best = o.t;
-  }
-  return best;
-}
-
-function bannerHtml(rec, cause) {
+function bannerHtml(rec, cause, scope) {
   const parts = [];
   if (cause.cars.length) parts.push(escapeHtml(carsText(cause.cars)));
   if (cause.type) parts.push(TYPE_TEXT[cause.type]);
   parts.push(`SECTOR ${escapeHtml(rec.msector)}`);
-  const lead = leadHtml(rec, cause);
+  const lead = leadFor(scope, RANK[rec.flag]);
   return `<div class="badge">${flagIcon(rec.flag)}<span>${FLAG_TEXT[rec.flag]}</span></div>` +
     `<div class="body">` +
     `<div class="line1">${parts.join('<span class="sep">|</span>')}</div>` +
@@ -222,16 +208,18 @@ function bannerHtml(rec, cause) {
     `</div><div class="mark">FAST FLAG</div>`;
 }
 
-function showBanner(rec, cause) {
-  const scope = GLOBAL_FLAGS.has(rec.flag) ? TRACK : rec.msector;
+function showBanner(rec, cause, scope) {
   const old = S.banners.get(scope);
-  if (old) old.el.remove();
+  if (old) {
+    old.el.remove();
+    S.banners.delete(scope);            // re-inserted below, so Map order stays oldest first
+  }
   const div = document.createElement("div");
   div.className = `banner flag-${rec.flag}`;
   div.dataset.scope = String(scope);
-  div.innerHTML = bannerHtml(rec, cause);
+  div.innerHTML = bannerHtml(rec, cause, scope);
   ui.banners.appendChild(div);
-  S.banners.set(scope, { el: div, rec, cause, rank: RANK[rec.flag] });
+  S.banners.set(scope, { el: div, rec, cause, scope });
   while (S.banners.size > BANNER_MAX) {
     const [k, b] = S.banners.entries().next().value;   // the oldest
     b.el.remove();
@@ -242,7 +230,7 @@ function showBanner(rec, cause) {
 function refreshLeads() {
   for (const b of S.banners.values()) {
     const leadEl = b.el.querySelector(".lead");
-    const lead = leadHtml(b.rec, b.cause);
+    const lead = leadFor(b.scope, RANK[b.rec.flag]);
     leadEl.className = `lead ${lead.cls}`;
     leadEl.textContent = lead.text;
   }
@@ -259,8 +247,8 @@ function dropBanner(scope) {
 // --- exposure clock -------------------------------------------------------------------
 
 function startClock(rec, cause) {
-  S.clock = { t0: rec.t, rank: RANK[rec.flag], flag: rec.flag, stricken: new Set(cause.cars),
-    crashDist: null, resting: false, exposed: [], frozen: false, official: null, clearedAt: null };
+  S.clock = { t0: Number(rec.t), rank: RANK[rec.flag], flag: rec.flag, stricken: new Set(cause.cars),
+    crashDist: null, resting: false, exposed: [], counted: new Set(), frozen: false, end: null, clearedAt: null };
   for (const drv of cause.cars) {
     const c = S.cars.get(drv);
     if (c && c.dist !== null) S.clock.crashDist = c.dist;
@@ -274,26 +262,29 @@ function startClock(rec, cause) {
 }
 
 function freezeClock(tOfficial) {
+  // an official message of at least the clock's level: the exposure window ends there
   const c = S.clock;
   if (!c || c.frozen) return;
   c.frozen = true;
-  c.official = tOfficial;
+  c.end = Math.max(tOfficial, c.t0);
   ui.clock.classList.remove("running");
   ui.clock.classList.add("frozen");
-  const lead = tOfficial - c.t0;
   ui.clockResult.className = "clock-result ahead";
-  ui.clockResult.textContent = `Race control +${lead.toFixed(1)} s | Cars exposed ${c.exposed.length}`;
+  ui.clockResult.textContent = `Race control +${(tOfficial - c.t0).toFixed(1)} s | Cars exposed ${c.exposed.length}`;
   updateClockText();
 }
 
-function endClockWithoutOfficial() {
+function endClockWithoutOfficial(t) {
+  // our flag cleared before race control called that level: the window ends at our clear
   const c = S.clock;
   if (!c || c.frozen) return;
   c.frozen = true;
+  c.end = Math.max(t, c.t0);
   ui.clock.classList.remove("running");
   ui.clock.classList.add("frozen");
   ui.clockResult.className = "clock-result";
   ui.clockResult.textContent = `No official ${FLAG_TEXT[c.flag]} | Cars exposed ${c.exposed.length}`;
+  updateClockText();
 }
 
 function hideClock() {
@@ -303,8 +294,7 @@ function hideClock() {
 function updateClockText() {
   const c = S.clock;
   if (!c || S.t === null) return;
-  const end = c.frozen && c.official !== null ? c.official : S.t;
-  const secs = Math.max(0, end - c.t0);
+  const secs = Math.max(0, (c.end ?? S.t) - c.t0);
   ui.clockValue.innerHTML = `${secs.toFixed(1)}<span class="unit">s</span>`;
   ui.clockCars.innerHTML = `CARS EXPOSED <b>${c.exposed.length}</b>`;
 }
@@ -332,14 +322,14 @@ function followStricken(t) {
 }
 
 function fieldMedian(bin) {
-  // median speed of every car seen at this point so far (any lap), once 3 samples exist
+  // median green-flag speed of every car seen at this point so far, once 3 samples exist
   const v = (S.field.get(bin) || []).slice().sort((a, b) => a - b);
   return v.length >= 3 ? v[Math.floor(v.length / 2)] : undefined;
 }
 
 function racingSpeed(drv, dist, speed) {
-  // racing speed: at least 80% of the car's own speed here on its previous lap; before it has
-  // one, 80% of the field's median speed here; before anyone has passed, a fixed 120 km/h
+  // racing speed: at least 80% of the car's own speed here on its last green lap; before it has
+  // one, 80% of the field's median green speed here; before anyone has passed, a fixed 120 km/h
   const h = S.hist.get(drv);
   const bin = Math.floor(dist / BIN_M);
   let ref = h && h.prev ? (h.prev.get(bin) ?? h.prev.get(bin - 1) ?? h.prev.get(bin + 1)) : undefined;
@@ -353,9 +343,10 @@ function racingSpeed(drv, dist, speed) {
 }
 
 function checkPasses(prev, drv, car) {
-  // did this car cross the crash location between its previous sample and this one?
+  // did this car cross the crash location between its previous sample and this one? Each car
+  // counts once per clock, even while the stricken car is still creeping forward
   const c = S.clock;
-  if (!c || c.frozen || c.crashDist === null || c.stricken.has(drv)) return;
+  if (!c || c.frozen || c.crashDist === null || c.stricken.has(drv) || c.counted.has(drv)) return;
   if (!prev || prev.dist === null || car.dist === null || car.inPit || prev.inPit) return;
   const L = S.lapLength;
   if (!L) return;
@@ -369,25 +360,36 @@ function checkPasses(prev, drv, car) {
   const { racing, pct, ref } = racingSpeed(drv, c.crashDist, speed);
   if (!racing) return;
   const pass = { drv, t: tp, speed, pct, ref };
+  c.counted.add(drv);
   c.exposed.push(pass);
   pushTicker(pass);
 }
 
-// --- per-car speed memory (previous lap) ------------------------------------------------
+// --- per-car speed memory (last green lap) ------------------------------------------------
 
-function remember(drv, dist, speed) {
+function neutralised(tick) {
+  // no reference samples under yellow, VSC, SC or red: a lap at neutralised pace is not racing speed
+  return String(tick.track_status) !== "1" || (S.official.get(TRACK) || []).length > 0;
+}
+
+function remember(drv, dist, speed, green) {
   let h = S.hist.get(drv);
   if (!h) {
-    h = { bins: new Map(), prev: null, lastDist: null };
+    h = { bins: new Map(), prev: null, lastDist: null, green: true };
     S.hist.set(drv, h);
   }
   if (S.lapLength && h.lastDist !== null && dist < h.lastDist - S.lapLength / 2) {
-    h.prev = h.bins;          // crossed the line: last lap becomes the reference
+    if (h.green) h.prev = h.bins;   // crossed the line: a fully green lap becomes the reference
     h.bins = new Map();
+    h.green = true;
+  }
+  h.lastDist = dist;
+  if (!green) {
+    h.green = false;
+    return;
   }
   const bin = Math.floor(dist / BIN_M);
   h.bins.set(bin, speed);
-  h.lastDist = dist;
   if (speed >= FIELD_MIN_KMH) {               // a crawling or stopped car is not a reference for the field
     let f = S.field.get(bin);
     if (!f) S.field.set(bin, (f = []));
@@ -407,17 +409,17 @@ function onTick(tick) {
   for (const car of tick.cars) maxDist = Math.max(maxDist, Number(car.dist) || 0);
   if (maxDist > 0 && !(S.lapLength >= maxDist)) S.lapLength = maxDist + (S.lapLength ? 0.5 : 100);   // the track's last sector ends before the line
   if (S.clock && !S.clock.frozen) followStricken(t);
+  const green = !neutralised(tick);
   for (const car of tick.cars) {
     const drv = String(car.drv);
     const dist = Number.isFinite(car.dist) ? car.dist : null;
     const cur = { t, dist, speed: Number(car.speed) || 0, inPit: Boolean(car.in_pit) };
     const prev = S.cars.get(drv);
-    if (dist !== null && !cur.inPit) remember(drv, dist, cur.speed);
+    if (dist !== null && !cur.inPit) remember(drv, dist, cur.speed, green);
     S.cars.set(drv, cur);
     checkPasses(prev, drv, cur);
   }
   if (S.clock) {
-    if (!S.clock.frozen) followStricken(t);
     updateClockText();
     if (S.clock.clearedAt !== null && t - S.clock.clearedAt > HIDE_AFTER_CLEAR_S) {
       S.clock = null;
@@ -432,21 +434,27 @@ function onDetection(det) {
 
 function onRec(rec) {
   const flag = String(rec.flag);
-  if (!(flag in RANK)) return;
+  if (!Object.hasOwn(RANK, flag)) return;
   const msector = Number(rec.msector);
   const t = Number(rec.t);
+  if (!Number.isFinite(msector) || !Number.isFinite(t)) return;
   if (flag === "CLEAR") return onClear(rec, msector, t);
   const rank = RANK[flag];
   const cause = causeOf(rec, msector);
   const scope = GLOBAL_FLAGS.has(flag) ? TRACK : msector;
   const levelUp = rank > (S.level.get(scope) || 0);
   raiseScope(scope, t, rank);
-  if (scope === TRACK) raiseScope(msector, t, rank);     // the cause sector is covered by the track-wide flag too
-  showBanner(rec, cause);
-  if (scope === TRACK && levelUp) {
-    const rcFirst = officialFirst(rank, TRACK, t);
-    if (rcFirst === null && (!S.clock || S.clock.frozen || rank > S.clock.rank)) startClock(rec, cause);
-  }
+  showBanner(rec, cause, scope);
+  if (scope === TRACK && levelUp && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
+}
+
+function maybeStartClock(rec, cause, rank, t) {
+  // run the clock only when race control has not called this level yet; an official that was
+  // received before our rec but is stamped later still means we were first, so freeze at once
+  const offs = officialsFor(TRACK, rank).map((o) => o.t);
+  if (offs.some((ot) => ot <= t)) return;
+  startClock(rec, cause);
+  if (offs.length) freezeClock(Math.min(...offs));
 }
 
 function onClear(rec, msector, t) {
@@ -458,17 +466,24 @@ function onClear(rec, msector, t) {
   if (sectorClear) S.cause.delete(msector);
   dropBanner(scope);
   if (!sectorClear && S.clock) {
-    if (!S.clock.frozen) endClockWithoutOfficial();
+    if (!S.clock.frozen) endClockWithoutOfficial(t);
     S.clock.clearedAt = t;
   }
 }
 
 function onOfficial(off) {
   const flag = String(off.flag);
-  if (!(flag in RANK) || flag === "CLEAR") return;
-  const rank = RANK[flag];
+  if (!Object.hasOwn(RANK, flag)) return;
   const t = Number(off.t);
+  if (!Number.isFinite(t)) return;
   const scope = off.msector === null || off.msector === undefined ? TRACK : Number(off.msector);
+  if (flag === "CLEAR") {
+    if (scope === TRACK) S.official.clear();       // TRACK CLEAR ends every official flag
+    else S.official.delete(scope);
+    refreshLeads();
+    return;
+  }
+  const rank = RANK[flag];
   if (!S.official.has(scope)) S.official.set(scope, []);
   S.official.get(scope).push({ t, rank });
   refreshLeads();
@@ -508,16 +523,38 @@ function connect() {
   };
 }
 
-async function init() {
+async function loadTrack() {
   try {
     const track = await (await fetch("/track")).json();
     let length = 0;
     for (const s of track.msectors || []) length = Math.max(length, Number(s.start_dist) || 0, Number(s.end_dist) || 0);
-    if (length > 0) S.lapLength = length;
-    if ((track.msectors || []).length) S.nSectors = track.msectors.length;
+    S.lapLength = length > 0 ? length : null;
+    S.nSectors = (track.msectors || []).length || 1000;
   } catch (e) {
     console.warn("overlay: GET /track failed, lap length from ticks", e);
   }
+}
+
+async function watchRace() {
+  // a race switch (POST /replay with another race) can move time forwards, so the tick-based
+  // reset never fires: nothing from the previous race may feed this race's claims
+  try {
+    const st = await (await fetch("/status")).json();
+    const id = `${st.race}|${st.t_start}`;
+    if (S.race !== null && id !== S.race) {
+      resetAll();
+      await loadTrack();
+    }
+    S.race = id;
+  } catch (e) {
+    // the server is restarting: the websocket reconnect handles it
+  }
+}
+
+async function init() {
+  await loadTrack();
+  await watchRace();
+  setInterval(watchRace, STATUS_POLL_MS);
   connect();
 }
 
