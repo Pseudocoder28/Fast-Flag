@@ -27,7 +27,8 @@ def classify(row: pd.Series) -> str | None:
     msg = str(row.get("Message") or "").upper()
     if row.get("Category") == "SafetyCar":
         if "DEPLOYED" in msg and "ENDING" not in msg:
-            return "VSC" if "VIRTUAL" in msg else "SC"
+            # 2023 to 2025: "VIRTUAL SAFETY CAR DEPLOYED"; 2026: "VSC DEPLOYED"
+            return "VSC" if "VIRTUAL" in msg or re.search(r"\bVSC\b", msg) else "SC"
         return None
     flag = str(row.get("Flag") or "").upper()
     return FLAG_MAP.get(flag)
