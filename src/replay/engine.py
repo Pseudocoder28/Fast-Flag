@@ -6,6 +6,10 @@ order: official events, ticks, and whatever the processors (detectors, risk
 model) emit for each tick. A processor only ever sees the current tick and its
 own memory of earlier ticks, so nothing from the future can reach it.
 
+`steps(to_t)` yields the same envelopes one tick at a time (TickStep), with the
+time spent in each pipeline stage, so the server and the benchmark can measure
+latency per tick (src.replay.latency).
+
 Run: python -m src.replay.engine 2023_Australian   (prints the first few seconds)
 """
 
@@ -14,14 +18,17 @@ from __future__ import annotations
 import bisect
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from time import perf_counter
 from typing import Protocol
 
 import numpy as np
 import pandas as pd
 
 from src.ingest.holdout import is_holdout_id
+from src.replay.latency import stage_name
 
 FEATURES = Path("data/features")
 HOLDOUT_DIR = Path("data/holdout")
@@ -112,6 +119,14 @@ def envelope_t(env: dict) -> float:
     return float(env["data"]["t"])
 
 
+@dataclass
+class TickStep:
+    t: float
+    envelopes: list[dict]        # official events due by this tick, the tick, then processor output
+    stage_s: dict[str, float]    # seconds spent in each pipeline stage for this tick
+    emitted_at: float            # perf_counter() when the tick was emitted into the pipeline
+
+
 class Engine:
     def __init__(self, race: RaceData, processors: list[Processor] | None = None) -> None:
         self.race = race
@@ -134,12 +149,23 @@ class Engine:
     def finished(self) -> bool:
         return self.k >= len(self.race.times)
 
-    def _process(self, k: int, tick: dict) -> list[dict]:
+    def _process(self, k: int, tick: dict, stage_s: dict[str, float] | None = None) -> list[dict]:
+        """Run every processor on tick k. Time spent is added to stage_s: 'frame' for
+        slicing the rows, then one entry per processor (src.replay.latency.stage_name)."""
+        stage_s = {} if stage_s is None else stage_s
         t = float(self.race.times[k])
-        frame = self.race.frame.iloc[self.race.rows(k)]
         out = []
+        if not self.processors:
+            return out
+        t0 = perf_counter()
+        frame = self.race.frame.iloc[self.race.rows(k)]
+        stage_s["frame"] = stage_s.get("frame", 0.0) + perf_counter() - t0
         for p in self.processors:
-            for env in p.on_tick(t, frame, tick):
+            t0 = perf_counter()
+            envs = p.on_tick(t, frame, tick)
+            name = stage_name(p)
+            stage_s[name] = stage_s.get(name, 0.0) + perf_counter() - t0
+            for env in envs:
                 if envelope_t(env) > t:
                     raise CausalityError(f"{type(p).__name__} emitted t={envelope_t(env)} at tick t={t}")
                 out.append(env)
@@ -156,20 +182,32 @@ class Engine:
             self._process(k, self.race.tick(k))
         self.k, self.j, self.clock = k_new, bisect.bisect_left(self.official_t, t), t
 
-    def advance(self, to_t: float) -> list[dict]:
-        """Every envelope with t <= to_t not sent yet, in time order."""
-        out = []
+    def steps(self, to_t: float) -> Iterator[TickStep]:
+        """One TickStep per tick with t <= to_t not played yet, in time order.
+        Call finish(to_t) after consuming it (advance() does both)."""
         times = self.race.times
         while self.k < len(times) and times[self.k] <= to_t:
             t = float(times[self.k])
-            out.extend(self._official_until(t))
+            envs = self._official_until(t)
+            t0 = perf_counter()
             tick = self.race.tick(self.k)
-            out.append({"kind": "tick", "data": tick})
-            out.extend(self._process(self.k, tick))
+            emitted = perf_counter()
+            stage_s = {"tick": emitted - t0}
+            envs.append({"kind": "tick", "data": tick})
+            envs.extend(self._process(self.k, tick, stage_s))
             self.k += 1
-        out.extend(self._official_until(to_t))
+            yield TickStep(t, envs, stage_s, emitted)
+
+    def finish(self, to_t: float) -> list[dict]:
+        """Official events after the last tick but <= to_t, and move the clock to to_t."""
+        out = self._official_until(to_t)
         self.clock = max(self.clock, min(to_t, self.t_end))
         return out
+
+    def advance(self, to_t: float) -> list[dict]:
+        """Every envelope with t <= to_t not sent yet, in time order."""
+        out = [env for step in self.steps(to_t) for env in step.envelopes]
+        return out + self.finish(to_t)
 
     def _official_until(self, t: float) -> list[dict]:
         out = []

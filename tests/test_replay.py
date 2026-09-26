@@ -118,3 +118,20 @@ def test_server_endpoints_and_stream() -> None:
 def test_server_refuses_holdout_by_default() -> None:
     with TestClient(create_app(synthetic_race(), autoplay=False)) as c:
         assert c.post("/replay", json={"race": "2026_Azerbaijan"}).status_code == 403
+
+
+def test_every_processor_is_timed_per_stage() -> None:
+    from src.replay.latency import LatencyTracker, stage_name
+    risk_like = type("RiskModel", (), {"__module__": "src.predict.risk"})()
+    assert stage_name(risk_like) == "predict"          # new stages are named and timed with no edits
+    spy = Spy()
+    eng = Engine(synthetic_race(), [spy])
+    steps = list(eng.steps(T0 + 5))
+    assert steps and all({"tick", "frame", "Spy"} <= set(s.stage_s) for s in steps)
+    lines: list[str] = []
+    tr = LatencyTracker(report_every_s=0.0, printer=lines.append)
+    tr.record({"tick": 0.001, "detect": 0.3}, total_s=0.3)       # 300 ms: over the 250 ms budget
+    tr.record({"tick": 0.001, "detect": 0.01}, total_s=0.01)
+    tr.maybe_report()
+    assert tr.summary()["over_budget"] == 1 and tr.summary()["stages"]["detect"]["n"] == 2
+    assert lines and "over 250 ms: 1" in lines[0]

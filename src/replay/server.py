@@ -14,6 +14,9 @@ Endpoints (identical to the mock server, plus GET /races):
   GET /status        race, replay time, speed, start and end time
   GET /races         races available to load
   /                  the dashboard/ folder
+
+Every 30 s of wall time the server prints per-stage latency (src.replay.latency):
+ticks processed, mean, p95 and worst ms per stage, and ticks over 250 ms.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+from time import perf_counter
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -32,6 +36,7 @@ from fastapi.staticfiles import StaticFiles
 
 from src.ingest.holdout import is_holdout_id
 from src.replay.engine import Engine, Processor, RaceData, available_races
+from src.replay.latency import LatencyTracker
 
 ROOT = Path(__file__).resolve().parents[2]
 DASHBOARD = ROOT / "dashboard"
@@ -68,6 +73,7 @@ class LiveReplay:
         self.allow_holdout = allow_holdout
         self.hub = Hub()
         self.speed = 1.0
+        self.latency = LatencyTracker()
         self.load(race)
 
     def load(self, race: RaceData) -> None:
@@ -85,9 +91,19 @@ class LiveReplay:
         while True:
             await asyncio.sleep(STEP_S)
             if self.speed <= 0 or self.engine.finished:
+                self.latency.maybe_report()
                 continue
-            for env in self.engine.advance(self.engine.clock + STEP_S * self.speed):
+            to_t = self.engine.clock + STEP_S * self.speed
+            for step in self.engine.steps(to_t):
+                t0 = perf_counter()
+                for env in step.envelopes:
+                    await self.hub.broadcast(env)
+                sent = perf_counter()
+                step.stage_s["send"] = sent - t0
+                self.latency.record(step.stage_s, sent - step.emitted_at)
+            for env in self.engine.finish(to_t):
                 await self.hub.broadcast(env)
+            self.latency.maybe_report()
 
     def status(self) -> dict:
         e = self.engine
