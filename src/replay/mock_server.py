@@ -26,7 +26,8 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+
+from src.replay.static import NoCacheStaticFiles
 
 ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "fixtures"
@@ -159,7 +160,7 @@ def create_app(no_recs: bool = False, loop: bool = True, autoplay: bool = True) 
         return replay.official
 
     if (DASHBOARD / "index.html").exists():
-        app.mount("/", StaticFiles(directory=DASHBOARD, html=True), name="dashboard")
+        app.mount("/", NoCacheStaticFiles(directory=DASHBOARD, html=True), name="dashboard")
     else:
         @app.get("/", response_class=HTMLResponse)
         async def placeholder() -> str:

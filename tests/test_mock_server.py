@@ -19,6 +19,13 @@ def test_http_endpoints() -> None:
         assert c.get("/").status_code == 200
 
 
+def test_dashboard_files_are_never_served_stale() -> None:
+    with TestClient(create_app(autoplay=False)) as c:
+        for path in ("/", "/app.js"):
+            r = c.get(path)
+            assert r.status_code == 200 and r.headers["cache-control"] == "no-cache"
+
+
 def test_stream_envelopes_and_rec_rebroadcast() -> None:
     with TestClient(create_app()) as c:
         c.post("/replay", json={"speed": 50, "seek_t": 4385.0})
