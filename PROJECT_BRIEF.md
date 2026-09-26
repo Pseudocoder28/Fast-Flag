@@ -96,7 +96,17 @@ Downloading every race since 2023 is tens of GB. Do this instead:
   - Multi-car collision at Turn 1 on the Safety Car restart (Colapinto into Gasly, Gasly into Norris), second Safety Car.
   - Bottas crashed late in the race and was reportedly covered by only a single yellow. If the messages confirm this, it is a strong demo case for our severity-based recommendation.
   - Both Aston Martins retired with technical issues (possible DROPOUT or STOPPED cases).
-- Verified official events: [fill in at kickoff]
+- Verified official events (checked at kickoff from FastF1 race control messages, SessionTime in seconds; FastF1 loads Baku as "2026 Azerbaijan Grand Prix", Madrid as "2026 Spanish Grand Prix"):
+  - Pre-race and formation noise: yellows in sector 1 (t=267, 380) and DY sector 3 (t=2547). Eval must only count events between race start and the chequered flag (t=9294.5).
+  - t=4300.5, lap 9: brief YELLOW sectors 14 and 15, cleared within 8 s.
+  - **Albon (23), retired after 29 laps:** t=6648.5 lap 30 DOUBLE YELLOW sector 7 + YELLOW sector 6, **SC deployed t=6667.5** (lap 31), recovery vehicle at Turn 6 (news said Turn 5). Also YELLOW sectors 1 and 2 at t=6580.5, 68 s earlier.
+  - t=6891.5 lap 32: DOUBLE YELLOW sector 10 (under SC). t=7023.5: DOUBLE YELLOW sector 11.
+  - **Turn 1 restart collision (cars 1 NOR, 10 GAS, 43 COL, all retired laps 35 to 36):** t=7478.5 lap 36 DOUBLE YELLOW sector 2 + YELLOW sector 1, YELLOW sectors 3 and 4 at t=7501.5, **second SC deployed t=7542.5**. COL got a 10 s penalty for causing a collision.
+  - t=8043.5 lap 40 and t=9153.5 lap 50: brief YELLOW sectors 1 and 2 (Turn 1 incidents, e.g. LIN / LAW noted).
+  - **Late incident, final lap (likely Bottas, car 77, T15 incident noted, retired):** t=9234.5 DOUBLE YELLOW sector 15 + YELLOW sector 14, no SC or VSC. The news claim "only a single yellow" is **not** confirmed: the sector got a double yellow. Still a useful severity case (check telemetry at A7).
+  - Aston Martins: STR retired after 7 laps, ALO after 20, no flags near either (likely pit-lane retirements, not track incidents).
+  - Events after t=9294.5 (cool-down lap) are ignored.
+  - Verdict: Baku is not incident-light. It stays the primary holdout.
 
 ### 4.5 OpenF1 (backup only)
 - Historical data from 2023 onwards is free, no auth. Real-time requires paid subscription. Not needed (no live F1 session during the hackathon).
@@ -258,6 +268,9 @@ Consumes detections + risk, maintains a per-sector flag state machine, emits Rec
 - Publishing: any client may send an envelope with `kind` = `rec` on the same socket. The server rebroadcasts it to every subscriber. The mock server does the same.
 - `GET /track` returns the map for the loaded race: `{"race": "2024_Singapore", "ref_line": [[x, y], ...], "msectors": [{"id": 7, "start_dist": 0.0, "end_dist": 0.0}], "corners": [{"number": 1, "x": 0.0, "y": 0.0}]}` (metres).
 - `GET /official` returns all official events for the loaded race, for the dashboard timeline and jump-to-incident list only. Never fed to detect or predict.
+- Official event shape (the `data` of an `official` envelope and each item of `GET /official`), added at kickoff:
+  `{"t": 4390.18, "category": "Flag", "message": "YELLOW IN TRACK SECTOR 9", "flag": "YELLOW|DOUBLE_YELLOW|RED|SC|VSC|CLEAR", "scope": "Sector|Track", "msector": 9, "drivers": []}`. `msector` is `null` for track-wide events (SC, VSC, RED, TRACK CLEAR).
+- Tick details, added at kickoff: a car with no fresh data (latest sample older than 1 s) is left out of that tick (that gap is a DROPOUT signal). `gap_ahead_m` is `-1.0` when unknown (for example in the pit lane). Values at tick t are the latest sample at or before t, never interpolated towards a future sample.
 - The server also serves the `dashboard/` folder at `/`, so the dashboard opens at http://localhost:8000.
 
 ### 7.6 Fixtures + mock server (A, by M0)

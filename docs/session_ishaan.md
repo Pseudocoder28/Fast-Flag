@@ -22,11 +22,24 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 1. `git clone <REPO_URL> fast-flag`
 2. `cd fast-flag`
 3. Mac: `python3.11 -m venv .venv && source .venv/bin/activate`. Windows: `py -3.11 -m venv .venv` then `.venv\Scripts\activate`.
+   - No Python 3.11? `python3 -m pip install --user uv`, then `uv python install 3.11` and `uv venv --python 3.11 .venv` (uv is in `~/Library/Python/3.9/bin/` on Mac), then activate as above and use `uv pip install -r requirements.txt` in step 4.
+   - LightGBM on Mac needs `libomp` (`brew install libomp`). You do not use LightGBM, so an import error from it is safe to ignore.
 4. `pip install -r requirements.txt`
 5. `git checkout b-work && git merge main`
 6. `pytest` (must pass)
 7. `python -m src.replay.mock_server`
-8. Open http://localhost:8000 (a blank page is fine until B3).
+8. Open http://localhost:8000 (a placeholder page until you create `dashboard/index.html` in B3).
+
+## Fixture facts (what the mock server plays)
+
+- Race `2023_Australian`, SessionTime 4240 to 4570 s, ~4 Hz ticks, loops forever.
+- Incident: car `23` (Albon) crashes at Turn 6, marshal sector 9. IMPACT at t=4387.25, STOPPED at t=4390.5.
+- Official: YELLOW sector 9 at t=4390.18, SC at t=4402.18, RED at t=4560.18.
+- Jump straight to it: `curl -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 1, "seek_t": 4370}'`. Speed 0 pauses.
+- `GET /status` shows current replay time and speed.
+- `official` data: `{t, category, message, flag, scope, msector, drivers}`, `msector` is null for track-wide events (SC, RED).
+- Ticks: a car with no fresh data is left out of that tick. `gap_ahead_m` is -1.0 when unknown.
+- Detections, risk and recs in the fixtures are hand-built. Ticks and official events are real data.
 
 ## Tasks
 
@@ -43,6 +56,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 - Output: `rec` (Section 7.4).
 - Pure logic in `src/racecontrol/engine.py`: class `RaceControl` with `on_tick`, `on_detection` and `on_risk`, each returning a list of recs. Rules from 6.5, hysteresis and clearing after N seconds.
 - Template message on every rec, e.g. `YELLOW IN TRACK SECTOR 7`.
+- Put your tests in your own files, e.g. `tests/test_racecontrol.py`.
 - Done when: a pytest test feeds `fixtures/detections_sample.jsonl` and `fixtures/ticks_sample.jsonl` and gets YELLOW or stronger for the fixture incident, with no flag flicker.
 
 **B2. Race control client (1:00pm to 5:00pm)**
@@ -97,7 +111,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 ## Don't touch
 
 - `src/ingest/`, `src/replay/`, `src/detect/`, `src/predict/`, `src/eval/`, `fixtures/`, `docs/charts/`
-- `CLAUDE.md`, `PROJECT_BRIEF.md`, `requirements.txt`, `tests/test_contracts.py`
+- `CLAUDE.md`, `PROJECT_BRIEF.md`, `requirements.txt`, `tests/test_contracts.py`, `tests/test_mock_server.py`
 
 ## Merging
 

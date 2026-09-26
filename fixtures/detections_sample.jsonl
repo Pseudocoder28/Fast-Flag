@@ -1,0 +1,3 @@
+{"id":"det-000001","t":4387.25,"drivers":["23"],"msector":9,"type":"IMPACT","severity":0.9,"evidence":"speed 180 -> 35 km/h in 1.0 s"}
+{"id":"det-000002","t":4387.5,"drivers":["23"],"msector":9,"type":"ANOMALY","severity":0.8,"evidence":"anomaly score 0.81 (speed deviation, decel)"}
+{"id":"det-000003","t":4390.5,"drivers":["23"],"msector":9,"type":"STOPPED","severity":0.85,"evidence":"speed 10 km/h vs ref 220 km/h"}

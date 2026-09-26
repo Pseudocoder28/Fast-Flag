@@ -26,6 +26,7 @@ Short rules and contracts. `PROJECT_BRIEF.md` is the single source of truth for 
 - racecontrol publishes by sending `rec` envelopes on the same socket, and the server rebroadcasts them.
 - HTTP: `POST /replay`, `GET /track`, `GET /official`, dashboard served at `/`. The mock server implements all of these, plus `--no-recs`.
 - Units: seconds (SessionTime), metres, km/h. `drv` is the car number as a string.
+- `official` data: `{t, category, message, flag, scope, msector, drivers}`, `msector` null when track-wide. Tick: cars with no fresh data are omitted, `gap_ahead_m` is -1.0 when unknown.
 - Serial protocol: PROJECT_BRIEF.md Section 7.7.
 - `tests/test_contracts.py` validates the fixtures against these shapes. Run `pytest` before every merge into `main`.
 

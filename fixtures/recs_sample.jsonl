@@ -1,0 +1,3 @@
+{"id":"rec-000001","t":4387.5,"msector":9,"flag":"YELLOW","confidence":0.7,"reason":"car 23 impact signature","message":"YELLOW IN TRACK SECTOR 9","source_detections":["det-000001"]}
+{"id":"rec-000002","t":4390.75,"msector":9,"flag":"DOUBLE_YELLOW","confidence":0.85,"reason":"car 23 stopped on racing line after impact","message":"DOUBLE YELLOW IN TRACK SECTOR 9","source_detections":["det-000001","det-000003"]}
+{"id":"rec-000003","t":4393.5,"msector":9,"flag":"SC","confidence":0.75,"reason":"high severity impact, car 23 stopped, recovery needed","message":"SAFETY CAR DEPLOYED","source_detections":["det-000001","det-000003"]}

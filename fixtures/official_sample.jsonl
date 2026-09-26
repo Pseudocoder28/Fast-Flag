@@ -1,0 +1,4 @@
+{"t":4390.18,"category":"Flag","message":"YELLOW IN TRACK SECTOR 9","flag":"YELLOW","scope":"Sector","msector":9,"drivers":[]}
+{"t":4402.18,"category":"SafetyCar","message":"SAFETY CAR DEPLOYED","flag":"SC","scope":"Track","msector":null,"drivers":[]}
+{"t":4560.18,"category":"Flag","message":"RED FLAG","flag":"RED","scope":"Track","msector":null,"drivers":[]}
+{"t":4560.18,"category":"Flag","message":"CLEAR IN TRACK SECTOR 9","flag":"CLEAR","scope":"Sector","msector":9,"drivers":[]}
