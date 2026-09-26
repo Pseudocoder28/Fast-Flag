@@ -90,7 +90,10 @@ def latency_from_onset() -> list[str]:
     out = ["## Latency from crash onset: race control vs us", "",
            "Source: latency_by_type.csv / .md / .png. Onset = speed below 50% of the car's own speed at that point "
            "on its previous 3 clean laps, for 1 s (full rule in latency_by_type.md). Latency on crashes with a "
-           "clear collapse, which is what our detectors are best at: not a recall figure.", ""]
+           "clear collapse, which is what our detectors are best at: not a recall figure. The onset car is the first "
+           "car of the last chain of collapses (less than 10 s apart) up to race control's first message; until "
+           "26 Sept it was the earliest collapse in a 120 s window, which anchored 7 of 63 incidents on an earlier, "
+           "unrelated slowdown. The change can only shorten race control's measured delay.", ""]
     for f in FLAG_NAMES:
         g = ev[ev["flag"] == f]
         if g.empty:
@@ -185,9 +188,9 @@ def escalation() -> list[str]:
             f"only, {c['no official flag']} with no official flag).",
             f"- Flag choice: same first flag as race control in {e['same_first_flag']} of {e['matched']}; our "
             f"{len(ours)} recommendations by flag: {by_ours}. FastF1 puts stopped cars on the racing line, so the "
-            f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" picks race "
-            f"control's flag {ir['right_with_impact_rule']} of {ir['escalations_with_onset_car']} times, \"always SC\" "
-            f"{ir['right_if_always_sc']}.",
+            f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" separates "
+            f"race control's VSCs from its SCs and reds correctly {ir['right_with_impact_rule']} of "
+            f"{ir['escalations_with_onset_car']} times, \"always SC\" {ir['right_if_always_sc']}.",
             ""]
 
 

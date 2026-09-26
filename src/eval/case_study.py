@@ -41,6 +41,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from src.eval.incidents import build_incidents, race_files, suspended_times  # noqa: E402
+from src.eval.latency_by_type import onset_candidates, onset_cars, pick_onset  # noqa: E402
 from src.eval.onset import RULE, add_own_ratio, onsets  # noqa: E402
 from src.ingest.holdout import is_holdout_id  # noqa: E402
 from src.ingest.reference import circ  # noqa: E402
@@ -51,7 +52,6 @@ CHARTS = Path("docs/charts")
 OUT = CHARTS / "case_studies.json"
 ESCALATIONS = ("VSC", "SC", "RED")
 SECTOR_FLAGS = ("YELLOW", "DOUBLE_YELLOW")
-ONSET_BEFORE_S, ONSET_AFTER_S = 120.0, 5.0
 ALERT_BEFORE_S, ALERT_AFTER_S = 10.0, 180.0
 REST_KMH, REST_WITHIN_S = 5.0, 30.0
 COUNTERFACTUAL = ("Counterfactual: assumes race control acted on our recommendation instantly; "
@@ -173,12 +173,11 @@ def crashes(rid: str, allow_holdout: bool = False) -> tuple[list[dict], str]:
         if not esc:
             continue
         match = (lambda m: not inc.sectors or any(sector_matches(int(m), s, n) for s in inc.sectors))
-        cand = ons[(ons["t"] >= inc.t - ONSET_BEFORE_S) & (ons["t"] <= inc.t + ONSET_AFTER_S)]
-        cand = cand[cand["msector"].apply(match)]
+        cand = onset_candidates(inc, ons, n)
         if cand.empty:
             continue
-        onset = cand.iloc[0]
-        cars = set(cand["drv"])
+        onset = pick_onset(cand, inc.t)
+        cars = onset_cars(cand, onset)
         crash_dist = rest_position(frame, onset["drv"], onset)
         alert = next((d for d in dets if onset["t"] - ALERT_BEFORE_S <= d["t"] <= onset["t"] + ALERT_AFTER_S
                       and (cars & set(d["drivers"]) or match(d["msector"]))), None)

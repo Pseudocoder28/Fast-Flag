@@ -51,7 +51,7 @@ import numpy as np
 import pandas as pd
 
 from src.eval.incidents import MATCH_BEFORE_S, build_incidents, race_files, suspended_times, was_suspended
-from src.eval.latency_by_type import ONSET_AFTER_S, ONSET_BEFORE_S, in_sectors, loro_suite, no_onset_reason
+from src.eval.latency_by_type import in_sectors, loro_suite, no_onset_reason, onset_candidates, pick_onset
 from src.eval.onset import add_own_ratio, onsets
 from src.eval.run import belongs
 from src.ingest.features import NEUTRAL_STATUS
@@ -122,10 +122,9 @@ def official_neutral(status: pd.Series, susp: pd.Series, t: float) -> bool:
 # ---- one race
 
 def onset_car(inc, ons: pd.DataFrame, n: int) -> pd.Series | None:
-    """The first car to collapse near the incident (same rule as src.eval.latency_by_type)."""
-    cand = ons[(ons["t"] >= inc.t - ONSET_BEFORE_S) & (ons["t"] <= inc.t + ONSET_AFTER_S)]
-    cand = cand[cand["msector"].apply(lambda m: in_sectors(m, inc, n))]
-    return None if cand.empty else cand.iloc[0]
+    """The car whose collapse race control reacted to (src.eval.latency_by_type.pick_onset)."""
+    cand = onset_candidates(inc, ons, n)
+    return None if cand.empty else pick_onset(cand, inc.t)
 
 
 def car_alerts(dets: list[dict], car: pd.Series) -> str:
@@ -471,9 +470,10 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
               f"- An impact separates them better. On the {ir['escalations_with_onset_car']} official escalations with "
               f"an onset car, {ir['official_sc_or_red_with_impact']} of {ir['official_sc_or_red']} SC or red followed "
               f"an IMPACT or MULTI detection involving the car and {ir['official_vsc_without_impact']} of "
-              f"{ir['official_vsc']} VSC did not: \"SC after an impact, VSC otherwise\" picks race control's flag "
-              f"{ir['right_with_impact_rule']} times, \"always SC\" {ir['right_if_always_sc']} times. In-sample, and "
-              "a small sample.", "",
+              f"{ir['official_vsc']} VSC did not: \"SC after an impact, VSC otherwise\" separates race control's "
+              f"VSCs from its SCs and reds correctly {ir['right_with_impact_rule']} times, \"always SC\" "
+              f"{ir['right_if_always_sc']} times. This check does not tell SC from red; exact agreement is the first "
+              "line. In-sample, and a small sample.", "",
               "## Per race", "",
               "| race | race hours | official escalations | earlier | later | missed | our escalations | extra |",
               "|---|---|---|---|---|---|---|---|"]

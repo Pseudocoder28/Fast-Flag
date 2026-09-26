@@ -1,10 +1,13 @@
 """Latency from crash onset: race control vs our system, by official flag type and by
 our alert type (training races only; the holdouts are never loaded here).
 
-For each official incident (src.eval.incidents) the onset car is the car with the
-earliest onset (src.eval.onset, fixed rule) in the 120 s before the incident's first
-official message, in a matching marshal sector (any sector for track-wide-only
-incidents). Then, for the first official message of each flag type in that incident:
+For each official incident (src.eval.incidents) the onset car is the car whose collapse
+(src.eval.onset, fixed rule) race control reacted to: among collapses from 120 s before
+the incident's first official message to 5 s after it, in a matching marshal sector (any
+sector for track-wide-only incidents), the first car of the last chain of collapses less
+than 10 s apart that starts up to that message (pick_onset). Until 26 Sept 2026 it was
+the earliest collapse in the window; see ANCHOR_NOTE. Then, for the first official
+message of each flag type in that incident:
 - race control latency = official time - onset
 - our latency = our first alert - onset, where our first alert is the first
   detection (any type) from 10 s before the onset to 180 s after it that involves an
@@ -47,6 +50,12 @@ ONSET_BEFORE_S = 120.0
 ONSET_AFTER_S = 5.0
 ALERT_BEFORE_S = 10.0
 ALERT_AFTER_S = 180.0
+PILEUP_GAP_S = 10.0       # collapses closer together than this are one chain (a pile-up)
+ANCHOR_NOTE = ("Changed on 26 Sept 2026: the onset car used to be the earliest collapse in the window. A review "
+               "found incidents anchored on an earlier, unrelated slowdown up to two minutes before race control's "
+               "first message (7 of 63: 3 a different car, 4 the same car slowing twice), so it is now the first car "
+               "of the last chain of collapses (less than 10 s apart) up to that message. The change can only "
+               "shorten race control's measured delay.")
 
 # chart: reference palette slots 1 and 2 (documented as passing the colour-blindness checks),
 # different marker shapes so identity is never colour alone; text uses ink tokens, not series colours
@@ -73,6 +82,32 @@ def detections_loro(race: RaceData) -> list[dict]:
 
 def in_sectors(msector: int, inc, n: int) -> bool:
     return not inc.sectors or any(sector_matches(int(msector), s, n) for s in inc.sectors)
+
+
+def onset_candidates(inc, ons: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Collapses near an official incident, in time order: from ONSET_BEFORE_S before its
+    first official message to ONSET_AFTER_S after, in a matching marshal sector."""
+    cand = ons[(ons["t"] >= inc.t - ONSET_BEFORE_S) & (ons["t"] <= inc.t + ONSET_AFTER_S)]
+    if cand.empty:
+        return cand
+    return cand[cand["msector"].apply(lambda m: in_sectors(m, inc, n)).astype(bool)].sort_values("t")
+
+
+def pick_onset(cand: pd.DataFrame, t_first: float) -> pd.Series:
+    """The collapse race control reacted to. Start from the last collapse up to its first
+    message (else the first one just after it: data timing), then walk back through
+    collapses less than PILEUP_GAP_S apart, so a pile-up is anchored on the car that started
+    it. An earlier collapse outside that chain is usually an unrelated car (ANCHOR_NOTE)."""
+    t = cand["t"].to_numpy(float)
+    i = max(int((t <= t_first).sum()) - 1, 0)
+    while i > 0 and t[i] - t[i - 1] < PILEUP_GAP_S:
+        i -= 1
+    return cand.iloc[i]
+
+
+def onset_cars(cand: pd.DataFrame, onset: pd.Series) -> set[str]:
+    """The onset car and every car that collapsed from ALERT_BEFORE_S before it on (a pile-up)."""
+    return set(cand.loc[cand["t"] >= float(onset["t"]) - ALERT_BEFORE_S, "drv"])
 
 
 def no_onset_reason(frame: pd.DataFrame, inc, n: int) -> str:
@@ -106,16 +141,15 @@ def race_events(rid: str, dets: list[dict] | None = None,
     incidents, _ = build_incidents(official, meta, suspended_times(race.frame), n)
     events, missing = [], []
     for inc in incidents:
-        cand = ons[(ons["t"] >= inc.t - ONSET_BEFORE_S) & (ons["t"] <= inc.t + ONSET_AFTER_S)]
-        cand = cand[cand["msector"].apply(lambda m: in_sectors(m, inc, n))]
+        cand = onset_candidates(inc, ons, n)
         firsts = {f: min(m["t"] for m in inc.messages if m["flag"] == f) for f in set(inc.flags)}
         if cand.empty:
             reason = no_onset_reason(frame, inc, n)
             missing += [{"race": rid, "t_official": t, "flag": f, "sectors": sorted(inc.sectors), "reason": reason}
                         for f, t in sorted(firsts.items(), key=lambda x: x[1])]
             continue
-        onset = cand.iloc[0]
-        cars = set(cand["drv"])
+        onset = pick_onset(cand, inc.t)
+        cars = onset_cars(cand, onset)
         after = frame[(frame["drv"] == onset["drv"]) & (frame["t"] > onset["t"]) & (frame["t"] <= onset["t"] + 20)]
         pitted = bool(after["in_pit"].any())         # a damaged car heading in, or a pit-entry slowdown
         alert = next((d for d in dets if onset["t"] - ALERT_BEFORE_S <= d["t"] <= onset["t"] + ALERT_AFTER_S
@@ -243,8 +277,11 @@ def write_report(ev: pd.DataFrame, missing: pd.DataFrame, by_flag: pd.DataFrame,
         f"Replay of historical FastF1 data, {n_races} training races, no holdout race. Latencies are measured "
         "from the crash onset.\n\n"
         f"**Onset rule** (fixed, independent of the detectors): {RULE}.\n\n"
-        f"The onset car of an official incident is the car with the earliest onset in the {ONSET_BEFORE_S:.0f} s "
-        "before the incident's first official message, in a matching marshal sector. Race control latency = "
+        "The onset car of an official incident is the car whose collapse race control reacted to: among onsets "
+        f"from {ONSET_BEFORE_S:.0f} s before the incident's first official message to {ONSET_AFTER_S:.0f} s after "
+        f"it, in a matching marshal sector, the first car of the last chain of onsets less than "
+        f"{PILEUP_GAP_S:.0f} s apart that starts up to that message. {ANCHOR_NOTE} "
+        "Race control latency = "
         "first official message of that flag type - onset. Our latency = our first alert (any detection from "
         f"{ALERT_BEFORE_S:.0f} s before the onset to {ALERT_AFTER_S:.0f} s after, involving an onset car or in a "
         "matching sector) - onset. Detections: production settings, ANOMALY model trained on the other races.\n\n"

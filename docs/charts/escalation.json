@@ -86,11 +86,11 @@
   },
   "impact_signal": {
     "escalations_with_onset_car": 26,
-    "official_sc_or_red_with_impact": 9,
+    "official_sc_or_red_with_impact": 8,
     "official_sc_or_red": 13,
-    "official_vsc_without_impact": 11,
+    "official_vsc_without_impact": 10,
     "official_vsc": 13,
-    "right_with_impact_rule": 20,
+    "right_with_impact_rule": 18,
     "right_if_always_sc": 13
   }
 }
