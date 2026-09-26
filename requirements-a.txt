@@ -1,0 +1,2 @@
+# A (Naman) additions, pinned
+matplotlib==3.11.2

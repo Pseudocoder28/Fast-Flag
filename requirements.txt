@@ -1,0 +1,17 @@
+# Shared pins from kickoff. Do not edit after kickoff: add packages to
+# requirements-a.txt (Naman) or requirements-b.txt (Ishaan), pinned.
+fastf1==3.8.3
+pandas==2.3.3
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.9.1
+lightgbm==4.7.0
+fastapi==0.141.1
+uvicorn[standard]==0.54.0
+websockets==17.1
+httpx==0.28.1
+pyarrow==25.0.1
+pyserial==3.5
+pytest==9.1.1
+-r requirements-a.txt
+-r requirements-b.txt
