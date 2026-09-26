@@ -31,7 +31,7 @@ def load_models() -> tuple[dict[int, lgb.Booster], dict] | None:
     paths = {h: MODELS / f"risk_{h}.txt" for h in (10, 30)}
     if not meta_path.exists() or not all(p.exists() for p in paths.values()):
         return None
-    return {h: lgb.Booster(model_file=str(p)) for h, p in paths.items()}, json.loads(meta_path.read_text())
+    return {h: lgb.Booster(model_file=str(p)) for h, p in paths.items()}, json.loads(meta_path.read_text(encoding="utf-8"))
 
 
 def risk_processors(race: RaceData) -> list[Processor]:

@@ -23,7 +23,7 @@ from src.ingest.scan import CACHE_DIR, OUT_CSV as RANKING_CSV
 
 
 def top_races(n: int) -> pd.DataFrame:
-    df = pd.read_csv(RANKING_CSV, keep_default_na=False)
+    df = pd.read_csv(RANKING_CSV, keep_default_na=False, encoding="utf-8")
     return df[df["error"] == ""].sort_values("score", ascending=False).head(n)
 
 

@@ -24,5 +24,5 @@ def test_scan_skipped_holdout() -> None:
     csv = Path("data/race_ranking.csv")
     if not csv.exists():
         pytest.skip("scan not run on this machine")
-    text = csv.read_text()
+    text = csv.read_text(encoding="utf-8")
     assert "2026_Azerbaijan" not in text and "2026_Spanish" not in text

@@ -117,7 +117,7 @@ def main() -> None:
         **summary,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2))
+    OUT.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(tracker.format(tracker.all, summary["ticks"], summary["over_budget"], wall))
     print(f"{ticks} ticks in {wall:.1f} s = {result['ticks_per_second']} ticks/s "
           f"({result['times_real_time']}x real time), setup {result['setup_seconds']}")

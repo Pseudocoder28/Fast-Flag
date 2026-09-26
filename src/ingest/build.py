@@ -108,16 +108,16 @@ def build_race(rid: str, holdout: bool = False) -> dict:
             "reference_source": "qualifying", "rows": len(df), "cars": int(df["drv"].nunique()),
             "flag_alignment": f"{hits}/{total}"}
     ref.save(out_dir / f"{rid}_ref.json")
-    (out_dir / f"{rid}_track.json").write_text(json.dumps(ref.to_track_json(rid)))
-    (out_dir / f"{rid}_official.json").write_text(json.dumps(official))
-    (out_dir / f"{rid}_meta.json").write_text(json.dumps(meta, indent=2))
+    (out_dir / f"{rid}_track.json").write_text(json.dumps(ref.to_track_json(rid)), encoding="utf-8")
+    (out_dir / f"{rid}_official.json").write_text(json.dumps(official), encoding="utf-8")
+    (out_dir / f"{rid}_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     plot_track(ref, f"{rid} (reference from qualifying, {ref.length:.0f} m)", PLOTS / f"{rid}_track.png")
     meta["seconds"] = round(time.time() - t0)
     return meta
 
 
 def top_races(n: int) -> list[str]:
-    df = pd.read_csv(RANKING_CSV, keep_default_na=False)
+    df = pd.read_csv(RANKING_CSV, keep_default_na=False, encoding="utf-8")
     return df[df["error"] == ""].sort_values("score", ascending=False)["race"].head(n).tolist()
 
 

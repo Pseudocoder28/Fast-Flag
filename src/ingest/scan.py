@@ -66,14 +66,14 @@ def scan_race(year: int, row: pd.Series) -> dict:
 
 def load_existing() -> pd.DataFrame:
     if OUT_CSV.exists():
-        df = pd.read_csv(OUT_CSV, keep_default_na=False)
+        df = pd.read_csv(OUT_CSV, keep_default_na=False, encoding="utf-8")
         return df[df["error"] == ""]
     return pd.DataFrame(columns=COLUMNS)
 
 
 def save(rows: list[dict]) -> None:
     df = pd.DataFrame(rows, columns=COLUMNS).sort_values("score", ascending=False)
-    df.to_csv(OUT_CSV, index=False)
+    df.to_csv(OUT_CSV, index=False, encoding="utf-8")
 
 
 def main() -> None:

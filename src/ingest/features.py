@@ -10,6 +10,7 @@ Run: python -m src.ingest.features 2023_Australian   (summary of a built race)
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -236,7 +237,7 @@ def add_features(df: pd.DataFrame, session, ref=None) -> pd.DataFrame:
 
 
 def main() -> None:
-    path = f"data/features/{sys.argv[1]}.parquet"
+    path = Path("data") / "features" / f"{sys.argv[1]}.parquet"
     df = pd.read_parquet(path)
     print(f"{path}: {len(df)} rows, {df['drv'].nunique()} cars, t {df['t'].min():.0f} to {df['t'].max():.0f}")
     print(df.describe().T[["count", "mean", "min", "max"]].to_string())

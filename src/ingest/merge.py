@@ -11,6 +11,7 @@ Run: python -m src.ingest.merge 2023 Australia   (prints a summary of the first 
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -173,7 +174,7 @@ def main() -> None:
 
     from src.ingest.reference import build_track_ref
     year, event = int(sys.argv[1]), sys.argv[2]
-    fastf1.Cache.enable_cache("data/fastf1_cache")
+    fastf1.Cache.enable_cache(str(Path("data") / "fastf1_cache"))
     q = fastf1.get_session(year, event, "Q")
     q.load(weather=False, messages=False)
     s = fastf1.get_session(year, event, "R")

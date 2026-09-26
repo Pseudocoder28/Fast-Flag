@@ -160,7 +160,7 @@ def cmd_cv(retrain: bool = True) -> None:
     print(table.round(4).to_string(index=False))
     print(ew.round(4).to_string(index=False))
     CHARTS.mkdir(parents=True, exist_ok=True)
-    table.to_csv(CHARTS / "risk_eval.csv", index=False)
+    table.to_csv(CHARTS / "risk_eval.csv", index=False, encoding="utf-8")
     (CHARTS / "risk_eval.md").write_text(
         "# Risk model, leave-one-race-out (training races only)\n\nReplay of historical FastF1 data. For each "
         "race, LightGBM is trained on the other training races and scores every racing tick of that race. "
@@ -170,10 +170,10 @@ def cmd_cv(retrain: bool = True) -> None:
         + f"\n\nEarly warning for {early[0]['car_incidents']} car incidents (risk_30s, flagged = crossed the "
           f"threshold at least {EARLY_S:.0f} s before detection; false episodes = a car above the threshold with "
           "no incident of its own in the next 30 s):\n\n" + ew.round(4).to_markdown(index=False)
-        + "\n\nSome incidents have no precursor in the data: this is risk forecasting, not a crystal ball.\n")
+        + "\n\nSome incidents have no precursor in the data: this is risk forecasting, not a crystal ball.\n", encoding="utf-8")
     MODELS.mkdir(parents=True, exist_ok=True)
     chosen = next(e for e in early if e["neg_tick_rate"] == DEFAULT_NEG_RATE)
-    (MODELS / "risk_cv.json").write_text(json.dumps({"chosen": chosen, "all": early}, indent=2))
+    (MODELS / "risk_cv.json").write_text(json.dumps({"chosen": chosen, "all": early}, indent=2), encoding="utf-8")
 
 
 def cmd_train() -> None:
@@ -183,15 +183,15 @@ def cmd_train() -> None:
     meta = {"features": ACTIVE, "horizons": list(HORIZONS), "neg_sample": NEG_SAMPLE, "races": races}
     cv = MODELS / "risk_cv.json"
     if cv.exists():
-        meta["threshold_p30"] = json.loads(cv.read_text())["chosen"]["threshold_p30"]
+        meta["threshold_p30"] = json.loads(cv.read_text(encoding="utf-8"))["chosen"]["threshold_p30"]
     for h in HORIZONS:
         model = fit(train, h, n_jobs=-1)
         model.booster_.save_model(str(MODELS / f"risk_{h}.txt"))
         if h == max(HORIZONS):
             imp = importance(model)
-            imp.to_csv(CHARTS / "risk_importance.csv", index=False)
+            imp.to_csv(CHARTS / "risk_importance.csv", index=False, encoding="utf-8")
             print(imp.head(15).round(4).to_string(index=False))
-    (MODELS / "risk_meta.json").write_text(json.dumps(meta, indent=2))
+    (MODELS / "risk_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"trained on {len(races)} training races ({len(train)} rows) -> {MODELS}/risk_*.txt")
 
 
