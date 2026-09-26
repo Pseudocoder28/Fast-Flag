@@ -112,14 +112,14 @@ def main() -> None:
     default_budget = 3.0 if 3.0 in budgets else budgets[0]
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     cfg = replace(Config(), **final[default_budget])
-    CONFIG_PATH.write_text(json.dumps({"budget_fa_h": default_budget, "config": asdict(cfg)}, indent=2))
+    CONFIG_PATH.write_text(json.dumps({"budget_fa_h": default_budget, "config": asdict(cfg)}, indent=2), encoding="utf-8")
     CHARTS.mkdir(parents=True, exist_ok=True)
     (CHARTS / "tune_results.md").write_text(
         "# Detector tuning, leave-one-race-out (training races only)\n\nReplay of historical FastF1 data. "
         "For each race the setting is chosen on the other training races and scored on that race; the naive "
         "speed-threshold baseline gets the same procedure and budget.\n\n" + res.round(3).to_markdown(index=False)
         + "\n\nSettings chosen on all training races:\n\n"
-        + "\n".join(f"- budget {b}/h: detectors {final[b]}, baseline {base_final[b]:.0f} km/h" for b in budgets) + "\n")
+        + "\n".join(f"- budget {b}/h: detectors {final[b]}, baseline {base_final[b]:.0f} km/h" for b in budgets) + "\n", encoding="utf-8")
     print(f"saved {CONFIG_PATH} (budget {default_budget}/h)")
 
 

@@ -3,24 +3,25 @@
   "note": "replay of historical FastF1 data, as fast as possible (no sleeping)",
   "ticks": 36677,
   "race_seconds": 9169.0,
-  "wall_seconds": 7.05,
-  "ticks_per_second": 5202.7,
-  "times_real_time": 1300.6,
+  "wall_seconds": 35.16,
+  "ticks_per_second": 1043.2,
+  "times_real_time": 260.8,
   "processors": [
-    "DetectorSuite"
+    "DetectorSuite",
+    "RiskProcessor"
   ],
   "setup_seconds": {
-    "load_race": 0.14,
-    "build_processors_incl_anomaly_scoring": 2.17
+    "load_race": 0.2,
+    "build_processors_incl_anomaly_scoring": 2.3
   },
   "anomaly": {
     "threshold": 0.7499,
     "scored_rows_at_load": 733540,
     "per_tick_if_scored_live": {
       "n": 300,
-      "mean_ms": 3.349,
-      "p95_ms": 3.485,
-      "max_ms": 3.922
+      "mean_ms": 3.487,
+      "p95_ms": 3.65,
+      "max_ms": 3.935
     }
   },
   "budget_ms": 250.0,
@@ -28,33 +29,39 @@
   "stages": {
     "tick": {
       "n": 36677,
-      "mean_ms": 0.058,
-      "p95_ms": 0.065,
-      "max_ms": 0.152
+      "mean_ms": 0.064,
+      "p95_ms": 0.074,
+      "max_ms": 0.399
     },
     "frame": {
       "n": 36677,
-      "mean_ms": 0.005,
-      "p95_ms": 0.006,
-      "max_ms": 0.043
+      "mean_ms": 0.007,
+      "p95_ms": 0.011,
+      "max_ms": 0.104
     },
     "detect": {
       "n": 36677,
-      "mean_ms": 0.1,
-      "p95_ms": 0.13,
-      "max_ms": 14.308
+      "mean_ms": 0.109,
+      "p95_ms": 0.147,
+      "max_ms": 14.826
+    },
+    "predict": {
+      "n": 36677,
+      "mean_ms": 0.738,
+      "p95_ms": 5.045,
+      "max_ms": 25.688
     },
     "send": {
       "n": 36677,
-      "mean_ms": 0.025,
-      "p95_ms": 0.028,
-      "max_ms": 0.102
+      "mean_ms": 0.034,
+      "p95_ms": 0.069,
+      "max_ms": 0.191
     },
     "total": {
       "n": 36677,
-      "mean_ms": 0.133,
-      "p95_ms": 0.167,
-      "max_ms": 14.354
+      "mean_ms": 0.893,
+      "p95_ms": 5.256,
+      "max_ms": 25.876
     }
   }
 }

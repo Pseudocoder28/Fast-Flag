@@ -122,4 +122,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # Run through the package import so saved models record src.detect.anomaly.AnomalyModel.
+    # Calling main() here directly would pickle them as __main__.AnomalyModel, which nothing else can load.
+    from src.detect.anomaly import main as run
+    run()

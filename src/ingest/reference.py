@@ -157,11 +157,11 @@ class TrackRef:
                    np.asarray(d.get("pit_xy", []), float))
 
     def save(self, path: Path) -> None:
-        path.write_text(json.dumps(self.to_json()))
+        path.write_text(json.dumps(self.to_json()), encoding="utf-8")
 
     @classmethod
     def load(cls, path: Path) -> "TrackRef":
-        return cls.from_json(json.loads(path.read_text()))
+        return cls.from_json(json.loads(path.read_text(encoding="utf-8")))
 
 
 def circ(d: np.ndarray, length: float) -> np.ndarray:
@@ -286,7 +286,7 @@ def build_track_ref(session, with_profile: bool = True) -> TrackRef:
 def main() -> None:
     import fastf1
     year, event = int(sys.argv[1]), sys.argv[2]
-    fastf1.Cache.enable_cache("data/fastf1_cache")
+    fastf1.Cache.enable_cache(str(Path("data") / "fastf1_cache"))
     s = fastf1.get_session(year, event, "Q")
     s.load(weather=False, messages=False)
     ref = build_track_ref(s)

@@ -81,7 +81,7 @@ class RaceData:
     @classmethod
     def load(cls, rid: str) -> "RaceData":
         d = race_dir(rid)
-        read = lambda suffix: json.loads((d / f"{rid}{suffix}").read_text())  # noqa: E731
+        read = lambda suffix: json.loads((d / f"{rid}{suffix}").read_text(encoding="utf-8"))  # noqa: E731
         return cls.from_frame(rid, pd.read_parquet(d / f"{rid}.parquet"), read("_track.json"),
                               read("_official.json"), read("_meta.json"))
 

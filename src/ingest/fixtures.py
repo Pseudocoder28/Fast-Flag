@@ -117,7 +117,7 @@ def build_risk(df: pd.DataFrame, t_impact: float, ms: int) -> list[dict]:
 
 
 def write_jsonl(name: str, rows: list[dict]) -> None:
-    with open(OUT / name, "w") as f:
+    with open(OUT / name, "w", encoding="utf-8") as f:
         for r in sorted(rows, key=lambda r: r["t"]):
             f.write(json.dumps(r, separators=(",", ":")) + "\n")
 
@@ -125,7 +125,7 @@ def write_jsonl(name: str, rows: list[dict]) -> None:
 def main() -> None:
     import fastf1
     assert_not_holdout(YEAR, LOCATION)
-    fastf1.Cache.enable_cache("data/fastf1_cache")
+    fastf1.Cache.enable_cache(str(Path("data") / "fastf1_cache"))
     fastf1.set_log_level(logging.ERROR)
     s = fastf1.get_session(YEAR, EVENT, "R")
     s.load(weather=False)
@@ -139,7 +139,7 @@ def main() -> None:
     write_jsonl("recs_sample.jsonl", build_recs(dets))
     write_jsonl("risk_sample.jsonl", build_risk(df, dets[0]["t"], dets[0]["msector"]))
     write_jsonl("official_sample.jsonl", [e for e in official_events(s) if T_START <= e["t"] <= T_END])
-    (OUT / "track_sample.json").write_text(json.dumps(ref.to_track_json(rid)))
+    (OUT / "track_sample.json").write_text(json.dumps(ref.to_track_json(rid)), encoding="utf-8")
     for p in sorted(OUT.iterdir()):
         print(f"{p.name:<26} {p.stat().st_size / 1e6:6.2f} MB")
 

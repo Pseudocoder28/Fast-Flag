@@ -28,7 +28,7 @@ CONFIG_PATH = Path("data/models/detector_config.json")
 def load_config() -> Config:
     if not CONFIG_PATH.exists():
         return Config()
-    saved = json.loads(CONFIG_PATH.read_text())["config"]
+    saved = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))["config"]
     return replace(Config(), **{k: v for k, v in saved.items() if k in Config.__dataclass_fields__})
 
 

@@ -64,8 +64,8 @@ class Incident:
 
 
 def race_files(rid: str, root: Path = FEATURES) -> tuple[list[dict], dict]:
-    official = json.loads((root / f"{rid}_official.json").read_text())
-    meta = json.loads((root / f"{rid}_meta.json").read_text())
+    official = json.loads((root / f"{rid}_official.json").read_text(encoding="utf-8"))
+    meta = json.loads((root / f"{rid}_meta.json").read_text(encoding="utf-8"))
     return official, meta
 
 
