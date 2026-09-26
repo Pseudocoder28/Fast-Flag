@@ -162,6 +162,30 @@ def case_studies() -> list[str]:
     return out + [""]
 
 
+def escalation() -> list[str]:
+    e = json.loads((CHARTS / "escalation.json").read_text(encoding="utf-8"))
+    st, c, ir = e["status"], e["our_by_category"], e["impact_rule"]
+    by = ", ".join(f"{FLAG_NAMES[f]} {v['official']}" for f, v in e["by_official_flag"].items())
+    return ["## Escalation scorecard: our VSC, SC and red recommendations vs race control", "",
+            "Source: escalation.json, escalation.md and escalation.png (python -m src.eval.escalation). In-sample: the "
+            "detector settings were tuned and the race control rules set on these races. Counterfactual: assumes race "
+            "control acted on our recommendation at once.", "",
+            f"- {e['official_escalations']} official escalations in {e['races']} training races ({by}). We recommended "
+            f"a VSC, SC or red for {e['matched']} ({pct(e['matched'] / e['official_escalations'])}), {st['earlier']} of "
+            f"them earlier than the race control feed; median lead {e['median_lead_s']:.1f} s (middle half "
+            f"{e['lead_iqr_s'][0]:.1f} to {e['lead_iqr_s'][1]:.1f} s).",
+            f"- Missed {st['missed']}: {e['missed_kind']['car collapse seen']} with a car collapse we could see, "
+            f"{e['missed_kind']['no car collapse']} without one (re-flags of an earlier stoppage, debris, weather, lap 1).",
+            f"- Escalations race control never made: {e['extra']} in {e['race_hours']:.1f} race hours = "
+            f"{e['extra_per_hour']:.2f} per race hour ({c['official yellows only']} where race control kept yellows "
+            f"only, {c['no official flag']} with no official flag).",
+            f"- Same first flag as race control in {e['same_first_flag']} of {e['matched']}. Our engine never "
+            f"recommends a VSC (FastF1 puts stopped cars on the racing line, so none looks off track). A candidate "
+            f"impact rule would pick race control's flag {ir['right_with_impact_rule']} of "
+            f"{ir['escalations_with_onset_car']} times against {ir['right_with_current_rule']} now (not in the engine).",
+            ""]
+
+
 def holdout() -> list[str]:
     runs = sorted(CHARTS.glob("holdout_*.json"))
     out = ["## Holdout (2026 Azerbaijan, 2026 Madrid)", ""]
@@ -182,6 +206,12 @@ def holdout() -> list[str]:
         for h, v in r["risk"]["horizons"].items():
             p = v.get("lightgbm_pr_auc_precursor")
             out.append(f"- Risk {h} s: precursor PR-AUC {'n/a' if p is None else f'{p:.4f}'} (base rate {v['base_rate']:.4f})")
+        if "escalation" in r:
+            e = r["escalation"]
+            lead = "n/a" if e["median_lead_s"] is None else f"{e['median_lead_s']:.1f} s"
+            out.append(f"- Escalations: {e['official_escalations']} official, we recommended {e['matched']} "
+                       f"({e['status']['earlier']} earlier, median lead {lead}), {e['extra']} extra "
+                       f"({e['extra_per_hour']:.2f} per race hour)")
         for c in r["case_study"]["crashes"]:
             w3 = next((w for w in c["windows"] if w["name"].startswith("W3")), None)
             if w3 is not None:
@@ -201,7 +231,8 @@ def build() -> str:
             "- Training data: 20 races from 2023 to 2026. Holdout races (2026 Azerbaijan, 2026 Madrid): no numbers "
             "until A7, after the code freeze.",
             "- Risk is a heat indicator, not an alarm. Case-study windows are counterfactuals.", ""]
-    body = detection_loro() + detection_deployed() + latency_from_onset() + risk() + pipeline_speed() + case_studies()
+    body = (detection_loro() + detection_deployed() + latency_from_onset() + risk() + pipeline_speed()
+            + escalation() + case_studies())
     return "\n".join(head + body + holdout())
 
 

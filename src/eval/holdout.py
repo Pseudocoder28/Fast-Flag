@@ -161,6 +161,7 @@ def risk_section(race: RaceData, dets: list[dict]) -> dict:
 def evaluate(rid: str, out_dir: Path, allow_holdout: bool) -> dict:
     from src.detect.detectors import NaiveThreshold
     from src.eval.case_study import crashes, plot as plot_crash
+    from src.eval.escalation import production_suite, race_scorecard, summarise as summarise_escalation, tables
     from src.eval.incidents import INCIDENT_FLAGS
     from src.eval.latency_by_type import race_events, summary
     from src.eval.run import score
@@ -181,9 +182,14 @@ def evaluate(rid: str, out_dir: Path, allow_holdout: bool) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     for c in found:
         plot_crash(c, out_dir / f"case_{rid}_car{c['car']}.png")
+    card = race_scorecard(rid, suite_for=production_suite, allow_holdout=allow_holdout)
+    off, ours = tables([card])
+    off.to_csv(out_dir / f"escalation_{rid}_official.csv", index=False, encoding="utf-8")
+    ours.to_csv(out_dir / f"escalation_{rid}_ours.csv", index=False, encoding="utf-8")
     return {"race": rid, "detection": detection, "latency_from_onset": latency,
             "latency_events": len(ev), "latency_no_onset": len(missing), "risk": risk_section(race, dets),
-            "case_study": {"recommendation_source": rec_source, "crashes": found}}
+            "case_study": {"recommendation_source": rec_source, "crashes": found},
+            "escalation": summarise_escalation([card])}
 
 
 # ---- report
@@ -221,6 +227,14 @@ def report_md(res: dict, header: list[str]) -> str:
         lines.append(f"- Frozen high-risk line ({e['threshold_p30']:.4f}): {pct(e['flagged_3s_before'])} of "
                      f"{e['car_incidents']} car incidents flagged at least {EARLY_S:.0f} s before detection, "
                      f"{e['false_episodes_per_hour']:.0f} false high-risk episodes per race hour")
+    if "escalation" in res:
+        e = res["escalation"]
+        lines += ["", f"## Escalations (VSC, SC, red): {e['official_escalations']} official", "",
+                  f"- We recommended a VSC, SC or red for {e['matched']}: {e['status']['earlier']} earlier, "
+                  f"{e['status']['later']} later, median lead {num(e['median_lead_s'], '.1f')} s. Missed "
+                  f"{e['status']['missed']}, already out {e['status']['already out']}.",
+                  f"- Extra escalations race control never made: {e['extra']} = {num(e['extra_per_hour'], '.2f')} "
+                  f"per race hour. Same first flag as race control: {e['same_first_flag']} of {e['matched']}."]
     lines += ["", "## Crashes (timelines and exposure)", ""]
     for c in res["case_study"]["crashes"]:
         tl = c["timeline"]

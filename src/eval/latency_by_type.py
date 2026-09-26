@@ -57,12 +57,17 @@ FLAG_LABEL = {"YELLOW": "Yellow", "DOUBLE_YELLOW": "Double yellow", "VSC": "VSC"
 FLOOR_S = 0.25
 
 
-def detections_loro(race: RaceData) -> list[dict]:
+def loro_suite(race: RaceData) -> DetectorSuite:
+    """Production detector settings with an ANOMALY model trained on the other training races."""
     others = [r for r in available_races() if r != race.race]
     model = train_anomaly(others)
     attach_scores(race.frame, model)
     n = len(race.track.get("msectors", [])) or None
-    eng = Engine(race, [DetectorSuite(load_config(), anomaly_threshold=model.threshold, n_sectors=n)])
+    return DetectorSuite(load_config(), anomaly_threshold=model.threshold, n_sectors=n)
+
+
+def detections_loro(race: RaceData) -> list[dict]:
+    eng = Engine(race, [loro_suite(race)])
     return [e["data"] for e in eng.advance(eng.t_end) if e["kind"] == "detection"]
 
 
