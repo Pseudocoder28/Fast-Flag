@@ -43,6 +43,7 @@ import pandas as pd  # noqa: E402
 from src.eval.incidents import build_incidents, race_files, suspended_times  # noqa: E402
 from src.eval.latency_by_type import onset_candidates, onset_cars, pick_onset  # noqa: E402
 from src.eval.onset import RULE, add_own_ratio, onsets  # noqa: E402
+from src.eval.run import rule_alerts  # noqa: E402
 from src.ingest.holdout import is_holdout_id  # noqa: E402
 from src.ingest.reference import circ  # noqa: E402
 from src.ingest.sectors import sector_matches  # noqa: E402
@@ -179,7 +180,7 @@ def crashes(rid: str, allow_holdout: bool = False) -> tuple[list[dict], str]:
         onset = pick_onset(cand, inc.t)
         cars = onset_cars(cand, onset)
         crash_dist = rest_position(frame, onset["drv"], onset)
-        alert = next((d for d in dets if onset["t"] - ALERT_BEFORE_S <= d["t"] <= onset["t"] + ALERT_AFTER_S
+        alert = next((d for d in rule_alerts(dets) if onset["t"] - ALERT_BEFORE_S <= d["t"] <= onset["t"] + ALERT_AFTER_S
                       and (cars & set(d["drivers"]) or match(d["msector"]))), None)
         yellow = min((m["t"] for m in inc.messages if m["flag"] in SECTOR_FLAGS), default=None)
         first_esc = min(esc, key=lambda m: m["t"])

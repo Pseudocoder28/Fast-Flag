@@ -64,23 +64,32 @@ def detection_loro() -> list[str]:
 def detection_deployed() -> list[str]:
     ev = pd.read_csv(CHARTS / "detect_eval.csv", encoding="utf-8")
     al = pd.read_csv(CHARTS / "detect_alerts.csv", encoding="utf-8")
-    al = al[al["system"] == "detectors"]
-    out = ["## Detection as deployed (production settings plus ANOMALY alerts)", "",
-           "Source: detect_eval.csv, detect_alerts.csv. Thresholds were selected on these same races, so these are "
-           "not strictly out of sample (use the headline above for that); the ANOMALY model is leave-one-race-out.", ""]
-    for system, label in (("detectors", "Our system"), ("baseline", "Untuned 50 km/h speed threshold")):
+    inc = pd.read_csv(CHARTS / "detect_incidents.csv", encoding="utf-8")
+    out = ["## Detection as deployed (production settings; ANOMALY as an advisory)", "",
+           "Source: detect_eval.csv, detect_alerts.csv, detect_incidents.csv. Thresholds were selected on these same "
+           "races, so these are not strictly out of sample (use the headline above for that); the ANOMALY model is "
+           "leave-one-race-out. ANOMALY detections are advisories (watch markers on the dashboard, confirmation for "
+           "race control), not alerts, so they are not in the recall or false alarms below.", ""]
+    for system, label in (("detectors", "Our system (rule-based alerts)"), ("baseline", "Untuned 50 km/h speed threshold")):
         g = ev[ev["system"] == system]
-        inc, m, held = g["incidents"].sum(), g["matched"].sum(), g["held"].sum()
+        n, m, held = g["incidents"].sum(), g["matched"].sum(), g["held"].sum()
         hours, fa = g["hours"].sum(), g["false_alarms"].sum()
-        out.append(f"- {label}: recall {pct(m / inc)} ({m} of {inc}, {held} by a still-held stopped-car alert), "
+        out.append(f"- {label}: recall {pct(m / n)} ({m} of {n}, {held} by a still-held stopped-car alert), "
                    f"{fa} false alarms in {hours:.1f} race hours = {fa / hours:.1f}/h.")
-    by_type = al.groupby("type")["false_alarm"].agg(["size", "sum"])
+    by_type = al[al["system"] == "detectors"].groupby("type")["false_alarm"].agg(["size", "sum"])
     out.append("- Our alerts by type (alerts / false alarms): " + ", ".join(
         f"{k} {int(v['size'])}/{int(v['sum'])}" for k, v in by_type.iterrows()) + ".")
-    if "ANOMALY" in by_type.index:
-        a = by_type.loc["ANOMALY"]
-        out.append(f"- ANOMALY as an alert: {int(a['size'])} alerts, {int(a['sum'])} false. It roughly doubles the "
-                   "false-alarm rate for about 2 extra incidents. Its measurable value is as a risk-model feature (below).")
+    adv = ev[ev["system"] == "anomaly_advisory"]
+    if len(adv):
+        n_adv, fa_adv, hours = adv["alerts"].sum(), adv["false_alarms"].sum(), adv["hours"].sum()
+        key = ["race", "t_official"]
+        both = inc[inc["system"] == "detectors"].merge(inc[inc["system"] == "anomaly_advisory"], on=key,
+                                                        suffixes=("", "_adv"))
+        extra = int((both["matched_adv"] & ~both["matched"]).sum())
+        out.append(f"- ANOMALY advisories: {n_adv} in {hours:.1f} race hours ({n_adv / hours:.1f}/h), {n_adv - fa_adv} "
+                   f"of them near an official incident; they would add {extra} incident(s) the rule-based alerts "
+                   "missed. Counted as alerts they would roughly double the false-alarm rate, so they stay advisories: "
+                   "the model's measurable value is as a risk-model feature (below) and as confirmation for race control.")
     return out + [""]
 
 

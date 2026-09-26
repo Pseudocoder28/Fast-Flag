@@ -10,8 +10,8 @@ the earliest collapse in the window; see ANCHOR_NOTE. Then, for the first offici
 message of each flag type in that incident:
 - race control latency = official time - onset
 - our latency = our first alert - onset, where our first alert is the first
-  detection (any type) from 10 s before the onset to 180 s after it that involves an
-  onset car or is in a matching sector
+  rule-based detection (ANOMALY is an advisory, not an alert) from 10 s before the onset
+  to 180 s after it that involves an onset car or is in a matching sector
 - lead = race control latency - our latency (positive = we were earlier)
 Our detections come from the production detector settings with an ANOMALY model
 trained on the other training races (leave-one-race-out). Events without an
@@ -41,6 +41,7 @@ from src.detect.detectors import DetectorSuite
 from src.detect.pipeline import load_config
 from src.eval.incidents import INCIDENT_FLAGS, build_incidents, race_files, suspended_times
 from src.eval.onset import FIELD_RACING, RULE, add_own_ratio, onsets
+from src.eval.run import rule_alerts
 from src.ingest.holdout import assert_not_holdout
 from src.ingest.sectors import sector_matches
 from src.replay.engine import Engine, RaceData, available_races
@@ -137,7 +138,7 @@ def race_events(rid: str, dets: list[dict] | None = None,
     n = meta["n_msectors"]
     frame = add_own_ratio(race.frame, float(meta["lap_length_m"]))
     ons = onsets(frame, float(meta["lap_length_m"]))
-    dets = sorted(dets if dets is not None else detections_loro(race), key=lambda d: d["t"])
+    dets = rule_alerts(sorted(dets if dets is not None else detections_loro(race), key=lambda d: d["t"]))
     incidents, _ = build_incidents(official, meta, suspended_times(race.frame), n)
     events, missing = [], []
     for inc in incidents:
@@ -282,7 +283,8 @@ def write_report(ev: pd.DataFrame, missing: pd.DataFrame, by_flag: pd.DataFrame,
         f"it, in a matching marshal sector, the first car of the last chain of onsets less than "
         f"{PILEUP_GAP_S:.0f} s apart that starts up to that message. {ANCHOR_NOTE} "
         "Race control latency = "
-        "first official message of that flag type - onset. Our latency = our first alert (any detection from "
+        "first official message of that flag type - onset. Our latency = our first alert (any rule-based detection, "
+        "ANOMALY being an advisory, from "
         f"{ALERT_BEFORE_S:.0f} s before the onset to {ALERT_AFTER_S:.0f} s after, involving an onset car or in a "
         "matching sector) - onset. Detections: production settings, ANOMALY model trained on the other races.\n\n"
         "**What this shows and what it does not.** This compares latency on crashes where a car clearly "
