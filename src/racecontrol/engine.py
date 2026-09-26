@@ -120,9 +120,10 @@ class RaceControl:
 
     # --- public API ----------------------------------------------------
 
-    def on_tick(self, tick: dict) -> list[dict]:
+    def on_tick(self, tick: dict) -> tuple[list[dict], bool]:
         new_t = tick["t"]
-        if self.t is not None and new_t < self.t - RESET_JUMP_S:
+        did_reset = self.t is not None and new_t < self.t - RESET_JUMP_S
+        if did_reset:
             self._reset_state()
         self.t = new_t
 
@@ -139,7 +140,7 @@ class RaceControl:
         recs.extend(self._check_sustained_stop())
         recs.extend(self._check_sector_clearing())
         recs.extend(self._check_global_clearing())
-        return recs
+        return recs, did_reset
 
     def on_detection(self, det: dict) -> list[dict]:
         det_t = det["t"]
