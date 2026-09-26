@@ -17,6 +17,7 @@ Run: python -m src.ingest.build 2023_Australian 2026_Dutch
      python -m src.ingest.build --top 20
      python -m src.ingest.build --case 2021_Azerbaijan    (case study race: data/case_studies/, never training)
      python -m src.ingest.build --holdout 2026_Azerbaijan   (A7 only, writes to data/holdout/)
+     python -m src.ingest.build 2026_Dutch --official-only  (rewrite only the official events)
 """
 
 from __future__ import annotations
@@ -85,15 +86,18 @@ def load(year: int, rnd: int, kind: str):
     return s
 
 
-def build_race(rid: str, holdout: bool = False, case: bool = False) -> dict:
-    year, rnd, location = resolve(rid)
+def output_dir(rid: str, year: int, location: str, holdout: bool, case: bool) -> Path:
     if holdout:
         if not is_holdout_id(rid):
             raise ValueError(f"{rid} is not a holdout race")
-        out_dir = HOLDOUT_DIR
-    else:
-        assert_not_holdout(year, location, rid=rid)
-        out_dir = CASE_DIR if case else FEATURES
+        return HOLDOUT_DIR
+    assert_not_holdout(year, location, rid=rid)
+    return CASE_DIR if case else FEATURES
+
+
+def build_race(rid: str, holdout: bool = False, case: bool = False) -> dict:
+    year, rnd, location = resolve(rid)
+    out_dir = output_dir(rid, year, location, holdout, case)
     out_dir.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     ref = build_track_ref(load(year, rnd, "Q"))
@@ -118,6 +122,18 @@ def build_race(rid: str, holdout: bool = False, case: bool = False) -> dict:
     return meta
 
 
+def rebuild_official(rid: str, holdout: bool = False, case: bool = False) -> int:
+    """Rewrite only <race>_official.json (after a fix to src.ingest.official), leaving
+    the features and every other sidecar file as they are. Returns the event count."""
+    year, rnd, location = resolve(rid)
+    path = output_dir(rid, year, location, holdout, case) / f"{rid}_official.json"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} does not exist: build the race first")
+    official = official_events(load(year, rnd, "R"))
+    path.write_text(json.dumps(official), encoding="utf-8")
+    return len(official)
+
+
 def top_races(n: int) -> list[str]:
     df = pd.read_csv(RANKING_CSV, keep_default_na=False, encoding="utf-8")
     return df[df["error"] == ""].sort_values("score", ascending=False)["race"].head(n).tolist()
@@ -129,6 +145,8 @@ def main() -> None:
     p.add_argument("--top", type=int, help="build the top N races of the ranking")
     p.add_argument("--holdout", help="build one holdout race into data/holdout/ (A7 only)")
     p.add_argument("--case", help="build one case-study race into data/case_studies/ (not a training race)")
+    p.add_argument("--official-only", action="store_true",
+                   help="only rewrite <race>_official.json of races that are already built")
     a = p.parse_args()
     fastf1.Cache.enable_cache(str(CACHE_DIR))
     fastf1.set_log_level(logging.ERROR)
@@ -140,6 +158,10 @@ def main() -> None:
     else:
         jobs, holdout = (a.races or []) + (top_races(a.top) if a.top else []), False
     for rid in dict.fromkeys(jobs):
+        if a.official_only:
+            print(f"{rid:<22} {rebuild_official(rid, holdout=holdout, case=case)} official events rewritten",
+                  flush=True)
+            continue
         try:
             m = build_race(rid, holdout=holdout, case=case)
             print(f"{rid:<22} {m['rows']:>8} rows  {m['cars']} cars  lap {m['lap_length_m']:>6.0f} m  "

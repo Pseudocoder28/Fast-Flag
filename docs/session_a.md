@@ -37,12 +37,35 @@ Naman now also owns `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol
 - Run the real server (`python -m src.replay.server`), `python -m src.racecontrol` and the dashboard together on one training race incident.
 - List every problem you see before fixing any of them.
 - Done when: the problem list is written down and the incident flows through replay, detect, recommend and dashboard.
+- How to run it: terminal 1 `python -m src.replay.server`, terminal 2 `python -m src.racecontrol`, open http://localhost:8000, then `curl -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 1, "seek_t": 4375}'` (Albon, car 23, sector 9).
+- Result (26 Sept, 2023_Australian): works end to end. Albon YELLOW at 4387.75 (official 4390.18) and SC at 4391.75 (official SC 4402.18). Problems found, and the task that fixes each:
+  1. SC never clears: retired cars keep reporting at a frozen x/y with speed 0 for the rest of the session (car 16 from t=3772, car 23 from t=4400), so they pin their sector forever and later incidents (Russell t=6431, Magnussen t=9401) cannot escalate. A9.
+  2. Leclerc lap 1 gets no SC: one noisy speed sample (0 to 70 km/h at t=3766) reset the sustained-stop timer, which only restarts on a new STOPPED detection. A9.
+  3. A forward seek does not reset race control, so flags from before the jump stay up. A9.
+  4. Track-wide recs (VSC, SC, RED, TRACK CLEAR) reuse the cause sector as `msector` and the rule for telling them apart from sector flags is not written down (the bridge needs it too). A9.
+  5. The race control client backs off up to 30 s after a server restart, and its URL is hardcoded. A9.
+  6. The dashboard paints the track-wide SC onto sector 9 ("sector 9 SC") and shows no track-wide status. A10, A11.
+  7. Retired cars stay on the map as normal dots (the stuck car). A10.
+  8. Cars missing from ticks keep their last position forever. A10.
+  9. In-pit cars are drawn like racing cars: during the red flag the field is a stack of overlapping dots. A10.
+  10. Choppy movement: one jump per tick at 1x (256 ms), bursts of 2 ticks every 57 ms at 10x and 10 ticks every 74 ms at 50x. A10.
+  11. The feed shows recs only, never detections or official messages. A10.
+  12. A forward seek does not reset the dashboard. A10.
+  13. Small dots, no car numbers. A10.
+  14. No "Replay of historical FastF1 data" banner (honesty rule). A11.
+  15. No header with race, lap, time, speed and track status. A11.
+  16. Flag colours differ from the spec, no icons, thin track. A11.
+  17. favicon.ico 404 on every page load. A11.
+  18. B4 items not built: lead-time timeline, replay controls, jump-to-incident list. Open.
+  19. Detection and ingest, report only: `lat_off` stays under 1 m for cars in the gravel (16, T3) or against the wall (23, T6), so every stop counts as on the racing line and race control never picks YELLOW plus VSC.
+  20. Detection, report only: Magnussen's official YELLOW is sector 4 at 9389, our first flag is DOUBLE_YELLOW sector 6 at 9401.
 
 **M1:** A8 passes. Merge into `main` following the CLAUDE.md workflow and tell Ishaan to test the dashboard against the real server.
 
 **A9. Race control: clearing and re-escalation**
 - Bug: the engine never clears an SC, so later crashes never escalate. Fix it with the clearing and hysteresis rules in PROJECT_BRIEF.md Section 6.5.
 - Done when: a test with two separate incidents in one race passes, and the second one escalates after the first clears.
+- Result: a flagged car stops holding its sector after 180 s without moving more than 3 m; track-wide flags hold 60 s and clear 5 s after every sector that caused or supported them is CLEAR; the stop timer pauses on a speed blip instead of being cancelled; any jump over 2 s resets. Headless reruns: on 2023_Australian, SC for Leclerc at 3772.5 (official 3805.2, none before) and Magnussen at 9405.5 (official 9450.2, none before). On 2021_Azerbaijan, Verstappen's crash now escalates to SC at 7283.25 (official 7367.0). Test: `test_two_incidents_second_escalates_after_first_clears`.
 
 **A10. Dashboard: car movement and the stuck car (`dashboard/` only)**
 - Stuck car: find the cause first. Same x/y in every tick = stopped or retired car, ticks stop arriving = data dropout, or `in_pit` is true. A stopped car stays on the map, clearly marked (grey ring plus a STOPPED or OUT label). No data for 5 s of replay time: fade it out. `in_pit` true: hide it or draw it in the pit lane.
@@ -50,6 +73,7 @@ Naman now also owns `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol
 - Draw the canvas only inside the rAF loop. Update the feed only when a detection, rec or official envelope arrives, and keep only the last 50 rows.
 - Dots about 3x the old radius, car number (`drv`) in bold white text centred on each dot.
 - Done when: cars glide at 1x, 10x and 50x, and a stopped car, a car with no data and a car in the pit lane each look right.
+- Result: the stuck car was a retired car whose ticks keep arriving with a frozen x/y (2023_Australian cars 16 and 23). It is now ringed grey and labelled STOPPED after 3 s still, OUT after 60 s. A car with no data fades after 5 s of replay time (car 27, t=9500 to 9538), and pit lane cars are small dim dots at their real position. About 1 tick in 6 repeats a moving car's previous position (irregular FastF1 position samples), so each car keeps its recent distinct positions and the map is drawn about one burst behind the newest tick. Measured still frames for a moving car: 0 of 239 at 1x, 1 at 10x, 2 at 50x.
 
 **A11. Dashboard: visual overhaul (`dashboard/` only, no CDN, no external fonts or images)**
 - Broadcast pit wall look: matte dark panels, subtle carbon-fibre texture from CSS gradients, padded cards, subtle 1 px borders, rounded corners, uppercase section headers.
@@ -60,10 +84,12 @@ Naman now also owns `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol
 - Small inline SVG flag icons next to flag names in the legend and the feed. No emoji.
 - Keep the "Replay of historical FastF1 data" banner.
 - Done when: it looks right in Chrome at 1920x1080 and at laptop size, against both the mock server and the real server.
+- Result: top bar with the replay banner, race, lap, session time and replay speed; track status shows our recommendation next to official race control (official state rebuilt from `GET /official` up to the replay time only); map with sector numbers, start line, double stripe for DOUBLE_YELLOW and a halo for track-wide flags; favicon inline (no 404). Checked in the app's Chromium browser pane at 1920x1080, 1440x900 and 1280x800 against the real server and the mock (Claude in Chrome was not connected).
 
 **A12. Housekeeping (last)**
 - Regenerate or delete the four stale `detect_*` files in `docs/charts/` so they match the final detector settings.
 - Write `docs/charts/NUMBERS.md`: every pitch figure with its source file. It is the single source of truth for the slides.
+- Result: done by the parallel A session (e5b8a13, f525c7f, 51d5e3b). The four `detect_*` files were regenerated at 16:24 with the production settings in `data/models/detector_config.json` (the file `src/detect/pipeline.py` loads), after the last detector code change (15:29). `NUMBERS.md` is generated by `python -m src.eval.numbers` and names a source file for every figure. Its case studies already use the A9 engine. Not in it yet: race control escalation stats across the training races (VSC, SC and RED recs against official ones).
 
 **Still open from Ishaan's B4 (not scheduled yet):** lead-time timeline (our recs next to `official` envelopes), replay controls (speed and seek through `POST /replay`) and a jump-to-incident list from `GET /official`.
 

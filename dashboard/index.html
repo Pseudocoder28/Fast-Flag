@@ -1,21 +1,59 @@
-<!-- restart python -m src.replay.mock_server after creating this file -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fast Flag pit wall</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23111418'/%3E%3Cpath d='M4 2.5v11' stroke='%23e6e8eb' stroke-width='1.4'/%3E%3Cpath d='M5 3h7l-1.6 2.4L12 7.8H5z' fill='%23ffd400'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
-  <canvas id="track"></canvas>
+  <header id="topbar">
+    <div class="brand">
+      <span class="brand-name">Fast Flag</span>
+      <span class="brand-sub">AI race control assistant</span>
+    </div>
+    <div class="replay-banner" role="note">Replay of historical FastF1 data <span class="banner-sep">·</span> not live</div>
+    <div class="session">
+      <span class="race" id="race-name">loading</span>
+      <span class="stat"><span class="k">Lap</span><span class="v mono" id="lap">-</span></span>
+      <span class="stat"><span class="k">Session time</span><span class="v mono" id="clock">-</span></span>
+      <span class="stat"><span class="k">Replay</span><span class="v mono" id="speed">-</span></span>
+      <span class="conn" id="conn-status" data-state="connecting">connecting</span>
+    </div>
+  </header>
+
+  <main id="map-panel" class="panel">
+    <canvas id="track" aria-label="Track map with marshal sectors and cars"></canvas>
+    <div class="map-note">Cars coloured by predicted incident risk in the next 30 s</div>
+  </main>
+
   <aside id="side">
-    <h1>Fast Flag</h1>
-    <p id="conn-status">connecting...</p>
-    <div id="legend"></div>
-    <h2>Alerts</h2>
-    <ol id="feed"></ol>
+    <section class="card">
+      <h2>Track status</h2>
+      <div class="status-grid">
+        <div class="status-cell">
+          <span class="status-k">Fast Flag recommends</span>
+          <span class="status-chip" id="track-flag" data-flag="UNKNOWN">WAITING</span>
+        </div>
+        <div class="status-cell">
+          <span class="status-k">Official race control</span>
+          <span class="status-chip" id="official-flag" data-flag="UNKNOWN">WAITING</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Legend</h2>
+      <div id="legend" class="legend"></div>
+      <div id="car-legend" class="legend car-legend"></div>
+    </section>
+
+    <section class="card feed-card">
+      <h2>Feed <span class="h2-note">newest first, last 50</span></h2>
+      <ol id="feed"></ol>
+    </section>
   </aside>
 </div>
 <script src="app.js"></script>

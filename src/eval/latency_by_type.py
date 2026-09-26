@@ -57,12 +57,17 @@ FLAG_LABEL = {"YELLOW": "Yellow", "DOUBLE_YELLOW": "Double yellow", "VSC": "VSC"
 FLOOR_S = 0.25
 
 
-def detections_loro(race: RaceData) -> list[dict]:
+def loro_suite(race: RaceData) -> DetectorSuite:
+    """Production detector settings with an ANOMALY model trained on the other training races."""
     others = [r for r in available_races() if r != race.race]
     model = train_anomaly(others)
     attach_scores(race.frame, model)
     n = len(race.track.get("msectors", [])) or None
-    eng = Engine(race, [DetectorSuite(load_config(), anomaly_threshold=model.threshold, n_sectors=n)])
+    return DetectorSuite(load_config(), anomaly_threshold=model.threshold, n_sectors=n)
+
+
+def detections_loro(race: RaceData) -> list[dict]:
+    eng = Engine(race, [loro_suite(race)])
     return [e["data"] for e in eng.advance(eng.t_end) if e["kind"] == "detection"]
 
 
@@ -85,14 +90,19 @@ def no_onset_reason(frame: pd.DataFrame, inc, n: int) -> str:
     return "no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 
 
-def race_events(rid: str) -> tuple[list[dict], list[dict]]:
-    assert_not_holdout(rid=rid)
+def race_events(rid: str, dets: list[dict] | None = None,
+                allow_holdout: bool = False) -> tuple[list[dict], list[dict]]:
+    """Onset-anchored latency events for one race. dets: precomputed detections (the
+    A7 holdout run passes the frozen production detections); by default the
+    detections come from an ANOMALY model trained on the other training races."""
+    if not allow_holdout:
+        assert_not_holdout(rid=rid)
     race = RaceData.load(rid)
     official, meta = race_files(rid)
     n = meta["n_msectors"]
     frame = add_own_ratio(race.frame, float(meta["lap_length_m"]))
     ons = onsets(frame, float(meta["lap_length_m"]))
-    dets = sorted(detections_loro(race), key=lambda d: d["t"])
+    dets = sorted(dets if dets is not None else detections_loro(race), key=lambda d: d["t"])
     incidents, _ = build_incidents(official, meta, suspended_times(race.frame), n)
     events, missing = [], []
     for inc in incidents:

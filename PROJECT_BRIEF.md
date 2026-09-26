@@ -201,13 +201,13 @@ Reactive but fast. Each detector outputs the Detection contract.
 
 ### 6.5 Race control engine (A, taken over from B on 26 Sept)
 Consumes detections + risk, maintains a per-sector flag state machine, emits Recommendations.
-- Interface (`src/racecontrol/engine.py`, class `RaceControl`): `on_tick(tick)` returns `(recs, did_reset)`, where `did_reset` is True when the tick jumped back in time (seek or loop) and all flag state was wiped. `on_detection(det)` and `on_risk(risk)` return a list of recs.
+- Interface (`src/racecontrol/engine.py`, class `RaceControl`): `on_tick(tick)` returns `(recs, did_reset)`, where `did_reset` is True when the tick jumped more than 2 s back or forward in time (seek or loop) and all flag state was wiped. `on_detection(det)` and `on_risk(risk)` return a list of recs.
 - Single car stopped in run-off, low severity: YELLOW in that sector.
 - Car stopped on racing line, or high severity: DOUBLE_YELLOW, consider VSC.
 - Multi-car incident or high SC probability: SC.
 - Extreme severity + multiple cars: RED.
-- Clearing: sector returns to CLEAR once no flagged car remains in it for N seconds.
-- Hysteresis so flags do not flicker.
+- Clearing: sector returns to CLEAR once no flagged car remains in it for N seconds (N = 5). A flagged car stops counting as in the sector once it drives out, enters the pit lane, sends no data for 120 s, or has not moved more than 3 m for 180 s. The last rule is needed because a retired car keeps reporting its last position for the rest of the session (2023 Australia: cars 16 and 23). A track-wide flag (VSC, SC, RED) clears 5 s after every sector that caused or supported it is CLEAR, so the next incident can escalate again.
+- Hysteresis so flags do not flicker: flags escalate at once and only come down after a hold, at least 2 s for a sector flag and 60 s for a track-wide flag. A stopped car's SC or VSC timer pauses while the car moves and restarts when it stops again, so one noisy speed sample cannot cancel it.
 - Narration: template message immediately ("YELLOW IN TRACK SECTOR 7"), optional Ollama-generated steward summary generated asynchronously. The LLM never decides, it only explains.
 
 ### 6.6 Dashboard (A, taken over from B on 26 Sept)
@@ -259,6 +259,7 @@ Consumes detections + risk, maintains a per-sector flag state machine, emits Rec
  "reason": "car 44 impact signature, stopped on racing line",
  "message": "YELLOW IN TRACK SECTOR 7", "source_detections": ["det-000123"]}
 ```
+- A rec with flag VSC, SC or RED is track-wide, and its `msector` is the sector that caused it. A CLEAR rec with message `TRACK CLEAR` ends the track-wide flag. A CLEAR rec with message `CLEAR IN TRACK SECTOR 7` clears only that sector.
 
 ### 7.5 Transport
 - WebSocket `ws://localhost:8000/stream` (owned by A).

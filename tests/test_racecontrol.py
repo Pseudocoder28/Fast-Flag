@@ -11,8 +11,10 @@ from src.racecontrol.engine import (
     ANOMALY_MAX_CONF,
     ANOMALY_MIN_SEV,
     GLOBAL_CLEAR_AFTER_S,
+    GLOBAL_MIN_HOLD_S,
     GLOBAL_RANK,
     MIN_HOLD_S,
+    PARKED_CAR_S,
     RESET_JUMP_S,
     SC_STOPPED_HOLD_S,
     SECTOR_CLEAR_AFTER_S,
@@ -23,6 +25,7 @@ from src.racecontrol.engine import (
 )
 
 FIX = Path(__file__).resolve().parent.parent / "fixtures"
+TICK_S = 0.25   # the real stream's tick spacing
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -31,14 +34,31 @@ def read_jsonl(path: Path) -> list[dict]:
 
 
 def make_car(drv: str, msector: int, speed: float = 200.0, lat_off: float = 0.0,
-             in_pit: bool = False) -> dict:
-    return {"drv": drv, "x": 0.0, "y": 0.0, "dist": 0.0, "lat_off": lat_off, "speed": speed,
+             in_pit: bool = False, x: float = 0.0, y: float = 0.0) -> dict:
+    return {"drv": drv, "x": x, "y": y, "dist": 0.0, "lat_off": lat_off, "speed": speed,
             "throttle": 100.0, "brake": False, "gear": 6, "rpm": 10000, "msector": msector,
             "gap_ahead_m": -1.0, "in_pit": in_pit}
 
 
+def moving_car(drv: str, msector: int, t: float) -> dict:
+    """A car at racing speed: its position changes every tick."""
+    return make_car(drv, msector, speed=200.0, x=55.0 * t)
+
+
 def make_tick(t: float, cars: list[dict], lap: int = 1, track_status: str = "1") -> dict:
     return {"t": t, "lap": lap, "track_status": track_status, "cars": cars}
+
+
+def tick_until(rc: RaceControl, t_from: float, t_to: float, cars) -> list[dict]:
+    """Tick every TICK_S after t_from up to and including t_to, like the real stream (a gap
+    over RESET_JUMP_S would count as a seek). cars is a list, or a function of t. Returns recs."""
+    recs: list[dict] = []
+    for i in range(1, round((t_to - t_from) / TICK_S) + 1):
+        t = t_from + i * TICK_S
+        out, did_reset = rc.on_tick(make_tick(t, cars(t) if callable(cars) else cars))
+        assert not did_reset
+        recs.extend(out)
+    return recs
 
 
 def make_det(det_id: str, t: float, drv: str, msector: int, dtype: str, severity: float,
@@ -170,12 +190,14 @@ def test_stale_car_releases_sector_for_clearing() -> None:
 
     # car 23 is never seen again: once it is stale it must stop pinning the sector,
     # which starts the clear countdown; the clear itself needs one more window after that
-    stale_t = STALE_CAR_S + 1.0
-    rc.on_tick(make_tick(stale_t, [make_car("99", 1)]))
+    others = lambda t: [moving_car("99", 1, t)]  # noqa: E731
+    tick_until(rc, 0.0, STALE_CAR_S, others)
+    assert rc.sectors[9].empty_since_t is None
+    stale_t = STALE_CAR_S + TICK_S
+    tick_until(rc, STALE_CAR_S, stale_t, others)
     assert rc.sectors[9].empty_since_t == stale_t
 
-    after = stale_t + SECTOR_CLEAR_AFTER_S + 1.0
-    recs, _ = rc.on_tick(make_tick(after, [make_car("99", 1)]))
+    recs = tick_until(rc, stale_t, stale_t + SECTOR_CLEAR_AFTER_S, others)
     clears = [r for r in recs if r["msector"] == 9 and r["flag"] == "CLEAR"]
     assert clears, "stale car must release its sector so it can clear"
 
@@ -189,21 +211,22 @@ def test_no_downgrade_before_hold_and_clear_window() -> None:
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.85))
     assert rc.sectors[9].flag == "DOUBLE_YELLOW"
 
-    # a car missing from a tick does not mean it left the sector: it must actually be
-    # observed in a different sector before the clear countdown can start. The clearing
-    # check also will not start that countdown until the hold gate itself has passed, so
-    # the countdown effectively begins at the first tick at/after MIN_HOLD_S.
-    moved_t = MIN_HOLD_S + 0.1
-    rc.on_tick(make_tick(moved_t, [make_car("23", 10, speed=200.0, lat_off=0.0)]))
-    assert rc.sectors[9].empty_since_t == moved_t
+    # the car drives on into sector 10 at once. A car missing from a tick does not mean it
+    # left (test_missing_car_keeps_last_known_state): it has to be seen in another sector.
+    # The clear countdown cannot start before the MIN_HOLD_S gate, so it begins at the
+    # first tick at MIN_HOLD_S, and the clear needs SECTOR_CLEAR_AFTER_S more.
+    gone = lambda t: [moving_car("23", 10, t)]  # noqa: E731
+    tick_until(rc, 0.0, MIN_HOLD_S - TICK_S, gone)
+    assert rc.sectors[9].empty_since_t is None
+    tick_until(rc, MIN_HOLD_S - TICK_S, MIN_HOLD_S, gone)
+    assert rc.sectors[9].empty_since_t == MIN_HOLD_S
 
-    just_before = moved_t + SECTOR_CLEAR_AFTER_S - 0.5
-    recs, _ = rc.on_tick(make_tick(just_before, [make_car("23", 10)]))
+    clear_t = MIN_HOLD_S + SECTOR_CLEAR_AFTER_S
+    recs = tick_until(rc, MIN_HOLD_S, clear_t - TICK_S, gone)
     assert all(r["msector"] != 9 or r["flag"] != "CLEAR" for r in recs)
     assert rc.sectors[9].flag == "DOUBLE_YELLOW"
 
-    after = moved_t + SECTOR_CLEAR_AFTER_S + 0.5
-    recs, _ = rc.on_tick(make_tick(after, [make_car("23", 10)]))
+    recs = tick_until(rc, clear_t - TICK_S, clear_t, gone)
     assert any(r["msector"] == 9 and r["flag"] == "CLEAR" for r in recs)
 
 
@@ -252,9 +275,10 @@ def test_stopped_ignored_when_in_pit() -> None:
 
 def test_dropout_ignored_while_global_sc() -> None:
     rc = RaceControl()
-    rc.on_tick(make_tick(0.0, [make_car("23", 9, lat_off=0.0)]))
+    stopped = [make_car("23", 9, speed=0.0, lat_off=0.0)]
+    rc.on_tick(make_tick(0.0, stopped))
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.85))
-    rc.on_tick(make_tick(SC_STOPPED_HOLD_S, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    tick_until(rc, 0.0, SC_STOPPED_HOLD_S, stopped)
     assert rc.global_.flag == "SC"
 
     recs = rc.on_detection(make_det("det-2", SC_STOPPED_HOLD_S, "44", 9, "DROPOUT", 0.95))
@@ -266,14 +290,15 @@ def test_dropout_ignored_while_global_sc() -> None:
 
 def test_sustained_stop_on_track_escalates_to_sc() -> None:
     rc = RaceControl()
-    rc.on_tick(make_tick(0.0, [make_car("23", 9, lat_off=0.0)]))
+    stopped = [make_car("23", 9, speed=0.0, lat_off=0.0)]
+    rc.on_tick(make_tick(0.0, stopped))
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.5))  # low severity, on-track only
     assert rc.sectors[9].flag == "DOUBLE_YELLOW"
 
-    rc.on_tick(make_tick(SC_STOPPED_HOLD_S - 0.1, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    tick_until(rc, 0.0, SC_STOPPED_HOLD_S - TICK_S, stopped)
     assert rc.global_.flag == "CLEAR"
 
-    recs, _ = rc.on_tick(make_tick(SC_STOPPED_HOLD_S + 0.1, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    recs = tick_until(rc, SC_STOPPED_HOLD_S - TICK_S, SC_STOPPED_HOLD_S, stopped)
     assert rc.global_.flag == "SC"
     assert any(r["flag"] == "SC" and r["msector"] == 9 for r in recs)
 
@@ -281,28 +306,48 @@ def test_sustained_stop_on_track_escalates_to_sc() -> None:
 def test_sustained_stop_off_track_escalates_to_vsc_not_sc() -> None:
     rc = RaceControl()
     off_track = 20.0
-    rc.on_tick(make_tick(0.0, [make_car("23", 9, lat_off=off_track)]))
+    stopped = [make_car("23", 9, speed=0.0, lat_off=off_track)]
+    rc.on_tick(make_tick(0.0, stopped))
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.5))
     assert rc.sectors[9].flag == "YELLOW"  # low severity, off track
 
-    rc.on_tick(make_tick(SC_STOPPED_HOLD_S + 0.1, [make_car("23", 9, speed=0.0, lat_off=off_track)]))
+    tick_until(rc, 0.0, VSC_STOPPED_HOLD_S - TICK_S, stopped)
     assert rc.global_.flag == "CLEAR", "off track must not escalate at the on-track SC hold time"
 
-    recs, _ = rc.on_tick(make_tick(VSC_STOPPED_HOLD_S + 0.1, [make_car("23", 9, speed=0.0, lat_off=off_track)]))
+    recs = tick_until(rc, VSC_STOPPED_HOLD_S - TICK_S, VSC_STOPPED_HOLD_S, stopped)
     assert rc.global_.flag == "VSC"
     assert any(r["flag"] == "VSC" and r["msector"] == 9 for r in recs)
 
 
 def test_second_stopped_detection_does_not_restart_timer() -> None:
     rc = RaceControl()
+    stopped = [make_car("23", 9, speed=0.0, lat_off=0.0)]
     rc.on_tick(make_tick(0.0, [make_car("23", 9, lat_off=0.0)]))
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.5))
-    rc.on_tick(make_tick(0.5, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    tick_until(rc, 0.0, 0.5, stopped)
     rc.on_detection(make_det("det-2", 0.5, "23", 9, "STOPPED", 0.6))  # same car, still stopped
     assert rc.sectors[9].stopped_since_t == 0.0, "stopped_since_t must not be overwritten"
 
-    rc.on_tick(make_tick(SC_STOPPED_HOLD_S + 0.1, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    tick_until(rc, 0.5, SC_STOPPED_HOLD_S, stopped)
     assert rc.global_.flag == "SC"
+
+
+def test_speed_blip_does_not_cancel_sustained_stop() -> None:
+    """Leclerc, 2023_Australian lap 1: stopped at t=3762, one 70 km/h sample at t=3766,
+    then stopped again. The blip used to cancel the SC hold for good (no SC at all)."""
+    rc = RaceControl()
+
+    def car16(t: float) -> list[dict]:
+        return [make_car("16", 5, speed=70.0 if t == 1.0 else 0.0, lat_off=0.0, x=100.0, y=100.0)]
+
+    rc.on_tick(make_tick(0.0, car16(0.0)))
+    rc.on_detection(make_det("det-1", 0.0, "16", 5, "STOPPED", 0.85))
+    restart_t = 1.0 + TICK_S       # first tick stopped again after the blip
+    recs = tick_until(rc, 0.0, restart_t + SC_STOPPED_HOLD_S - TICK_S, car16)
+    assert not any(r["flag"] == "SC" for r in recs), "the hold restarts when the car stops again"
+
+    recs = tick_until(rc, restart_t + SC_STOPPED_HOLD_S - TICK_S, restart_t + SC_STOPPED_HOLD_S, car16)
+    assert [(r["flag"], r["msector"]) for r in recs] == [("SC", 5)]
 
 
 # --- no re-emission at same/higher global level -----------------------------
@@ -310,42 +355,135 @@ def test_second_stopped_detection_does_not_restart_timer() -> None:
 
 def test_global_rec_not_reemitted_while_already_at_level() -> None:
     rc = RaceControl()
-    rc.on_tick(make_tick(0.0, [make_car("23", 9, lat_off=0.0)]))
+    stopped = [make_car("23", 9, speed=0.0, lat_off=0.0)]
+    rc.on_tick(make_tick(0.0, stopped))
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.85))
-    rc.on_tick(make_tick(SC_STOPPED_HOLD_S + 0.1, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    tick_until(rc, 0.0, SC_STOPPED_HOLD_S, stopped)
     assert rc.global_.flag == "SC"
 
-    sc_recs = []
-    for i in range(5):
-        t = SC_STOPPED_HOLD_S + 0.1 + (i + 1) * 0.25
-        recs, _ = rc.on_tick(make_tick(t, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
-        sc_recs.extend(r for r in recs if r["flag"] == "SC")
+    recs = tick_until(rc, SC_STOPPED_HOLD_S, SC_STOPPED_HOLD_S + 5.0, stopped)
+    sc_recs = [r for r in recs if r["flag"] == "SC"]
     assert sc_recs == [], "SC must not be re-emitted every tick while already active"
 
 
-# --- global de-escalation ---------------------------------------------------
+# --- clearing and hysteresis (PROJECT_BRIEF.md Section 6.5) ------------------
 
 
 def test_global_clears_after_cause_sector_clears_and_hold() -> None:
     rc = RaceControl()
-    rc.on_tick(make_tick(0.0, [make_car("23", 9, lat_off=0.0)]))
+    stopped = [make_car("23", 9, speed=0.0, lat_off=0.0)]
+    rc.on_tick(make_tick(0.0, stopped))
     rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.85))
-    t = SC_STOPPED_HOLD_S + 0.1
-    rc.on_tick(make_tick(t, [make_car("23", 9, speed=0.0, lat_off=0.0)]))
+    sc_t = SC_STOPPED_HOLD_S
+    tick_until(rc, 0.0, sc_t, stopped)
     assert rc.global_.flag == "SC"
 
     # car recovers and drives off, so sector 9 can start its own clear countdown
-    t += 0.1
-    rc.on_tick(make_tick(t, [make_car("23", 10, speed=200.0, lat_off=0.0)]))
-    t += MIN_HOLD_S + SECTOR_CLEAR_AFTER_S + 1.0
-    rc.on_tick(make_tick(t, [make_car("23", 10)]))
+    gone = lambda t: [moving_car("23", 10, t)]  # noqa: E731
+    sector_clear_t = sc_t + TICK_S + SECTOR_CLEAR_AFTER_S
+    tick_until(rc, sc_t, sector_clear_t, gone)
     assert rc.sectors[9].flag == "CLEAR"
+    assert rc.global_.flag == "SC", "a track-wide flag holds at least GLOBAL_MIN_HOLD_S"
 
-    # now global needs its own hold + clear-after on top of that
-    t += MIN_HOLD_S + GLOBAL_CLEAR_AFTER_S + 1.0
-    recs, _ = rc.on_tick(make_tick(t, [make_car("23", 10)]))
+    # the SC holds GLOBAL_MIN_HOLD_S from deployment, then needs GLOBAL_CLEAR_AFTER_S more
+    clear_t = sc_t + GLOBAL_MIN_HOLD_S + GLOBAL_CLEAR_AFTER_S
+    recs = tick_until(rc, sector_clear_t, clear_t - TICK_S, gone)
+    assert rc.global_.flag == "SC" and not any(r["message"] == "TRACK CLEAR" for r in recs)
+    recs = tick_until(rc, clear_t - TICK_S, clear_t, gone)
     assert rc.global_.flag == "CLEAR"
-    assert any(r["flag"] == "CLEAR" and r["msector"] == 9 for r in recs)
+    assert any(r["flag"] == "CLEAR" and r["msector"] == 9 and r["message"] == "TRACK CLEAR" for r in recs)
+
+
+def test_parked_car_releases_its_sector() -> None:
+    """A retired car keeps reporting the same position for the rest of the session. After
+    PARKED_CAR_S without moving it counts as recovered, even with a little GPS jitter."""
+    rc = RaceControl()
+
+    def wreck(t: float) -> list[dict]:
+        jitter = 0.4 if round(t / TICK_S) % 2 else 0.0
+        return [make_car("23", 9, speed=0.0, lat_off=30.0, x=500.0 + jitter, y=500.0)]
+
+    rc.on_tick(make_tick(0.0, wreck(0.0)))
+    rc.on_detection(make_det("det-1", 0.0, "23", 9, "IMPACT", 0.7))
+    tick_until(rc, 0.0, PARKED_CAR_S - TICK_S, wreck)
+    assert rc.sectors[9].flag == "YELLOW", "a car stopped for less than PARKED_CAR_S still holds its sector"
+
+    recs = tick_until(rc, PARKED_CAR_S - TICK_S, PARKED_CAR_S + SECTOR_CLEAR_AFTER_S, wreck)
+    assert any(r["msector"] == 9 and r["flag"] == "CLEAR" for r in recs)
+    assert rc.on_detection(make_det("det-2", rc.t, "23", 9, "STOPPED", 0.9)) == [], \
+        "a recovered car must not flag its sector again"
+
+
+def test_two_incidents_second_escalates_after_first_clears() -> None:
+    """The A9 bug: the wreck of the first incident kept reporting its position forever, so
+    its sector and its SC never cleared and the second incident could never escalate."""
+    rc = RaceControl()
+    wreck = make_car("23", 9, speed=0.0, lat_off=0.0, x=500.0, y=500.0)
+    first = lambda t: [wreck, moving_car("16", 2, t)]  # noqa: E731
+
+    # incident 1: car 23 stops on the racing line in sector 9 and never moves again
+    recs, _ = rc.on_tick(make_tick(0.0, first(0.0)))
+    recs += rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.85))
+    recs += tick_until(rc, 0.0, 300.0, first)
+    assert [r["msector"] for r in recs if r["flag"] == "SC"] == [9]
+    track_clear = [r for r in recs if r["message"] == "TRACK CLEAR"]
+    assert len(track_clear) == 1, "the first SC must clear once the wreck counts as recovered"
+    assert track_clear[0]["t"] >= PARKED_CAR_S
+    assert rc.global_.flag == "CLEAR" and rc.sectors[9].flag == "CLEAR"
+
+    # incident 2: car 16 stops on the racing line in sector 5, well after the first cleared
+    second = [wreck, make_car("16", 5, speed=0.0, lat_off=0.0, x=900.0, y=900.0)]
+    t2 = 320.0
+    recs2 = tick_until(rc, 300.0, t2, second)
+    recs2 += rc.on_detection(make_det("det-2", t2, "16", 5, "STOPPED", 0.85))
+    recs2 += tick_until(rc, t2, t2 + SC_STOPPED_HOLD_S, second)
+    assert [(r["flag"], r["msector"]) for r in recs2] == [("DOUBLE_YELLOW", 5), ("SC", 5)]
+    assert recs2[-1]["t"] > track_clear[0]["t"]
+
+    track_wide = [r["message"] if r["message"] == "TRACK CLEAR" else r["flag"]
+                  for r in recs + recs2 if r["flag"] in ("VSC", "SC", "RED") or r["message"] == "TRACK CLEAR"]
+    assert track_wide == ["SC", "TRACK CLEAR", "SC"]
+
+
+def test_sc_waits_for_every_sector_that_supports_it() -> None:
+    """A second car stopping on track while the SC is out supports it: the SC must not
+    clear when the first sector clears while the second one is still flagged."""
+    rc = RaceControl()
+    car23 = make_car("23", 9, speed=0.0, lat_off=0.0, x=500.0, y=500.0)
+    rc.on_tick(make_tick(0.0, [car23, moving_car("16", 2, 0.0)]))
+    rc.on_detection(make_det("det-1", 0.0, "23", 9, "STOPPED", 0.85))
+    tick_until(rc, 0.0, 10.0, lambda t: [car23, moving_car("16", 2, t)])
+    assert rc.global_.flag == "SC"
+
+    car16 = make_car("16", 5, speed=0.0, lat_off=0.0, x=900.0, y=900.0)
+    rc.on_detection(make_det("det-2", 10.0, "16", 5, "STOPPED", 0.85))
+    recs = tick_until(rc, 10.0, 20.0, [car23, car16])
+    assert not any(r["flag"] == "SC" for r in recs), "no second SC rec while the SC is out"
+    assert rc.global_.cause_sectors == {9, 5}
+
+    # car 23 is recovered and driven off, car 16 is still stopped: the SC stays
+    tick_until(rc, 20.0, 120.0, lambda t: [moving_car("23", 10, t), car16])
+    assert rc.sectors[9].flag == "CLEAR" and rc.sectors[5].flag == "DOUBLE_YELLOW"
+    assert rc.global_.flag == "SC", "sector 5 still supports the SC"
+
+    # car 16 drives off too, then the SC clears
+    tick_until(rc, 120.0, 140.0, lambda t: [moving_car("23", 10, t), moving_car("16", 6, t)])
+    assert rc.sectors[5].flag == "CLEAR" and rc.global_.flag == "CLEAR"
+
+
+# --- seeks ---------------------------------------------------------------
+
+
+def test_forward_seek_resets() -> None:
+    rc = RaceControl()
+    rc.on_tick(make_tick(100.0, [make_car("1", 5)]))
+    rc.on_detection(make_det("det-1", 100.0, "1", 5, "IMPACT", 0.9))
+    _, did_reset = rc.on_tick(make_tick(100.0 + RESET_JUMP_S, [make_car("1", 5)]))
+    assert did_reset is False and rc.sectors[5].flag == "YELLOW"
+
+    _, did_reset = rc.on_tick(make_tick(100.0 + RESET_JUMP_S + 50.0, [make_car("1", 5)]))
+    assert did_reset is True, "a jump forward (seek) wipes flags from before the jump"
+    assert rc.sectors == {}
 
 
 # --- rec contract shape ------------------------------------------------
