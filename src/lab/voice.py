@@ -42,7 +42,7 @@ CONFIRM_WINDOW_S = 120.0      # a cleared episode can still be confirmed this lo
 MIN_LEAD_S = 0.05             # below the spoken resolution: not a lead
 MAX_MESSAGE_BYTES = 4 * 1024 * 1024
 STEP_S = 0.1
-BACKOFF_START_S, BACKOFF_CAP_S = 1.0, 30.0
+BACKOFF_START_S, BACKOFF_CAP_S = 1.0, 5.0    # local server: same cap as the race control client
 
 RANK = {"CLEAR": 0, "YELLOW": 1, "DOUBLE_YELLOW": 2, "VSC": 3, "SC": 4, "RED": 5}
 GLOBAL_FLAGS = {"VSC", "SC", "RED"}

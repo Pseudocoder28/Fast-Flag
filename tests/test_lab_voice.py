@@ -398,3 +398,8 @@ def test_forward_seek_resets_like_the_engine() -> None:
         "Yellow flag. Car 33, impact, sector 21.", "Safety Car. Car 33, impact, sector 21.",
         "Race control confirms Double yellow, 19.0 seconds after Fast Flag.",
         "Race control confirms Safety Car, 83.7 seconds after Fast Flag."]
+
+
+def test_reconnect_waits_at_most_5_s() -> None:
+    from src.lab.voice import BACKOFF_CAP_S
+    assert BACKOFF_CAP_S == 5.0, "a server started after the voice is picked up within 5 s"
