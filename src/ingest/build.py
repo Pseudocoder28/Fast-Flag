@@ -15,6 +15,7 @@ Outputs for training races, in data/features/:
 
 Run: python -m src.ingest.build 2023_Australian 2026_Dutch
      python -m src.ingest.build --top 20
+     python -m src.ingest.build --case 2021_Azerbaijan    (case study race: data/case_studies/, never training)
      python -m src.ingest.build --holdout 2026_Azerbaijan   (A7 only, writes to data/holdout/)
 """
 
@@ -40,6 +41,7 @@ from src.ingest.sectors import sector_matches
 
 FEATURES = Path("data/features")
 HOLDOUT_DIR = Path("data/holdout")
+CASE_DIR = Path("data/case_studies")
 END_MARGIN_S = 10.0
 SLOW_RATIO = 0.6          # sanity check: a car below 60% of reference speed counts as slow
 
@@ -83,7 +85,7 @@ def load(year: int, rnd: int, kind: str):
     return s
 
 
-def build_race(rid: str, holdout: bool = False) -> dict:
+def build_race(rid: str, holdout: bool = False, case: bool = False) -> dict:
     year, rnd, location = resolve(rid)
     if holdout:
         if not is_holdout_id(rid):
@@ -91,7 +93,7 @@ def build_race(rid: str, holdout: bool = False) -> dict:
         out_dir = HOLDOUT_DIR
     else:
         assert_not_holdout(year, location, rid=rid)
-        out_dir = FEATURES
+        out_dir = CASE_DIR if case else FEATURES
     out_dir.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     ref = build_track_ref(load(year, rnd, "Q"))
@@ -126,16 +128,20 @@ def main() -> None:
     p.add_argument("races", nargs="*", help="race ids, e.g. 2023_Australian")
     p.add_argument("--top", type=int, help="build the top N races of the ranking")
     p.add_argument("--holdout", help="build one holdout race into data/holdout/ (A7 only)")
+    p.add_argument("--case", help="build one case-study race into data/case_studies/ (not a training race)")
     a = p.parse_args()
     fastf1.Cache.enable_cache(str(CACHE_DIR))
     fastf1.set_log_level(logging.ERROR)
+    case = bool(a.case)
     if a.holdout:
         jobs, holdout = [a.holdout], True
+    elif a.case:
+        jobs, holdout = [a.case], False
     else:
         jobs, holdout = (a.races or []) + (top_races(a.top) if a.top else []), False
     for rid in dict.fromkeys(jobs):
         try:
-            m = build_race(rid, holdout=holdout)
+            m = build_race(rid, holdout=holdout, case=case)
             print(f"{rid:<22} {m['rows']:>8} rows  {m['cars']} cars  lap {m['lap_length_m']:>6.0f} m  "
                   f"sectors {m['n_msectors']} in order={m['msectors_in_order']}  "
                   f"flag alignment {m['flag_alignment']:>5}  {m['seconds']} s", flush=True)

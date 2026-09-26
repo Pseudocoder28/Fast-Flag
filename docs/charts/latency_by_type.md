@@ -38,4 +38,6 @@ The onset car of an official incident is the car with the earliest onset in the 
 
 Every one is listed in latency_by_type_no_onset.csv.
 
+**Check:** in 1 of 55 incidents the onset car entered the pit lane within 20 s (a damaged car heading in, or a car braking for the pit entry before the pit-lane geometry covers it). They are kept and marked in latency_by_type.csv (onset_car_pitted_20s).
+
 ![latency by flag type](latency_by_type.png)

@@ -106,6 +106,8 @@ def race_events(rid: str) -> tuple[list[dict], list[dict]]:
             continue
         onset = cand.iloc[0]
         cars = set(cand["drv"])
+        after = frame[(frame["drv"] == onset["drv"]) & (frame["t"] > onset["t"]) & (frame["t"] <= onset["t"] + 20)]
+        pitted = bool(after["in_pit"].any())         # a damaged car heading in, or a pit-entry slowdown
         alert = next((d for d in dets if onset["t"] - ALERT_BEFORE_S <= d["t"] <= onset["t"] + ALERT_AFTER_S
                       and (cars & set(d["drivers"]) or in_sectors(d["msector"], inc, n))), None)
         for f, t in firsts.items():
@@ -115,7 +117,7 @@ def race_events(rid: str) -> tuple[list[dict], list[dict]]:
                            "cars": ",".join(sorted(cars)), "t_official": t, "rc_latency_s": round(rc, 2),
                            "our_alert_type": alert["type"] if alert else None,
                            "our_latency_s": round(ours, 2) if alert else np.nan,
-                           "lead_s": round(rc - ours, 2) if alert else np.nan})
+                           "lead_s": round(rc - ours, 2) if alert else np.nan, "onset_car_pitted_20s": pitted})
     return events, missing
 
 
@@ -239,7 +241,12 @@ def write_report(ev: pd.DataFrame, missing: pd.DataFrame, by_flag: pd.DataFrame,
         + "\n\n## By our alert type\n\n" + by_type.round(2).to_markdown(index=False)
         + f"\n\n## Events without an identifiable onset car ({len(missing)} events)\n\n"
         + (reasons.to_markdown() if len(reasons) else "none")
-        + "\n\nEvery one is listed in latency_by_type_no_onset.csv.\n\n![latency by flag type](latency_by_type.png)\n",
+        + "\n\nEvery one is listed in latency_by_type_no_onset.csv.\n\n"
+        + f"**Check:** in {int(ev.drop_duplicates(['race', 't_onset'])['onset_car_pitted_20s'].sum())} of "
+          f"{len(ev.drop_duplicates(['race', 't_onset']))} incidents the onset car entered the pit lane within 20 s "
+          "(a damaged car heading in, or a car braking for the pit entry before the pit-lane geometry covers it). "
+          "They are kept and marked in latency_by_type.csv (onset_car_pitted_20s).\n\n"
+          "![latency by flag type](latency_by_type.png)\n",
         encoding="utf-8")
 
 
