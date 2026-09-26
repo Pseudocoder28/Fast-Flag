@@ -73,6 +73,7 @@ Naman now also owns `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol
 - Draw the canvas only inside the rAF loop. Update the feed only when a detection, rec or official envelope arrives, and keep only the last 50 rows.
 - Dots about 3x the old radius, car number (`drv`) in bold white text centred on each dot.
 - Done when: cars glide at 1x, 10x and 50x, and a stopped car, a car with no data and a car in the pit lane each look right.
+- Result: the stuck car was a retired car whose ticks keep arriving with a frozen x/y (2023_Australian cars 16 and 23). It is now ringed grey and labelled STOPPED after 3 s still, OUT after 60 s. A car with no data fades after 5 s of replay time (car 27, t=9500 to 9538), and pit lane cars are small dim dots at their real position. About 1 tick in 6 repeats a moving car's previous position (irregular FastF1 position samples), so each car keeps its recent distinct positions and the map is drawn about one burst behind the newest tick. Measured still frames for a moving car: 0 of 239 at 1x, 1 at 10x, 2 at 50x.
 
 **A11. Dashboard: visual overhaul (`dashboard/` only, no CDN, no external fonts or images)**
 - Broadcast pit wall look: matte dark panels, subtle carbon-fibre texture from CSS gradients, padded cards, subtle 1 px borders, rounded corners, uppercase section headers.
