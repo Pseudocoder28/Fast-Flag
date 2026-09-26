@@ -56,7 +56,7 @@ from src.eval.onset import add_own_ratio, onsets
 from src.eval.run import belongs
 from src.ingest.features import NEUTRAL_STATUS
 from src.ingest.holdout import assert_not_holdout
-from src.racecontrol.engine import ON_TRACK_LAT_OFF_M, RaceControl
+from src.racecontrol.engine import RaceControl
 from src.replay.engine import Engine, Processor, RaceData, available_races
 
 CHARTS = Path("docs/charts")
@@ -64,7 +64,8 @@ ESCALATIONS = ("VSC", "SC", "RED")
 RANK = {f: i for i, f in enumerate(ESCALATIONS)}
 SECTOR_FLAGS = ("YELLOW", "DOUBLE_YELLOW")
 LATE_S = 60.0
-STOPPED_KMH = 5.0          # stopped-car rows for the lateral offset check
+STOPPED_KMH = 5.0          # stopped-car rows for the lateral offset check ...
+OFF_LINE_M = 8.0           # ... and how far from the racing line a car off the track surface would be
 MATCHED = ("earlier", "later")
 OFFICIAL_COLUMNS = ["race", "t_incident", "t_official", "official_flag", "official_top", "sectors", "status", "lead_s",
                     "our_t", "our_flag", "our_top", "miss_kind", "onset_car", "onset_car_alerts", "detail"]
@@ -223,8 +224,8 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
     stopped = stopped.abs().dropna()
     return {"race": rid, "official": official_rows, "ours": ours_rows, "hours": hours, "resets": len(resets),
             "stopped_rows": len(stopped), "stopped_within_1m": int((stopped <= 1.0).sum()),
-            "stopped_off_track": int((stopped > ON_TRACK_LAT_OFF_M).sum()),
-            "stopped_off_track_cars": sorted(race.frame.loc[stopped.index[stopped > ON_TRACK_LAT_OFF_M], "drv"].unique())}
+            "stopped_off_line": int((stopped > OFF_LINE_M).sum()),
+            "stopped_off_line_cars": sorted(race.frame.loc[stopped.index[stopped > OFF_LINE_M], "drv"].unique())}
 
 
 # ---- totals
@@ -270,36 +271,37 @@ def summarise(results: list[dict]) -> dict:
         "extra": len(extra),
         "extra_per_hour": round(len(extra) / hours, 2) if hours else None,
         "extra_by_flag": counts(extra["flag"], ESCALATIONS),
+        "our_by_flag": counts(ours["flag"], ESCALATIONS),
         "engine_resets": int(sum(res["resets"] for res in results)),
         "stopped_lateral_offset": stopped_offset(results),
-        "impact_rule": impact_rule(off),
+        "impact_signal": impact_signal(off),
     }
 
 
 def stopped_offset(results: list[dict]) -> dict:
-    """Why we never recommend VSC: the race control engine calls a stopped car off track
-    (VSC) when it is more than ON_TRACK_LAT_OFF_M from the racing line, but FastF1
-    positions of stopped cars sit on the line, even for retired cars parked in run-off."""
+    """Why the lateral offset cannot pick VSC or SC: FastF1 positions of stopped cars sit
+    on the racing line, even for retired cars parked in run-off."""
     rows = sum(r["stopped_rows"] for r in results)
     return {"stopped_car_rows": rows,
             "share_within_1m": round(sum(r["stopped_within_1m"] for r in results) / rows, 4) if rows else None,
-            "rows_beyond_threshold": sum(r["stopped_off_track"] for r in results),
-            "episodes_beyond_threshold": [f"{r['race']} car {c}" for r in results for c in r["stopped_off_track_cars"]],
-            "engine_off_track_threshold_m": ON_TRACK_LAT_OFF_M}
+            "rows_beyond_threshold": sum(r["stopped_off_line"] for r in results),
+            "episodes_beyond_threshold": [f"{r['race']} car {c}" for r in results for c in r["stopped_off_line_cars"]],
+            "off_line_threshold_m": OFF_LINE_M}
 
 
-def impact_rule(off: pd.DataFrame) -> dict:
-    """Candidate replacement (not in the engine): SC or red when our IMPACT or MULTI
-    detection involved the onset car, VSC otherwise. Scored on the official escalations
-    with an onset car, against the current outcome (always SC)."""
+def impact_signal(off: pd.DataFrame) -> dict:
+    """How well an impact separates race control's SC or red from its VSC, on the official
+    escalations with an onset car: "SC after our IMPACT or MULTI detection involved the
+    car, VSC otherwise" against "always SC". A property of the data and the detectors,
+    whatever rule the race control engine uses (its own flags are in flag_pairs)."""
     has = off[off["onset_car"].notna()]
-    impact = has["onset_car_alerts"].str.contains("IMPACT|MULTI")
+    impact = has["onset_car_alerts"].fillna("").astype(str).str.contains("IMPACT|MULTI")
     severe = has["official_flag"].isin(["SC", "RED"])
     return {"escalations_with_onset_car": len(has),
             "official_sc_or_red_with_impact": int((impact & severe).sum()), "official_sc_or_red": int(severe.sum()),
             "official_vsc_without_impact": int((~impact & ~severe).sum()), "official_vsc": int((~severe).sum()),
             "right_with_impact_rule": int((impact == severe).sum()),
-            "right_with_current_rule": int(severe.sum())}
+            "right_if_always_sc": int(severe.sum())}
 
 
 # ---- report and chart
@@ -322,11 +324,14 @@ def outcome(row: pd.Series) -> str:
     return row["miss_kind"] if row["status"] == "missed" else row["status"]
 
 
-def plot(off: pd.DataFrame, summ: dict, path: Path) -> None:
+def plot(off: pd.DataFrame, summ: dict, path: Path, title: str | None = None, scope_note: str = IN_SAMPLE) -> None:
+    """Scorecard chart. title and scope_note default to the training-race wording (the A7
+    holdout run passes its own)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
+    from matplotlib.ticker import MaxNLocator
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8.2), facecolor=SURFACE,
                                    gridspec_kw={"height_ratios": [3.1, 1.9], "hspace": 0.55})
@@ -369,6 +374,7 @@ def plot(off: pd.DataFrame, summ: dict, path: Path) -> None:
     ax2.set_yticks(range(len(ESCALATIONS)))
     ax2.set_yticklabels([FLAG_NAME[f] for f in ESCALATIONS])
     ax2.set_xlabel("Official escalations", color=INK2)
+    ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax2.set_title("Outcome per official escalation", loc="left", fontsize=10.5, color=INK, pad=8)
     fig.legend(handles=[Patch(facecolor=c, edgecolor=SURFACE, label=lbl) for _, lbl, c, _ in SEGMENTS],
                loc="upper left", bbox_to_anchor=(0.19, 0.2), ncol=2, frameon=False, fontsize=8.5)
@@ -385,16 +391,19 @@ def plot(off: pd.DataFrame, summ: dict, path: Path) -> None:
             lbl.set_color(INK)
 
     c = summ["our_by_category"]
-    fig.text(0.02, 0.975, f"Escalation scorecard: {summ['official_escalations']} official VSC, SC and red flags in "
-             f"{summ['races']} training races", fontsize=13, color=INK, weight="bold", va="top")
+    title = title or (f"Escalation scorecard: {summ['official_escalations']} official VSC, SC and red flags in "
+                      f"{summ['races']} training races")
+    med = "" if summ["median_lead_s"] is None else f" (median {summ['median_lead_s']:.0f} s)"
+    per_hour = "" if summ["extra_per_hour"] is None else f" ({summ['extra_per_hour']:.2f} per race hour)"
+    fig.text(0.02, 0.975, title, fontsize=13, color=INK, weight="bold", va="top")
     fig.text(0.02, 0.94, f"Our race control recommended a neutralisation for {summ['matched']}, "
-             f"{summ['status']['earlier']} of them earlier (median {summ['median_lead_s']:.0f} s).\nIt also made "
-             f"{summ['extra']} escalations race control did not ({summ['extra_per_hour']:.2f} per race hour).",
+             f"{summ['status']['earlier']} of them earlier{med}.\nIt also made "
+             f"{summ['extra']} escalation{'' if summ['extra'] == 1 else 's'} race control did not{per_hour}.",
              fontsize=9.5, color=INK2, va="top", linespacing=1.4)
     fig.text(0.02, 0.015, f"Our {summ['our_escalations']} recommendations: {c['matched']} matched, "
              f"{c['during an official neutralisation']} during an official neutralisation, "
              f"{c['official yellows only']} where race control kept yellows only, {c['no official flag']} with no "
-             f"official flag. Replay of historical FastF1 data.\n{IN_SAMPLE}\n"
+             f"official flag. Replay of historical FastF1 data.\n{scope_note}\n"
              + COUNTERFACTUAL.replace(" Claim", "\nClaim"), fontsize=7.5, color=INK2, va="bottom", linespacing=1.4)
     fig.savefig(path, dpi=160, facecolor=SURFACE)
     plt.close(fig)
@@ -413,7 +422,7 @@ def pct(a: int, b: int) -> str:
 
 
 def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: list[dict]) -> str:
-    st, c, so, ir = summ["status"], summ["our_by_category"], summ["stopped_lateral_offset"], summ["impact_rule"]
+    st, c, so, ir = summ["status"], summ["our_by_category"], summ["stopped_lateral_offset"], summ["impact_signal"]
     lines = [
         "# Escalation scorecard (training races)", "",
         f"Replay of historical FastF1 data: {summ['races']} training races, {summ['race_hours']:.1f} race hours. "
@@ -449,21 +458,22 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
               f"match window, {c['no official flag']} with no official flag). By flag: "
               + ", ".join(f"{FLAG_NAME[k]} {v}" for k, v in summ["extra_by_flag"].items()) + ".",
               f"- Race control engine resets (tick jumps over 2 s): {summ['engine_resets']}.", "",
-              "## Finding: our engine never recommends a VSC", "",
-              f"The engine sends a VSC for a car stopped more than {so['engine_off_track_threshold_m']:.0f} m from "
-              f"the racing line and an SC otherwise. FastF1 positions of stopped cars sit on the line, even for "
-              f"retired cars parked in run-off: of {so['stopped_car_rows']:,} stopped-car rows (below "
+              "## Flag choice: VSC or SC", "",
+              f"- Our first flag matched race control's in {summ['same_first_flag']} of {summ['matched']} matched "
+              f"escalations ({pairs_text(summ['flag_pairs'])}).",
+              f"- Our {summ['our_escalations']} recommendations by flag: "
+              + ", ".join(f"{FLAG_NAME[k]} {v}" for k, v in summ["our_by_flag"].items()) + ".",
+              f"- The lateral offset cannot choose between them. FastF1 positions of stopped cars sit on the racing "
+              f"line, even for retired cars parked in run-off: of {so['stopped_car_rows']:,} stopped-car rows (below "
               f"{STOPPED_KMH:.0f} km/h, outside the pit lane), {so['share_within_1m']:.2%} are within 1 m of it and "
-              f"{so['rows_beyond_threshold']} are beyond {so['engine_off_track_threshold_m']:.0f} m (short episodes: "
-              f"{', '.join(so['episodes_beyond_threshold']) or 'none'}). So every sustained stop becomes an SC, and "
-              f"all {sum(v for k, v in summ['flag_pairs'].items() if k.startswith('VSC'))} matched official VSCs "
-              "got an SC from us.", "",
-              f"Candidate rule (not in the engine): SC when our IMPACT or MULTI detection involved the car, VSC when it "
-              f"stopped without one. On the {ir['escalations_with_onset_car']} official escalations with an onset car, "
-              f"{ir['official_sc_or_red_with_impact']} of {ir['official_sc_or_red']} SC or red had an impact and "
-              f"{ir['official_vsc_without_impact']} of {ir['official_vsc']} VSC had none: it picks race control's "
-              f"flag {ir['right_with_impact_rule']} times against {ir['right_with_current_rule']} now. Same "
-              "in-sample caveat, and a small sample.", "",
+              f"{so['rows_beyond_threshold']} are more than {so['off_line_threshold_m']:.0f} m away (short episodes: "
+              f"{', '.join(so['episodes_beyond_threshold']) or 'none'}).",
+              f"- An impact separates them better. On the {ir['escalations_with_onset_car']} official escalations with "
+              f"an onset car, {ir['official_sc_or_red_with_impact']} of {ir['official_sc_or_red']} SC or red followed "
+              f"an IMPACT or MULTI detection involving the car and {ir['official_vsc_without_impact']} of "
+              f"{ir['official_vsc']} VSC did not: \"SC after an impact, VSC otherwise\" picks race control's flag "
+              f"{ir['right_with_impact_rule']} times, \"always SC\" {ir['right_if_always_sc']} times. In-sample, and "
+              "a small sample.", "",
               "## Per race", "",
               "| race | race hours | official escalations | earlier | later | missed | our escalations | extra |",
               "|---|---|---|---|---|---|---|---|"]

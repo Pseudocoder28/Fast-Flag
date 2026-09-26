@@ -10,6 +10,13 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   caused, would never clear and a later crash could never escalate.
 - A track-wide flag (VSC, SC, RED) holds at least GLOBAL_MIN_HOLD_S and clears
   GLOBAL_CLEAR_AFTER_S after every sector that caused or supported it is CLEAR.
+- A stopped car gets an SC after SC_STOPPED_HOLD_S when our IMPACT or MULTI
+  detection involved it (from IMPACT_BEFORE_STOP_S before its stop onward), and a
+  VSC after VSC_STOPPED_HOLD_S otherwise. A later IMPACT or MULTI upgrades that VSC
+  to an SC. Every stopped car in a sector is tracked and the highest call wins, so
+  a crash is never hidden behind another car's stop. Lateral offset cannot make this
+  call: FastF1 positions of stopped cars sit on the racing line even in run-off
+  (docs/charts/escalation.md).
 - A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
   wipes all flag state.
 """
@@ -31,8 +38,9 @@ ANOMALY_MIN_SEV = 0.75
 ANOMALY_MAX_CONF = 0.6
 ANOMALY_CORROBORATION_WINDOW_S = 5.0
 ANOMALY_CORROBORATION_BOOST = 0.15
-SC_STOPPED_HOLD_S = 3.0
-VSC_STOPPED_HOLD_S = 10.0
+SC_STOPPED_HOLD_S = 3.0      # stopped after an impact: SC after this long
+VSC_STOPPED_HOLD_S = 10.0    # stopped without one: VSC after this long
+IMPACT_BEFORE_STOP_S = 30.0  # an IMPACT or MULTI this long before the stop still counts
 STOPPED_SPEED_KMH = 30.0
 STALE_CAR_S = 120.0
 PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot ...
@@ -50,6 +58,14 @@ GLOBAL_RANK = {"CLEAR": 0, "VSC": 1, "SC": 2, "RED": 3}
 
 
 @dataclass
+class Stop:
+    """One stopped car in a sector."""
+    first_t: float            # when this stop was first detected: the impact lookback starts here
+    since_t: float | None     # start of the current hold, None while the car moves (paused)
+    severity: float
+
+
+@dataclass
 class SectorState:
     flag: str = "CLEAR"
     since_t: float = 0.0
@@ -57,9 +73,7 @@ class SectorState:
     reason: str = ""
     cause_drivers: set[str] = field(default_factory=set)
     cause_detection_ids: list[str] = field(default_factory=list)
-    stopped_since_t: float | None = None
-    stopped_driver: str | None = None
-    stopped_severity: float | None = None
+    stops: dict[str, Stop] = field(default_factory=dict)    # every stopped car in the sector, by drv
     empty_since_t: float | None = None
 
 
@@ -101,6 +115,7 @@ class RaceControl:
         self.global_ = GlobalState()
         self.car_state: dict[str, dict] = {}
         self.risk: dict[str, dict] = {}
+        self.impact_t: dict[str, float] = {}      # drv -> latest IMPACT or MULTI detection with that car
         self.last_physical_by_sector: dict[int, list[tuple[float, str]]] = {}
         # rec id counter is not reset here, ids stay unique across a reset
 
@@ -160,6 +175,10 @@ class RaceControl:
         if dtype == "ANOMALY":
             return self._on_anomaly(det)
 
+        if dtype in ("IMPACT", "MULTI"):
+            for d in det["drivers"]:
+                self.impact_t[d] = max(det_t, self.impact_t.get(d, det_t))
+
         sec = self.sectors.setdefault(msector, SectorState())
         drv = det["drivers"][0]
         car = self.car_state.get(drv, {})
@@ -173,10 +192,16 @@ class RaceControl:
 
         target, conf, reason = self._physical_target(det, sec, car, drv)
 
-        if dtype == "STOPPED" and sec.stopped_since_t is None:
-            sec.stopped_since_t = det_t
-            sec.stopped_driver = drv
-            sec.stopped_severity = det["severity"]
+        if dtype == "STOPPED":
+            stop = sec.stops.get(drv)
+            if stop is None:
+                sec.stops[drv] = Stop(first_t=det_t, since_t=det_t, severity=det["severity"])
+            elif stop.since_t is None:
+                stop.since_t = det_t        # stopped again: restart the hold, keep when the stop began
+                stop.severity = max(stop.severity, det["severity"])
+
+        # every car with a physical detection here is a flagged car: the sector waits for it to leave
+        sec.cause_drivers |= set(det["drivers"])
 
         recs: list[dict] = []
         if SECTOR_RANK[target] > SECTOR_RANK[sec.flag]:
@@ -184,7 +209,6 @@ class RaceControl:
             sec.since_t = det_t
             sec.confidence = min(MAX_CONF, conf)
             sec.reason = reason
-            sec.cause_drivers |= set(det["drivers"])
             sec.cause_detection_ids.append(det["id"])
             recs.append(
                 self._make_rec(
@@ -347,48 +371,55 @@ class RaceControl:
     # --- tick-driven checks ----------------------------------------------
 
     def _check_sustained_stop(self) -> list[dict]:
-        recs: list[dict] = []
+        """Every stopped car in every sector calls for SC after an impact, VSC without one,
+        once its hold has run. The highest call is escalated, once per tick; every sector
+        whose call the flag already out covers supports that flag (it holds it up)."""
+        calls = []   # (rank, target, msector, drv, stop, elapsed, impact), in sector then drv order
         for msector, sec in self.sectors.items():
-            if sec.stopped_driver is None:
-                continue
-            car = self.car_state.get(sec.stopped_driver)
-            if car is None:
-                continue
-            if not self._holds_sector(sec.stopped_driver, msector):
-                # drove out, pitted, no data or parked long enough to count as recovered
-                sec.stopped_since_t = None
-                sec.stopped_driver = None
-                sec.stopped_severity = None
-                continue
-            if car["speed"] > STOPPED_SPEED_KMH:
-                # moving again: pause the hold but keep watching the car, so one noisy
-                # speed sample cannot cancel the escalation of a car that stays put
-                sec.stopped_since_t = None
-                continue
-            if sec.stopped_since_t is None:
-                sec.stopped_since_t = self.t
+            for drv in sorted(sec.stops):
+                stop = sec.stops[drv]
+                car = self.car_state.get(drv)
+                if car is None:
+                    continue
+                if not self._holds_sector(drv, msector):
+                    del sec.stops[drv]   # drove out, pitted, no data or parked long enough to count as recovered
+                    continue
+                if car["speed"] > STOPPED_SPEED_KMH:
+                    # moving again: pause the hold but keep watching the car, so one noisy
+                    # speed sample cannot cancel the escalation of a car that stays put
+                    stop.since_t = None
+                    continue
+                if stop.since_t is None:
+                    stop.since_t = self.t
 
-            elapsed = self.t - sec.stopped_since_t
-            on_track = abs(car["lat_off"]) <= ON_TRACK_LAT_OFF_M
-            target: str | None = None
-            if on_track and elapsed >= SC_STOPPED_HOLD_S:
-                target = "SC"
-            elif (not on_track) and elapsed >= VSC_STOPPED_HOLD_S:
-                target = "VSC"
+                elapsed = self.t - stop.since_t
+                impact = self._impact_since(drv, stop.first_t - IMPACT_BEFORE_STOP_S)
+                if impact and elapsed >= SC_STOPPED_HOLD_S:
+                    calls.append((GLOBAL_RANK["SC"], "SC", msector, drv, stop, elapsed, impact))
+                elif not impact and elapsed >= VSC_STOPPED_HOLD_S:
+                    calls.append((GLOBAL_RANK["VSC"], "VSC", msector, drv, stop, elapsed, impact))
+        if not calls:
+            return []
 
-            if target is None:
-                continue
-            if GLOBAL_RANK[target] <= GLOBAL_RANK[self.global_.flag]:
-                self.global_.cause_sectors.add(msector)   # supports the flag already out
-                continue
-
-            conf = min(MAX_CONF, sec.stopped_severity or 0.0)
-            risk = self.risk.get(sec.stopped_driver, {})
-            if risk.get("risk_30s", 0.0) >= RISK_SC_SUPPORT:
+        recs: list[dict] = []
+        rank, target, msector, drv, stop, elapsed, impact = max(calls, key=lambda c: c[0])
+        if rank > GLOBAL_RANK[self.global_.flag]:
+            conf = min(MAX_CONF, stop.severity)
+            if self.risk.get(drv, {}).get("risk_30s", 0.0) >= RISK_SC_SUPPORT:
                 conf = min(MAX_CONF, conf + RISK_CONF_BOOST)
-            reason = f"car {sec.stopped_driver} stopped {'on track' if on_track else 'off track'} for {elapsed:.1f} s"
-            recs.extend(self._escalate_global(self.t, msector, target, conf, reason, None))
+            reason = (f"car {drv} stopped for {elapsed:.1f} s after an impact" if impact
+                      else f"car {drv} stopped for {elapsed:.1f} s, no impact detected")
+            recs = self._escalate_global(self.t, msector, target, conf, reason, None)
+        for c in calls:
+            if c[0] <= GLOBAL_RANK[self.global_.flag]:
+                self.global_.cause_sectors.add(c[2])
         return recs
+
+    def _impact_since(self, drv: str, t0: float) -> bool:
+        """Our IMPACT or MULTI detection involved the car at or after t0 (and, as detections
+        only arrive up to now, at or before now)."""
+        t_imp = self.impact_t.get(drv)
+        return t_imp is not None and t_imp >= t0
 
     def _check_sector_clearing(self) -> list[dict]:
         recs: list[dict] = []
@@ -420,9 +451,7 @@ class RaceControl:
             sec.reason = ""
             sec.cause_drivers = set()
             sec.cause_detection_ids = []
-            sec.stopped_since_t = None
-            sec.stopped_driver = None
-            sec.stopped_severity = None
+            sec.stops.clear()
             sec.empty_since_t = None
         return recs
 

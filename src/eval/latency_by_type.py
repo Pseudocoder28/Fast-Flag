@@ -147,8 +147,14 @@ def summary(ev: pd.DataFrame, by: str, order: list[str]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def plot(ev: pd.DataFrame, by_flag: pd.DataFrame, n_races: int, n_missing: int, path: Path) -> None:
-    """Headline chart: per flag type, race control latency next to ours (log time axis)."""
+def earlier_text(share: float) -> str:
+    return "none caught" if pd.isna(share) else f"ours earlier in {share:.0%}"
+
+
+def plot(ev: pd.DataFrame, by_flag: pd.DataFrame, n_races: int, n_missing: int, path: Path,
+         subtitle: str | None = None, source: str = "latency_by_type.md") -> None:
+    """Headline chart: per flag type, race control latency next to ours (log time axis).
+    subtitle and source default to the training-race wording (the A7 holdout run passes its own)."""
     flags = [f for f in INCIDENT_FLAGS if f in set(ev["flag"])]
     fig, ax = plt.subplots(figsize=(10, 6.2), dpi=150)
     fig.patch.set_facecolor(SURFACE)
@@ -173,8 +179,8 @@ def plot(ev: pd.DataFrame, by_flag: pd.DataFrame, n_races: int, n_missing: int, 
                         fontsize=8.5, color=INK2)
     stats = by_flag.set_index("flag")
     ax.set_yticks(range(len(flags)))
-    ax.set_yticklabels([f"{FLAG_LABEL[f]}\n{int(stats.loc[f, 'events'])} events, ours earlier in "
-                        f"{stats.loc[f, 'earlier_share']:.0%}" for f in reversed(flags)], fontsize=9, color=INK)
+    ax.set_yticklabels([f"{FLAG_LABEL[f]}\n{int(stats.loc[f, 'events'])} event{'' if stats.loc[f, 'events'] == 1 else 's'}, "
+                        f"{earlier_text(stats.loc[f, 'earlier_share'])}" for f in reversed(flags)], fontsize=9, color=INK)
     ax.set_xscale("log")
     ax.set_xlim(0.2, 400)
     ticks = [0.25, 0.5, 1, 2, 5, 10, 30, 60, 120, 300]
@@ -194,12 +200,13 @@ def plot(ev: pd.DataFrame, by_flag: pd.DataFrame, n_races: int, n_missing: int, 
               labelcolor=INK)
     fig.text(0.01, 0.985, "From crash onset to first flag: race control vs our system", fontsize=13,
              weight="bold", color=INK, va="top")
-    fig.text(0.01, 0.945, f"Replay of historical FastF1 data, {n_races} training races (2023 to 2026), "
-             f"{len(ev)} flag events with an identifiable crash onset", fontsize=9.5, color=INK2, va="top")
+    subtitle = subtitle or (f"Replay of historical FastF1 data, {n_races} training races (2023 to 2026), "
+                            f"{len(ev)} flag events with an identifiable crash onset")
+    fig.text(0.01, 0.945, subtitle, fontsize=9.5, color=INK2, va="top")
     fig.text(0.01, 0.01, "Onset: speed below 50% of the car's own speed at that point on its previous 3 clean laps, "
              "for 1 s. Dots: events. Large marker: median. Line: middle half.\nValues at or below 0.25 s (race control "
              "flagging before the collapse, or our alert on the onset tick) are drawn at 0.25 s.\n"
-             f"{n_missing} events without an identifiable onset car are listed in latency_by_type.md.",
+             f"{n_missing} events without an identifiable onset car are listed in {source}.",
              fontsize=7.5, color=INK2, va="bottom")
     fig.subplots_adjust(left=0.235, right=0.98, top=0.84, bottom=0.21)
     fig.savefig(path, facecolor=SURFACE)

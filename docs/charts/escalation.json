@@ -3,32 +3,34 @@
   "race_hours": 31.23,
   "official_escalations": 51,
   "status": {
-    "earlier": 28,
-    "later": 1,
+    "earlier": 27,
+    "later": 2,
     "already out": 0,
     "missed": 22
   },
   "matched": 29,
-  "median_lead_s": 20.1,
+  "median_lead_s": 20.0,
   "lead_iqr_s": [
-    12.1,
+    9.1,
     33.9
   ],
-  "same_first_flag": 17,
+  "same_first_flag": 22,
   "flag_pairs": {
     "RED->RED": 1,
     "SC->RED": 2,
-    "SC->SC": 16,
-    "VSC->SC": 10
+    "SC->SC": 13,
+    "SC->VSC": 3,
+    "VSC->SC": 2,
+    "VSC->VSC": 8
   },
   "by_official_flag": {
     "VSC": {
       "official": 23,
-      "earlier": 9,
-      "later": 1,
+      "earlier": 8,
+      "later": 2,
       "already out": 0,
       "missed": 13,
-      "median_lead_s": 21.6
+      "median_lead_s": 14.6
     },
     "SC": {
       "official": 25,
@@ -36,7 +38,7 @@
       "later": 0,
       "already out": 0,
       "missed": 7,
-      "median_lead_s": 22.7
+      "median_lead_s": 21.3
     },
     "RED": {
       "official": 3,
@@ -51,20 +53,25 @@
     "car collapse seen": 7,
     "no car collapse": 15
   },
-  "our_escalations": 62,
+  "our_escalations": 59,
   "our_by_category": {
     "matched": 29,
     "during an official neutralisation": 6,
-    "official yellows only": 23,
+    "official yellows only": 20,
     "escalated incident, outside the match window": 0,
     "no official flag": 4
   },
-  "extra": 27,
-  "extra_per_hour": 0.86,
+  "extra": 24,
+  "extra_per_hour": 0.77,
   "extra_by_flag": {
-    "VSC": 0,
-    "SC": 23,
+    "VSC": 6,
+    "SC": 14,
     "RED": 4
+  },
+  "our_by_flag": {
+    "VSC": 17,
+    "SC": 34,
+    "RED": 8
   },
   "engine_resets": 0,
   "stopped_lateral_offset": {
@@ -75,15 +82,15 @@
       "2026_Italian car 16",
       "2026_Miami car 6"
     ],
-    "engine_off_track_threshold_m": 8.0
+    "off_line_threshold_m": 8.0
   },
-  "impact_rule": {
+  "impact_signal": {
     "escalations_with_onset_car": 26,
     "official_sc_or_red_with_impact": 9,
     "official_sc_or_red": 13,
     "official_vsc_without_impact": 11,
     "official_vsc": 13,
     "right_with_impact_rule": 20,
-    "right_with_current_rule": 13
+    "right_if_always_sc": 13
   }
 }

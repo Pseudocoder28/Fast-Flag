@@ -75,10 +75,10 @@ def test_track_wide_state_follows_escalations_track_clear_and_resets() -> None:
     assert track_wide_at(changes, 130.0)[0] == "CLEAR"        # an engine reset wipes the flag
 
 
-def test_impact_rule_is_scored_against_always_sc() -> None:
-    from src.eval.escalation import OFFICIAL_COLUMNS, impact_rule
-    rows = [("SC", "IMPACT STOPPED"), ("SC", "STOPPED"), ("VSC", "STOPPED"), ("VSC", "")]
+def test_impact_signal_is_scored_against_always_sc() -> None:
+    from src.eval.escalation import OFFICIAL_COLUMNS, impact_signal
+    rows = [("SC", "IMPACT STOPPED"), ("SC", "STOPPED"), ("VSC", "STOPPED"), ("VSC", None)]   # None: read from csv
     off = pd.DataFrame([{**dict.fromkeys(OFFICIAL_COLUMNS), "official_flag": f, "onset_car": "1",
                          "onset_car_alerts": a} for f, a in rows])
-    r = impact_rule(off)
-    assert r["right_with_impact_rule"] == 3 and r["right_with_current_rule"] == 2
+    r = impact_signal(off)
+    assert r["right_with_impact_rule"] == 3 and r["right_if_always_sc"] == 2
