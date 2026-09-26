@@ -29,6 +29,7 @@ import pandas as pd
 
 from src.detect.anomaly import attach_scores, train
 from src.detect.detectors import Config, DetectorSuite, NaiveThreshold
+from src.detect.pipeline import CONFIG_PATH, load_config
 from src.eval.incidents import (MATCH_AFTER_S, MATCH_BEFORE_S, Incident, alert_matches, build_incidents,
                                 race_files, suspended_times)
 from src.ingest.holdout import assert_not_holdout
@@ -126,8 +127,11 @@ def score(race: RaceData, system: str, dets: list[dict]) -> RaceResult:
 def run_race(rid: str, cfg: Config | None = None, anomaly: bool = True,
              anomaly_q: float | None = None) -> list[RaceResult]:
     """Score one race. The ANOMALY model is trained leave-one-race-out: on every
-    other training race, never on the race being scored (and never on the holdout)."""
+    other training race, never on the race being scored (and never on the holdout).
+    Detector settings default to production (data/models/detector_config.json), the
+    same settings the live server uses."""
     assert_not_holdout(rid=rid)
+    cfg = cfg or load_config()
     race = RaceData.load(rid)
     n = len(race.track.get("msectors", [])) or None
     threshold = None
@@ -201,10 +205,22 @@ def main() -> None:
         df.to_csv(CHARTS / "detect_eval.csv", index=False, encoding="utf-8")
         pd.DataFrame([row for r in results for row in r.rows]).to_csv(CHARTS / "detect_incidents.csv", index=False, encoding="utf-8")
         pd.DataFrame([row for r in results for row in r.alert_rows]).to_csv(CHARTS / "detect_alerts.csv", index=False, encoding="utf-8")
+        by_type = (al.groupby("type")["false_alarm"].agg(alerts="size", false_alarms="sum").reset_index()
+                   if len(al) else pd.DataFrame())
+        anomaly_note = ("ANOMALY: model trained on the other training races (leave-one-race-out), alerting "
+                        "above the 99.995th percentile of scores on normal racing and only for cars slower than "
+                        "the field or their own last lap." if not a.no_anomaly else "ANOMALY: off for this run.")
         (CHARTS / "detect_eval.md").write_text(
             "# Detection eval (training races)\n\nReplay of historical FastF1 data. Matching and metric "
-            "definitions: src/eval/incidents.py and src/eval/run.py.\n\n" + tot.round(3).to_markdown(index=False)
-            + "\n\n" + df.round(3).to_markdown(index=False) + "\n", encoding="utf-8")
+            "definitions: src/eval/incidents.py and src/eval/run.py.\n\n"
+            f"**Settings.** Detectors: production settings ({CONFIG_PATH.as_posix()}, chosen by leave-one-race-out "
+            "tuning at 3 false alarms per race hour; see tune_results.md). Those thresholds were selected on these "
+            "same 20 races, so for strictly out-of-sample detection numbers use tune_results.md. " + anomaly_note
+            + " Baseline: the untuned naive speed threshold (any car below 50 km/h outside the pit lane for 1 s); "
+            "for a like-for-like comparison at the same false-alarm rate see tune_results.md.\n\n"
+            + tot.round(3).to_markdown(index=False)
+            + "\n\n## Detector alerts by type\n\n" + (by_type.to_markdown(index=False) if len(by_type) else "none")
+            + "\n\n## Per race\n\n" + df.round(3).to_markdown(index=False) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

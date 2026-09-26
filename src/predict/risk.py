@@ -168,13 +168,14 @@ def cmd_cv(retrain: bool = True) -> None:
             list(ex.map(cv_race, races))
     pred = pd.concat([pd.read_parquet(FEATURES_DIR / f"{r}_risk_pred.parquet") for r in races], ignore_index=True)
     table, early = evaluate(pred)
-    ew = pd.DataFrame(early)[["model", "neg_tick_rate", "threshold_p30", "flagged_3s_before",
+    ew = pd.DataFrame(early)[["model", "neg_tick_rate", "threshold_p30", "car_incidents", "flagged_3s_before",
                               "median_s_before_when_flagged", "false_episodes_per_hour"]]
     pd.set_option("display.width", 200)
     print(table.round(4).to_string(index=False))
     print(ew.round(4).to_string(index=False))
     CHARTS.mkdir(parents=True, exist_ok=True)
     table.to_csv(CHARTS / "risk_eval.csv", index=False, encoding="utf-8")
+    ew.to_csv(CHARTS / "risk_early_warning.csv", index=False, encoding="utf-8")
     (CHARTS / "risk_eval.md").write_text(
         "# Risk model, leave-one-race-out (training races only)\n\nReplay of historical FastF1 data. For each "
         "race, LightGBM is trained on the other training races and scores every racing tick of that race. "

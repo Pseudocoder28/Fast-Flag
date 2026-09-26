@@ -19,13 +19,13 @@ Replay of historical FastF1 data. For each race, LightGBM is trained on the othe
 
 Early warning for 79 car incidents (risk_30s, flagged = crossed the threshold at least 3 s before detection; false episodes = a car above the threshold with no incident of its own in the next 30 s):
 
-| model                    |   neg_tick_rate |   threshold_p30 |   flagged_3s_before |   median_s_before_when_flagged |   false_episodes_per_hour |
-|:-------------------------|----------------:|----------------:|--------------------:|-------------------------------:|--------------------------:|
-| lightgbm                 |           0.005 |          0.0106 |              0.3924 |                          8     |                   70.205  |
-| lightgbm                 |           0.002 |          0.0193 |              0.3418 |                          7.25  |                   53.753  |
-| lightgbm                 |           0.001 |          0.0271 |              0.2911 |                          6.5   |                   35.1025 |
-| lightgbm_without_anomaly |           0.005 |          0.01   |              0.3671 |                          8.75  |                   68.3475 |
-| lightgbm_without_anomaly |           0.002 |          0.0188 |              0.3165 |                          7.5   |                   49.5074 |
-| lightgbm_without_anomaly |           0.001 |          0.0265 |              0.2785 |                          6.375 |                   35.5195 |
+| model                    |   neg_tick_rate |   threshold_p30 |   car_incidents |   flagged_3s_before |   median_s_before_when_flagged |   false_episodes_per_hour |
+|:-------------------------|----------------:|----------------:|----------------:|--------------------:|-------------------------------:|--------------------------:|
+| lightgbm                 |           0.005 |          0.0106 |              79 |              0.3924 |                          8     |                   70.205  |
+| lightgbm                 |           0.002 |          0.0193 |              79 |              0.3418 |                          7.25  |                   53.753  |
+| lightgbm                 |           0.001 |          0.0271 |              79 |              0.2911 |                          6.5   |                   35.1025 |
+| lightgbm_without_anomaly |           0.005 |          0.01   |              79 |              0.3671 |                          8.75  |                   68.3475 |
+| lightgbm_without_anomaly |           0.002 |          0.0188 |              79 |              0.3165 |                          7.5   |                   49.5074 |
+| lightgbm_without_anomaly |           0.001 |          0.0265 |              79 |              0.2785 |                          6.375 |                   35.5195 |
 
 Some incidents have no precursor in the data: this is risk forecasting, not a crystal ball.
