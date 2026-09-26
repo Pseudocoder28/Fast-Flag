@@ -19,7 +19,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 
 ## Setup
 
-1. `git clone <REPO_URL> fast-flag`
+1. Accept the GitHub collaborator invite email (the repo is private), then `git clone https://github.com/Pseudocoder28/Fast-Flag.git fast-flag`
 2. `cd fast-flag`
 3. Mac: `python3.11 -m venv .venv && source .venv/bin/activate`. Windows: `py -3.11 -m venv .venv` then `.venv\Scripts\activate`.
    - No Python 3.11? `python3 -m pip install --user uv`, then `uv python install 3.11` and `uv venv --python 3.11 .venv` (uv is in `~/Library/Python/3.9/bin/` on Mac), then activate as above and use `uv pip install -r requirements.txt` in step 4.
