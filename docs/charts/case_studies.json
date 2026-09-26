@@ -1,0 +1,379 @@
+{
+  "note": "Replay of historical FastF1 data.",
+  "counterfactual": "Counterfactual: assumes race control acted on our recommendation instantly; no model of how drivers react.",
+  "onset_rule": "speed below 50% of the car's own median speed at that point (10 m bins) on its previous 3 clean laps, for at least 1 s, right after a tick at 50% or more, while green or under a local yellow, on track, not in the pit lane, and while the field is racing (median car on track at 80% or more of its own reference)",
+  "races": {
+    "2021_Azerbaijan": {
+      "out_of_sample": "Out of sample twice: our models never saw this race, and 2021 cars ran under different technical rules from our 2023 to 2026 training data.",
+      "recommendation_source": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main",
+      "crashes": [
+        {
+          "race": "2021_Azerbaijan",
+          "car": "18",
+          "driver": "STR",
+          "cars_involved": [
+            "18"
+          ],
+          "crash_location_m": 5288.1,
+          "msector": 20,
+          "timeline": {
+            "onset": 5274.25,
+            "our_first_alert": {
+              "t": 5275.25,
+              "type": "IMPACT",
+              "evidence": "lost 216 km/h in 1 s (271 to 0 km/h), harder than braking"
+            },
+            "official_yellow": 5277.99,
+            "our_escalation_recommendation": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main",
+            "official_escalation": {
+              "t": 5311.99,
+              "flag": "SC"
+            },
+            "all_official_messages": [
+              {
+                "t": 5277.99,
+                "flag": "DOUBLE_YELLOW",
+                "message": "DOUBLE YELLOW IN TRACK SECTOR 21"
+              },
+              {
+                "t": 5287.99,
+                "flag": "YELLOW",
+                "message": "YELLOW IN TRACK SECTOR 20"
+              },
+              {
+                "t": 5311.99,
+                "flag": "SC",
+                "message": "SAFETY CAR DEPLOYED"
+              }
+            ]
+          },
+          "windows": [
+            {
+              "name": "W1 onset -> our first alert (unavoidable)",
+              "start": 5274.25,
+              "end": 5275.25,
+              "seconds": 1.0,
+              "cars_passing": 0,
+              "passes": [],
+              "note": ""
+            },
+            {
+              "name": "W2 our first alert -> official yellow",
+              "start": 5275.25,
+              "end": 5277.99,
+              "seconds": 2.74,
+              "cars_passing": 0,
+              "passes": [],
+              "note": ""
+            },
+            {
+              "name": "W3 our escalation recommendation -> official escalation (headline)",
+              "start": null,
+              "end": 5311.99,
+              "seconds": null,
+              "cars_passing": null,
+              "passes": [],
+              "note": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main"
+            },
+            {
+              "name": "context: official yellow -> official escalation (not a counterfactual)",
+              "start": 5277.99,
+              "end": 5311.99,
+              "seconds": 34.0,
+              "cars_passing": 8,
+              "passes": [
+                {
+                  "car": "10",
+                  "driver": "GAS",
+                  "t": 5278.92,
+                  "speed_kmh": 310.7,
+                  "own_normal_kmh": 309.0,
+                  "pct_of_own_normal": 100.5
+                },
+                {
+                  "car": "16",
+                  "driver": "LEC",
+                  "t": 5280.19,
+                  "speed_kmh": 317.0,
+                  "own_normal_kmh": 314.0,
+                  "pct_of_own_normal": 101.0
+                },
+                {
+                  "car": "5",
+                  "driver": "VET",
+                  "t": 5281.52,
+                  "speed_kmh": 311.4,
+                  "own_normal_kmh": 321.2,
+                  "pct_of_own_normal": 96.9
+                },
+                {
+                  "car": "22",
+                  "driver": "TSU",
+                  "t": 5285.75,
+                  "speed_kmh": 305.8,
+                  "own_normal_kmh": 312.4,
+                  "pct_of_own_normal": 97.9
+                },
+                {
+                  "car": "4",
+                  "driver": "NOR",
+                  "t": 5287.86,
+                  "speed_kmh": 283.3,
+                  "own_normal_kmh": 313.6,
+                  "pct_of_own_normal": 90.3
+                },
+                {
+                  "car": "77",
+                  "driver": "BOT",
+                  "t": 5289.7,
+                  "speed_kmh": 274.8,
+                  "own_normal_kmh": 313.0,
+                  "pct_of_own_normal": 87.8
+                },
+                {
+                  "car": "3",
+                  "driver": "RIC",
+                  "t": 5297.3,
+                  "speed_kmh": 302.2,
+                  "own_normal_kmh": 312.0,
+                  "pct_of_own_normal": 96.9
+                },
+                {
+                  "car": "55",
+                  "driver": "SAI",
+                  "t": 5308.91,
+                  "speed_kmh": 135.8,
+                  "own_normal_kmh": 309.6,
+                  "pct_of_own_normal": 43.9
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "race": "2021_Azerbaijan",
+          "car": "33",
+          "driver": "VER",
+          "cars_involved": [
+            "33"
+          ],
+          "crash_location_m": 5794.8,
+          "msector": 21,
+          "timeline": {
+            "onset": 7278.25,
+            "our_first_alert": {
+              "t": 7279.0,
+              "type": "IMPACT",
+              "evidence": "lost 169 km/h in 1 s (267 to 0 km/h), with brakes on"
+            },
+            "official_yellow": 7297.99,
+            "our_escalation_recommendation": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main",
+            "official_escalation": {
+              "t": 7366.99,
+              "flag": "SC"
+            },
+            "all_official_messages": [
+              {
+                "t": 7297.99,
+                "flag": "DOUBLE_YELLOW",
+                "message": "DOUBLE YELLOW IN TRACK SECTOR 21"
+              },
+              {
+                "t": 7300.99,
+                "flag": "YELLOW",
+                "message": "YELLOW IN TRACK SECTOR 20"
+              },
+              {
+                "t": 7366.99,
+                "flag": "SC",
+                "message": "SAFETY CAR DEPLOYED"
+              },
+              {
+                "t": 7562.99,
+                "flag": "RED",
+                "message": "RED FLAG"
+              }
+            ]
+          },
+          "windows": [
+            {
+              "name": "W1 onset -> our first alert (unavoidable)",
+              "start": 7278.25,
+              "end": 7279.0,
+              "seconds": 0.75,
+              "cars_passing": 0,
+              "passes": [],
+              "note": ""
+            },
+            {
+              "name": "W2 our first alert -> official yellow",
+              "start": 7279.0,
+              "end": 7297.99,
+              "seconds": 18.99,
+              "cars_passing": 6,
+              "passes": [
+                {
+                  "car": "11",
+                  "driver": "PER",
+                  "t": 7282.55,
+                  "speed_kmh": 315.8,
+                  "own_normal_kmh": 316.3,
+                  "pct_of_own_normal": 99.8
+                },
+                {
+                  "car": "44",
+                  "driver": "HAM",
+                  "t": 7283.85,
+                  "speed_kmh": 294.0,
+                  "own_normal_kmh": 322.0,
+                  "pct_of_own_normal": 91.3
+                },
+                {
+                  "car": "5",
+                  "driver": "VET",
+                  "t": 7288.53,
+                  "speed_kmh": 316.6,
+                  "own_normal_kmh": 318.0,
+                  "pct_of_own_normal": 99.6
+                },
+                {
+                  "car": "10",
+                  "driver": "GAS",
+                  "t": 7291.94,
+                  "speed_kmh": 314.2,
+                  "own_normal_kmh": 313.1,
+                  "pct_of_own_normal": 100.4
+                },
+                {
+                  "car": "16",
+                  "driver": "LEC",
+                  "t": 7294.46,
+                  "speed_kmh": 308.6,
+                  "own_normal_kmh": 317.6,
+                  "pct_of_own_normal": 97.2
+                },
+                {
+                  "car": "22",
+                  "driver": "TSU",
+                  "t": 7295.62,
+                  "speed_kmh": 321.5,
+                  "own_normal_kmh": 318.6,
+                  "pct_of_own_normal": 100.9
+                }
+              ],
+              "note": ""
+            },
+            {
+              "name": "W3 our escalation recommendation -> official escalation (headline)",
+              "start": null,
+              "end": 7366.99,
+              "seconds": null,
+              "cars_passing": null,
+              "passes": [],
+              "note": "pending: the race control engine (src/racecontrol, Ishaan) is not importable here (ModuleNotFoundError); rerun once it is on main"
+            },
+            {
+              "name": "context: official yellow -> official escalation (not a counterfactual)",
+              "start": 7297.99,
+              "end": 7366.99,
+              "seconds": 69.0,
+              "cars_passing": 11,
+              "passes": [
+                {
+                  "car": "4",
+                  "driver": "NOR",
+                  "t": 7298.13,
+                  "speed_kmh": 273.4,
+                  "own_normal_kmh": 320.0,
+                  "pct_of_own_normal": 85.4
+                },
+                {
+                  "car": "55",
+                  "driver": "SAI",
+                  "t": 7299.96,
+                  "speed_kmh": 251.1,
+                  "own_normal_kmh": 323.6,
+                  "pct_of_own_normal": 77.6
+                },
+                {
+                  "car": "3",
+                  "driver": "RIC",
+                  "t": 7301.4,
+                  "speed_kmh": 255.2,
+                  "own_normal_kmh": 321.0,
+                  "pct_of_own_normal": 79.5
+                },
+                {
+                  "car": "14",
+                  "driver": "ALO",
+                  "t": 7305.16,
+                  "speed_kmh": 305.4,
+                  "own_normal_kmh": 317.0,
+                  "pct_of_own_normal": 96.4
+                },
+                {
+                  "car": "7",
+                  "driver": "RAI",
+                  "t": 7305.69,
+                  "speed_kmh": 326.8,
+                  "own_normal_kmh": 340.5,
+                  "pct_of_own_normal": 96.0
+                },
+                {
+                  "car": "99",
+                  "driver": "GIO",
+                  "t": 7306.93,
+                  "speed_kmh": 321.3,
+                  "own_normal_kmh": 329.0,
+                  "pct_of_own_normal": 97.6
+                },
+                {
+                  "car": "77",
+                  "driver": "BOT",
+                  "t": 7309.1,
+                  "speed_kmh": 242.2,
+                  "own_normal_kmh": 321.0,
+                  "pct_of_own_normal": 75.4
+                },
+                {
+                  "car": "63",
+                  "driver": "RUS",
+                  "t": 7311.84,
+                  "speed_kmh": 265.4,
+                  "own_normal_kmh": 323.0,
+                  "pct_of_own_normal": 82.2
+                },
+                {
+                  "car": "9",
+                  "driver": "MAZ",
+                  "t": 7315.48,
+                  "speed_kmh": 314.2,
+                  "own_normal_kmh": 307.1,
+                  "pct_of_own_normal": 102.3
+                },
+                {
+                  "car": "6",
+                  "driver": "LAT",
+                  "t": 7321.46,
+                  "speed_kmh": 231.2,
+                  "own_normal_kmh": 324.0,
+                  "pct_of_own_normal": 71.3
+                },
+                {
+                  "car": "47",
+                  "driver": "MSC",
+                  "t": 7352.31,
+                  "speed_kmh": 125.2,
+                  "own_normal_kmh": 316.0,
+                  "pct_of_own_normal": 39.6
+                }
+              ],
+              "note": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

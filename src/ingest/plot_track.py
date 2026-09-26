@@ -72,7 +72,7 @@ def plot_track(ref: TrackRef, title: str, out: Path) -> Path:
 
 def main() -> None:
     rid = sys.argv[1]
-    ref = TrackRef.load(Path(f"data/features/{rid}_ref.json"))
+    ref = TrackRef.load(Path("data") / "features" / f"{rid}_ref.json")
     print(plot_track(ref, rid, PLOTS / f"{rid}_track.png"))
 
 

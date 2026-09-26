@@ -32,6 +32,7 @@ from src.replay.latency import stage_name
 
 FEATURES = Path("data/features")
 HOLDOUT_DIR = Path("data/holdout")
+CASE_DIR = Path("data/case_studies")   # replayable, but never listed as training races
 WARMUP_S = 30.0          # after a seek, processors silently replay this much history
 
 
@@ -48,7 +49,9 @@ class Processor(Protocol):
 
 
 def race_dir(rid: str) -> Path:
-    return HOLDOUT_DIR if is_holdout_id(rid) else FEATURES
+    if is_holdout_id(rid):
+        return HOLDOUT_DIR
+    return CASE_DIR if (CASE_DIR / f"{rid}_meta.json").exists() else FEATURES
 
 
 def available_races(include_holdout: bool = False) -> list[str]:
@@ -81,7 +84,7 @@ class RaceData:
     @classmethod
     def load(cls, rid: str) -> "RaceData":
         d = race_dir(rid)
-        read = lambda suffix: json.loads((d / f"{rid}{suffix}").read_text())  # noqa: E731
+        read = lambda suffix: json.loads((d / f"{rid}{suffix}").read_text(encoding="utf-8"))  # noqa: E731
         return cls.from_frame(rid, pd.read_parquet(d / f"{rid}.parquet"), read("_track.json"),
                               read("_official.json"), read("_meta.json"))
 

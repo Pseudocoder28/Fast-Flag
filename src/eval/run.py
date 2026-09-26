@@ -198,13 +198,13 @@ def main() -> None:
         print(detail.to_string(index=False))
     if not a.no_save:
         CHARTS.mkdir(parents=True, exist_ok=True)
-        df.to_csv(CHARTS / "detect_eval.csv", index=False)
-        pd.DataFrame([row for r in results for row in r.rows]).to_csv(CHARTS / "detect_incidents.csv", index=False)
-        pd.DataFrame([row for r in results for row in r.alert_rows]).to_csv(CHARTS / "detect_alerts.csv", index=False)
+        df.to_csv(CHARTS / "detect_eval.csv", index=False, encoding="utf-8")
+        pd.DataFrame([row for r in results for row in r.rows]).to_csv(CHARTS / "detect_incidents.csv", index=False, encoding="utf-8")
+        pd.DataFrame([row for r in results for row in r.alert_rows]).to_csv(CHARTS / "detect_alerts.csv", index=False, encoding="utf-8")
         (CHARTS / "detect_eval.md").write_text(
             "# Detection eval (training races)\n\nReplay of historical FastF1 data. Matching and metric "
             "definitions: src/eval/incidents.py and src/eval/run.py.\n\n" + tot.round(3).to_markdown(index=False)
-            + "\n\n" + df.round(3).to_markdown(index=False) + "\n")
+            + "\n\n" + df.round(3).to_markdown(index=False) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

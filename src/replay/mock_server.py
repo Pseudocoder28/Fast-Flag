@@ -39,7 +39,7 @@ STREAMS = {"tick": "ticks_sample.jsonl", "detection": "detections_sample.jsonl",
 
 
 def read_jsonl(path: Path) -> list[dict]:
-    return [json.loads(ln) for ln in path.read_text().splitlines() if ln.strip()]
+    return [json.loads(ln) for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
 
 
 def load_events(no_recs: bool) -> list[tuple[float, int, dict]]:
@@ -63,7 +63,7 @@ class Replay:
         self.cursor = 0
         self.speed = 1.0
         self.loop = loop
-        self.track = json.loads((FIX / "track_sample.json").read_text())
+        self.track = json.loads((FIX / "track_sample.json").read_text(encoding="utf-8"))
         self.official = read_jsonl(FIX / "official_sample.jsonl")
         self.clients: set[WebSocket] = set()
 

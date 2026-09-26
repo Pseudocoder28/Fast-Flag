@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import re
 import sys
+from pathlib import Path
 
 import pandas as pd
 
@@ -59,7 +60,7 @@ def official_events(session) -> list[dict]:
 def main() -> None:
     import fastf1
     year, event = int(sys.argv[1]), sys.argv[2]
-    fastf1.Cache.enable_cache("data/fastf1_cache")
+    fastf1.Cache.enable_cache(str(Path("data") / "fastf1_cache"))
     s = fastf1.get_session(year, event, "R")
     s.load(weather=False)
     for e in official_events(s):
