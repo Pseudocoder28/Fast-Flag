@@ -6,6 +6,8 @@ racing tick of the held-out race. Metrics:
 - PR-AUC per horizon, pooled over all held-out ticks (not accuracy).
 - Baselines on the same ticks: the ANOMALY score, the naive speed threshold
   (lower speed = higher risk) and the base rate.
+- With and without the ANOMALY score as a feature (lightgbm vs
+  lightgbm_without_anomaly), to show what the learned IsolationForest adds.
 - Precursor PR-AUC: the same, with each incident's last 3 s before detection left
   out, so the car already crashing does not count as "predicting" it.
 - Early warning at several thresholds: share of car incidents where risk_30s
@@ -53,6 +55,8 @@ EPISODE_GAP_S = 5.0
 # and without them precursor PR-AUC is higher at 10 and 20 s (docs/charts/risk_eval.md). RISK_DROP adds more.
 DROP = ["track_temp", "air_temp"] + [f for f in os.environ.get("RISK_DROP", "").split(",") if f]
 ACTIVE = [f for f in FEATURES if f not in DROP]
+WITHOUT_ANOMALY = [f for f in ACTIVE if f != "anomaly_score"]
+VARIANTS = {"": ACTIVE, "_noanom": WITHOUT_ANOMALY}    # prediction column suffix -> features
 
 
 def risk_path(rid: str) -> Path:
@@ -73,18 +77,21 @@ def training_rows(races: list[str]) -> pd.DataFrame:
     return pd.concat(parts, ignore_index=True)
 
 
-def fit(train: pd.DataFrame, h: int, n_jobs: int = 2) -> lgb.LGBMClassifier:
-    return lgb.LGBMClassifier(**PARAMS, n_jobs=n_jobs).fit(train[ACTIVE], train[f"y{h}"])
+def fit(train: pd.DataFrame, h: int, features: list[str] = ACTIVE, n_jobs: int = 2) -> lgb.LGBMClassifier:
+    return lgb.LGBMClassifier(**PARAMS, n_jobs=n_jobs).fit(train[features], train[f"y{h}"])
 
 
 def cv_race(rid: str) -> str:
-    """Train on the other races, score every racing tick of rid, save predictions."""
+    """Train on the other races, score every racing tick of rid, save predictions
+    (with and without the ANOMALY feature)."""
     others = [r for r in available_races() if r != rid]
     train = training_rows(others)
     test = pd.read_parquet(risk_path(rid))
     out = test[["t", "drv", "msector", "speed", "anomaly_score"] + [f"y{h}" for h in HORIZONS]].copy()
     for h in HORIZONS:
-        out[f"p{h}"] = correct(fit(train, h).predict_proba(test[ACTIVE])[:, 1]).astype("float32")
+        for suffix, feats in VARIANTS.items():
+            p = fit(train, h, feats).predict_proba(test[feats])[:, 1]
+            out[f"p{h}{suffix}"] = correct(p).astype("float32")
     out["race"] = rid
     path = FEATURES_DIR / f"{rid}_risk_pred.parquet"
     out.to_parquet(path, index=False)
@@ -98,17 +105,17 @@ def incident_end(pred: pd.DataFrame) -> pd.Series:
     return pd.Series(pd.MultiIndex.from_frame(pred[["race", "drv"]]).map(ends), index=pred.index)
 
 
-def early_warning(pred: pd.DataFrame, threshold: float, hours: float) -> dict:
+def early_warning(pred: pd.DataFrame, threshold: float, hours: float, col: str = "p30") -> dict:
     """Incidents flagged EARLY_S before detection, and false high-risk episodes per race hour."""
     t_inc = incident_end(pred)
     rows = []
     for (race, drv), g in pred[pred["y30"] == 1].groupby(["race", "drv"]):
         t0 = t_inc.loc[g.index[0]]
-        crossed = g[(g["t"] <= t0 - EARLY_S) & (g["p30"] >= threshold)]
+        crossed = g[(g["t"] <= t0 - EARLY_S) & (g[col] >= threshold)]
         rows.append({"early": len(crossed) > 0,
                      "seconds_before": float(t0 - crossed["t"].min()) if len(crossed) else np.nan})
     inc = pd.DataFrame(rows)
-    hi = pred[(pred["p30"] >= threshold) & (pred["y30"] == 0)].sort_values(["race", "drv", "t"])
+    hi = pred[(pred[col] >= threshold) & (pred["y30"] == 0)].sort_values(["race", "drv", "t"])
     new_episode = (hi["t"].diff() > EPISODE_GAP_S) | (hi["drv"] != hi["drv"].shift()) | (hi["race"] != hi["race"].shift())
     return {"threshold_p30": threshold, "car_incidents": len(inc),
             "flagged_3s_before": float(inc["early"].mean()),
@@ -128,16 +135,23 @@ def evaluate(pred: pd.DataFrame) -> tuple[pd.DataFrame, list[dict]]:
     rows = []
     for h in HORIZONS:
         y = pred[f"y{h}"].to_numpy()
-        scores = {"lightgbm": pred[f"p{h}"].to_numpy(), "anomaly_score": pred["anomaly_score"].fillna(0).to_numpy(),
-                  "speed_threshold": -pred["speed"].to_numpy()}
+        scores = {"lightgbm": pred[f"p{h}"].to_numpy()}
+        if f"p{h}_noanom" in pred:
+            scores["lightgbm_without_anomaly"] = pred[f"p{h}_noanom"].to_numpy()
+        scores |= {"anomaly_score": pred["anomaly_score"].fillna(0).to_numpy(),
+                   "speed_threshold": -pred["speed"].to_numpy()}
         for name, s in scores.items():
             rows.append({"horizon_s": h, "model": name, "pr_auc": average_precision_score(y, s),
                          "pr_auc_precursor": average_precision_score(y[precursor], s[precursor]),
                          "pr_auc_mean_per_race": pr_auc_per_race(pred, f"y{h}", s), "base_rate": y.mean()})
-    neg = pred.loc[pred["y30"] == 0, "p30"]
     hours = len(pred) / 4 / 3600 / pred.groupby("race")["drv"].nunique().mean()   # racing time, per car-field
-    early = [early_warning(pred, float(np.quantile(neg, 1 - r)), hours) | {"neg_tick_rate": r}
-             for r in ALERT_NEG_RATES]
+    early = []
+    for col, name in (("p30", "lightgbm"), ("p30_noanom", "lightgbm_without_anomaly")):
+        if col not in pred:
+            continue
+        neg = pred.loc[pred["y30"] == 0, col]
+        early += [early_warning(pred, float(np.quantile(neg, 1 - r)), hours, col) | {"model": name, "neg_tick_rate": r}
+                  for r in ALERT_NEG_RATES]
     return pd.DataFrame(rows), early
 
 
@@ -154,7 +168,7 @@ def cmd_cv(retrain: bool = True) -> None:
             list(ex.map(cv_race, races))
     pred = pd.concat([pd.read_parquet(FEATURES_DIR / f"{r}_risk_pred.parquet") for r in races], ignore_index=True)
     table, early = evaluate(pred)
-    ew = pd.DataFrame(early)[["neg_tick_rate", "threshold_p30", "flagged_3s_before",
+    ew = pd.DataFrame(early)[["model", "neg_tick_rate", "threshold_p30", "flagged_3s_before",
                               "median_s_before_when_flagged", "false_episodes_per_hour"]]
     pd.set_option("display.width", 200)
     print(table.round(4).to_string(index=False))
@@ -166,13 +180,15 @@ def cmd_cv(retrain: bool = True) -> None:
         "race, LightGBM is trained on the other training races and scores every racing tick of that race. "
         "PR-AUC is pooled over all held-out ticks; pr_auc_precursor leaves out each incident's last "
         f"{EARLY_S:.0f} s before detection. Baselines: ANOMALY score (IsolationForest, also leave-one-race-out) "
-        "and the naive speed threshold (lower speed = higher risk).\n\n" + table.round(4).to_markdown(index=False)
+        "and the naive speed threshold (lower speed = higher risk). lightgbm_without_anomaly is the same model "
+        "trained without the ANOMALY score as a feature, to show what the learned IsolationForest adds.\n\n"
+        + table.round(4).to_markdown(index=False)
         + f"\n\nEarly warning for {early[0]['car_incidents']} car incidents (risk_30s, flagged = crossed the "
           f"threshold at least {EARLY_S:.0f} s before detection; false episodes = a car above the threshold with "
           "no incident of its own in the next 30 s):\n\n" + ew.round(4).to_markdown(index=False)
         + "\n\nSome incidents have no precursor in the data: this is risk forecasting, not a crystal ball.\n", encoding="utf-8")
     MODELS.mkdir(parents=True, exist_ok=True)
-    chosen = next(e for e in early if e["neg_tick_rate"] == DEFAULT_NEG_RATE)
+    chosen = next(e for e in early if e["model"] == "lightgbm" and e["neg_tick_rate"] == DEFAULT_NEG_RATE)
     (MODELS / "risk_cv.json").write_text(json.dumps({"chosen": chosen, "all": early}, indent=2), encoding="utf-8")
 
 
