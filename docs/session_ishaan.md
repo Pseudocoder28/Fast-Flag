@@ -71,6 +71,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
   - The banner says it is a replay of historical FastF1 data.
   - Nothing overlaps or gets cut off at your screen size.
   - No errors in the browser console (F12, Console tab).
+- Expected, not bugs: on the mock every car shows "risk high" (the fixture risk values are hand-built and all above the real model's alert line). After a page reload the "Fast Flag recommends" chip says WAITING until the next seek or track-wide rec.
 - Report to Naman: what you did, what you saw, a screenshot, browser name and window size. Never edit `dashboard/` or `src/racecontrol/`.
 - Done when: every push Naman tells you about gets either "works" or an issue list from you.
 

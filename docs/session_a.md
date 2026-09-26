@@ -84,6 +84,7 @@ Naman now also owns `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol
 - Small inline SVG flag icons next to flag names in the legend and the feed. No emoji.
 - Keep the "Replay of historical FastF1 data" banner.
 - Done when: it looks right in Chrome at 1920x1080 and at laptop size, against both the mock server and the real server.
+- Result: top bar with the replay banner, race, lap, session time and replay speed; track status shows our recommendation next to official race control (official state rebuilt from `GET /official` up to the replay time only); map with sector numbers, start line, double stripe for DOUBLE_YELLOW and a halo for track-wide flags; favicon inline (no 404). Checked in the app's Chromium browser pane at 1920x1080, 1440x900 and 1280x800 against the real server and the mock (Claude in Chrome was not connected).
 
 **A12. Housekeeping (last)**
 - Regenerate or delete the four stale `detect_*` files in `docs/charts/` so they match the final detector settings.
