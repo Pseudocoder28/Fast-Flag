@@ -163,9 +163,13 @@ def case_studies() -> list[str]:
 
 
 def escalation() -> list[str]:
+    from src.eval.escalation import impact_signal
     e = json.loads((CHARTS / "escalation.json").read_text(encoding="utf-8"))
-    st, c, ir = e["status"], e["our_by_category"], e["impact_rule"]
+    ours = pd.read_csv(CHARTS / "escalation_ours.csv", encoding="utf-8")
+    ir = impact_signal(pd.read_csv(CHARTS / "escalation_official.csv", encoding="utf-8"))
+    st, c = e["status"], e["our_by_category"]
     by = ", ".join(f"{FLAG_NAMES[f]} {v['official']}" for f, v in e["by_official_flag"].items())
+    by_ours = ", ".join(f"{FLAG_NAMES[f]} {int((ours['flag'] == f).sum())}" for f in ("VSC", "SC", "RED"))
     return ["## Escalation scorecard: our VSC, SC and red recommendations vs race control", "",
             "Source: escalation.json, escalation.md and escalation.png (python -m src.eval.escalation). In-sample: the "
             "detector settings were tuned and the race control rules set on these races. Counterfactual: assumes race "
@@ -179,10 +183,11 @@ def escalation() -> list[str]:
             f"- Escalations race control never made: {e['extra']} in {e['race_hours']:.1f} race hours = "
             f"{e['extra_per_hour']:.2f} per race hour ({c['official yellows only']} where race control kept yellows "
             f"only, {c['no official flag']} with no official flag).",
-            f"- Same first flag as race control in {e['same_first_flag']} of {e['matched']}. Our engine never "
-            f"recommends a VSC (FastF1 puts stopped cars on the racing line, so none looks off track). A candidate "
-            f"impact rule would pick race control's flag {ir['right_with_impact_rule']} of "
-            f"{ir['escalations_with_onset_car']} times against {ir['right_with_current_rule']} now (not in the engine).",
+            f"- Flag choice: same first flag as race control in {e['same_first_flag']} of {e['matched']}; our "
+            f"{len(ours)} recommendations by flag: {by_ours}. FastF1 puts stopped cars on the racing line, so the "
+            f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" picks race "
+            f"control's flag {ir['right_with_impact_rule']} of {ir['escalations_with_onset_car']} times, \"always SC\" "
+            f"{ir['right_if_always_sc']}.",
             ""]
 
 
