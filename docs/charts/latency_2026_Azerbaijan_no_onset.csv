@@ -1,0 +1,7 @@
+race,t_official,flag,sectors,reason
+2026_Azerbaijan,6891.53,YELLOW,"[9, 10]","field not racing (SC, VSC, restart or procession)"
+2026_Azerbaijan,6891.53,DOUBLE_YELLOW,"[9, 10]","field not racing (SC, VSC, restart or procession)"
+2026_Azerbaijan,7023.53,DOUBLE_YELLOW,[11],"field not racing (SC, VSC, restart or procession)"
+2026_Azerbaijan,7478.53,YELLOW,"[1, 2, 3, 4]",car already slow or stopped before the window (re-flag of an earlier stoppage)
+2026_Azerbaijan,7478.53,DOUBLE_YELLOW,"[1, 2, 3, 4]",car already slow or stopped before the window (re-flag of an earlier stoppage)
+2026_Azerbaijan,7542.53,SC,"[1, 2, 3, 4]",car already slow or stopped before the window (re-flag of an earlier stoppage)

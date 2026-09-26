@@ -1,0 +1,381 @@
+{
+  "race": "2026_Azerbaijan",
+  "detection": {
+    "rule_alerts": {
+      "incidents": 10,
+      "matched": 7,
+      "held": 0,
+      "recall": 0.7,
+      "recall_window": 0.7,
+      "median_lead_s": 0.78,
+      "earlier_share": 0.8571428571428571,
+      "false_alarms": 1,
+      "race_hours": 1.6308333333333334,
+      "fa_per_hour": 0.6131834440470108
+    },
+    "anomaly_advisories": {
+      "incidents": 10,
+      "matched": 0,
+      "held": 0,
+      "recall": 0.0,
+      "recall_window": 0.0,
+      "median_lead_s": null,
+      "earlier_share": null,
+      "false_alarms": 1,
+      "race_hours": 1.6308333333333334,
+      "fa_per_hour": 0.6131834440470108
+    },
+    "naive_speed_threshold": {
+      "incidents": 10,
+      "matched": 8,
+      "held": 0,
+      "recall": 0.8,
+      "recall_window": 0.8,
+      "median_lead_s": 2.03,
+      "earlier_share": 1.0,
+      "false_alarms": 27,
+      "race_hours": 1.6308333333333334,
+      "fa_per_hour": 16.55595298926929
+    }
+  },
+  "latency_from_onset": [
+    {
+      "flag": "YELLOW",
+      "events": 7,
+      "matched": 7,
+      "rc_median_s": 4.03,
+      "rc_p25_s": 3.155,
+      "rc_p75_s": 6.904999999999999,
+      "ours_median_s": 3.25,
+      "ours_p25_s": 2.0,
+      "ours_p75_s": 3.375,
+      "earlier_share": 0.8571428571428571
+    },
+    {
+      "flag": "DOUBLE_YELLOW",
+      "events": 2,
+      "matched": 2,
+      "rc_median_s": 5.654999999999999,
+      "rc_p25_s": 3.8425,
+      "rc_p75_s": 7.467499999999999,
+      "ours_median_s": 1.375,
+      "ours_p25_s": 1.1875,
+      "ours_p75_s": 1.5625,
+      "earlier_share": 1.0
+    },
+    {
+      "flag": "SC",
+      "events": 1,
+      "matched": 1,
+      "rc_median_s": 28.28,
+      "rc_p25_s": 28.28,
+      "rc_p75_s": 28.28,
+      "ours_median_s": 1.0,
+      "ours_p25_s": 1.0,
+      "ours_p75_s": 1.0,
+      "earlier_share": 1.0
+    }
+  ],
+  "latency_events": 10,
+  "latency_no_onset": 6,
+  "risk": {
+    "cars_with_incident": 8,
+    "ticks": 429140,
+    "horizons": {
+      "10": {
+        "base_rate": 0.0007456774013142564,
+        "lightgbm_pr_auc": 0.1927831051098448,
+        "lightgbm_pr_auc_precursor": 0.00937500465583535,
+        "anomaly_score_pr_auc": 0.021893487479949156,
+        "anomaly_score_pr_auc_precursor": 0.0015249427785696107,
+        "speed_threshold_pr_auc": 0.14513632107209706,
+        "speed_threshold_pr_auc_precursor": 0.0009835333865807973
+      },
+      "30": {
+        "base_rate": 0.0022370322039427693,
+        "lightgbm_pr_auc": 0.019945862082437465,
+        "lightgbm_pr_auc_precursor": 0.0027049375938710714,
+        "anomaly_score_pr_auc": 0.009151346849154966,
+        "anomaly_score_pr_auc_precursor": 0.0020206737335751786,
+        "speed_threshold_pr_auc": 0.04979929364498967,
+        "speed_threshold_pr_auc_precursor": 0.0015283800010698113
+      }
+    },
+    "early_warning": {
+      "threshold_p30": 0.02710011973977089,
+      "car_incidents": 8,
+      "flagged_3s_before": 0.375,
+      "median_s_before_when_flagged": 3.25,
+      "false_episodes_per_hour": 57.58120892948689
+    }
+  },
+  "case_study": {
+    "recommendation_source": "src.racecontrol.engine.RaceControl",
+    "crashes": [
+      {
+        "race": "2026_Azerbaijan",
+        "car": "23",
+        "driver": "ALB",
+        "cars_involved": [
+          "23"
+        ],
+        "crash_location_m": 2077.3,
+        "msector": 7,
+        "timeline": {
+          "onset": 6639.25,
+          "our_first_alert": {
+            "t": 6640.25,
+            "type": "IMPACT",
+            "evidence": "lost 81 km/h in 1 s (81 to 0 km/h), without braking"
+          },
+          "official_yellow": 6648.53,
+          "our_escalation_recommendation": {
+            "t": 6644.25,
+            "flag": "SC"
+          },
+          "official_escalation": {
+            "t": 6667.53,
+            "flag": "SC"
+          },
+          "all_official_messages": [
+            {
+              "t": 6648.53,
+              "flag": "DOUBLE_YELLOW",
+              "message": "DOUBLE YELLOW IN TRACK SECTOR 7"
+            },
+            {
+              "t": 6648.53,
+              "flag": "YELLOW",
+              "message": "YELLOW IN TRACK SECTOR 6"
+            },
+            {
+              "t": 6667.53,
+              "flag": "SC",
+              "message": "SAFETY CAR DEPLOYED"
+            }
+          ]
+        },
+        "windows": [
+          {
+            "name": "W1 onset -> our first alert (unavoidable)",
+            "start": 6639.25,
+            "end": 6640.25,
+            "seconds": 1.0,
+            "cars_passing": 0,
+            "passes": [],
+            "note": ""
+          },
+          {
+            "name": "W2 our first alert -> official yellow",
+            "start": 6640.25,
+            "end": 6648.53,
+            "seconds": 8.28,
+            "cars_passing": 2,
+            "passes": [
+              {
+                "car": "31",
+                "driver": "OCO",
+                "t": 6640.36,
+                "speed_kmh": 88.9,
+                "own_normal_kmh": 88.7,
+                "pct_of_own_normal": 100.2
+              },
+              {
+                "car": "41",
+                "driver": "LIN",
+                "t": 6646.22,
+                "speed_kmh": 77.8,
+                "own_normal_kmh": 92.2,
+                "pct_of_own_normal": 84.4
+              }
+            ],
+            "note": ""
+          },
+          {
+            "name": "W3 our escalation recommendation -> official escalation (headline)",
+            "start": 6644.25,
+            "end": 6667.53,
+            "seconds": 23.28,
+            "cars_passing": 4,
+            "passes": [
+              {
+                "car": "41",
+                "driver": "LIN",
+                "t": 6646.22,
+                "speed_kmh": 77.8,
+                "own_normal_kmh": 92.2,
+                "pct_of_own_normal": 84.4
+              },
+              {
+                "car": "5",
+                "driver": "BOR",
+                "t": 6654.29,
+                "speed_kmh": 93.0,
+                "own_normal_kmh": 94.0,
+                "pct_of_own_normal": 98.9
+              },
+              {
+                "car": "27",
+                "driver": "HUL",
+                "t": 6655.52,
+                "speed_kmh": 90.6,
+                "own_normal_kmh": 92.0,
+                "pct_of_own_normal": 98.5
+              },
+              {
+                "car": "11",
+                "driver": "PER",
+                "t": 6662.52,
+                "speed_kmh": 82.0,
+                "own_normal_kmh": 88.0,
+                "pct_of_own_normal": 93.2
+              }
+            ],
+            "note": ""
+          },
+          {
+            "name": "context: official yellow -> official escalation (not a counterfactual)",
+            "start": 6648.53,
+            "end": 6667.53,
+            "seconds": 19.0,
+            "cars_passing": 3,
+            "passes": [
+              {
+                "car": "5",
+                "driver": "BOR",
+                "t": 6654.29,
+                "speed_kmh": 93.0,
+                "own_normal_kmh": 94.0,
+                "pct_of_own_normal": 98.9
+              },
+              {
+                "car": "27",
+                "driver": "HUL",
+                "t": 6655.52,
+                "speed_kmh": 90.6,
+                "own_normal_kmh": 92.0,
+                "pct_of_own_normal": 98.5
+              },
+              {
+                "car": "11",
+                "driver": "PER",
+                "t": 6662.52,
+                "speed_kmh": 82.0,
+                "own_normal_kmh": 88.0,
+                "pct_of_own_normal": 93.2
+              }
+            ],
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "escalation": {
+    "races": 1,
+    "race_hours": 1.63,
+    "official_escalations": 2,
+    "status": {
+      "earlier": 2,
+      "later": 0,
+      "already out": 0,
+      "missed": 0
+    },
+    "matched": 2,
+    "median_lead_s": 44.0,
+    "lead_iqr_s": [
+      33.7,
+      54.4
+    ],
+    "same_first_flag": 1,
+    "flag_pairs": {
+      "SC->RED": 1,
+      "SC->SC": 1
+    },
+    "by_official_flag": {
+      "VSC": {
+        "official": 0,
+        "earlier": 0,
+        "later": 0,
+        "already out": 0,
+        "missed": 0,
+        "median_lead_s": null
+      },
+      "SC": {
+        "official": 2,
+        "earlier": 2,
+        "later": 0,
+        "already out": 0,
+        "missed": 0,
+        "median_lead_s": 44.0
+      },
+      "RED": {
+        "official": 0,
+        "earlier": 0,
+        "later": 0,
+        "already out": 0,
+        "missed": 0,
+        "median_lead_s": null
+      }
+    },
+    "missed_kind": {
+      "car collapse seen": 0,
+      "no car collapse": 0
+    },
+    "our_escalations": 4,
+    "our_by_category": {
+      "matched": 2,
+      "during an official neutralisation": 0,
+      "official yellows only": 2,
+      "escalated incident, outside the match window": 0,
+      "no official flag": 0
+    },
+    "extra": 2,
+    "extra_per_hour": 1.23,
+    "extra_by_flag": {
+      "VSC": 2,
+      "SC": 0,
+      "RED": 0
+    },
+    "our_by_flag": {
+      "VSC": 2,
+      "SC": 1,
+      "RED": 1
+    },
+    "engine_resets": 0,
+    "stopped_lateral_offset": {
+      "stopped_car_rows": 25735,
+      "share_within_1m": 1.0,
+      "rows_beyond_threshold": 0,
+      "episodes_beyond_threshold": [],
+      "off_line_threshold_m": 8.0
+    },
+    "impact_signal": {
+      "escalations_with_onset_car": 1,
+      "official_sc_or_red_with_impact": 1,
+      "official_sc_or_red": 1,
+      "official_vsc_without_impact": 0,
+      "official_vsc": 0,
+      "right_with_impact_rule": 1,
+      "right_if_always_sc": 1
+    }
+  },
+  "charts": [
+    "latency_2026_Azerbaijan.png",
+    "case_2026_Azerbaijan_car23.png",
+    "escalation_2026_Azerbaijan.png"
+  ],
+  "freeze": {
+    "frozen_at": "2026-09-26T18:54:35",
+    "commit": "380ddc5349c96c3a3825fc1d6e16e5e48946c18e",
+    "anomaly_threshold": 0.7499027570755339,
+    "risk_threshold_p30": 0.02710011973977089
+  },
+  "runs": [
+    {
+      "at": "2026-09-26T18:54:40",
+      "commit": "380ddc5349c96c3a3825fc1d6e16e5e48946c18e",
+      "reason": null
+    }
+  ]
+}

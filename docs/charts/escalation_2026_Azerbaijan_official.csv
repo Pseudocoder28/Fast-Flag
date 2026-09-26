@@ -1,0 +1,3 @@
+race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_t,our_flag,our_top,miss_kind,onset_car,onset_car_alerts,detail
+2026_Azerbaijan,6648.53,6667.53,SC,SC,6 7,earlier,23.28,6644.25,SC,SC,,23,IMPACT STOPPED,car 23 stopped for 3.0 s after an impact
+2026_Azerbaijan,7478.53,7542.53,SC,SC,1 2 3 4,earlier,64.78,7477.75,RED,RED,,,,multi-car incident
