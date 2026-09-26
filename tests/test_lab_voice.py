@@ -378,3 +378,10 @@ def test_fixture_end_to_end_through_speaker() -> None:
         "Safety Car. Car 23, stopped, sector 9.",
         "Race control confirms Safety Car, 8.7 seconds after Fast Flag.",
     ]
+
+
+def test_only_track_clear_ends_a_track_wide_flag() -> None:
+    # contract: a CLEAR rec with message TRACK CLEAR ends VSC, SC and RED, any other CLEAR clears one sector
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "STOPPED"), rec(100.0, "DOUBLE_YELLOW", 9, ["d1"]),
+            rec(103.0, "SC", 9, []), rec(120.0, "CLEAR", 9, [], ""), rec(125.0, "CLEAR", 9, [], "TRACK CLEAR")]
+    assert [u.text for u in narrate(envs)][-2:] == ["Sector 9 clear.", "Track clear."]

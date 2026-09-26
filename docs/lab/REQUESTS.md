@@ -2,12 +2,9 @@
 
 The lab never edits core files. Anything it needs or finds in the core goes here.
 
-## 1. `docs/charts/latency_by_type.csv` labels a VSC as SC (2026 Australian)
+## 1. Resolved: `latency_by_type.csv` labelled a VSC as SC (2026 Australian)
 
-- Row: `2026_Australian,SC,4654.5,6,6,4681.38,26.88,...`
-- The official feed at that time is `VSC DEPLOYED` (`data/features/2026_Australian_official.json`, t = 4681.38, flag VSC). `docs/lab/delay_cost.json` reads the same file and gets VSC.
-- Likely a stale CSV from before the official-message mapping changed. Rerunning `python -m src.eval.latency_by_type` should fix it. If the numbers in `docs/charts/NUMBERS.md` move, regenerate them with `python -m src.eval.numbers`.
-- Not checked for other races.
+Fixed on `main` in PR #7 ("the corrected VSC split"). The lab output and the core CSV now agree.
 
 ## 2. Onset grouping differs from `src.eval.latency_by_type` (for information)
 

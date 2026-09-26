@@ -193,7 +193,7 @@ class Narrator:
 
     def on_clear(self, rec: dict, msector: int) -> list[Utterance]:
         msg = str(rec.get("message", "")).upper()
-        sector_clear = "SECTOR" in msg or (self.level.get(TRACK, 0) == 0 and self.level.get(msector, 0) > 0)
+        sector_clear = msg.strip() != "TRACK CLEAR"      # contract: only TRACK CLEAR ends VSC, SC and RED
         scope: Scope = msector if sector_clear else TRACK
         if self.level.get(scope, 0) == 0:
             return []

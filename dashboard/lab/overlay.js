@@ -459,7 +459,7 @@ function maybeStartClock(rec, cause, rank, t) {
 
 function onClear(rec, msector, t) {
   const msg = String(rec.message || "").toUpperCase();
-  const sectorClear = msg.includes("SECTOR") || ((S.level.get(TRACK) || 0) === 0 && (S.level.get(msector) || 0) > 0);
+  const sectorClear = msg.trim() !== "TRACK CLEAR";     // contract: only TRACK CLEAR ends VSC, SC and RED
   const scope = sectorClear ? msector : TRACK;
   if ((S.level.get(scope) || 0) === 0) return;
   S.level.set(scope, 0);
