@@ -96,7 +96,7 @@ def recommendations(envelopes: list[dict]) -> tuple[list[dict] | None, str]:
 
 def rest_position(frame: pd.DataFrame, drv: str, onset: pd.Series) -> float:
     after = frame[(frame["drv"] == drv) & (frame["t"] >= onset["t"]) & (frame["t"] <= onset["t"] + REST_WITHIN_S)]
-    stopped = after[(after["speed"] < REST_KMH) & after["dist"].notna()]
+    stopped = after[(after["speed"] < REST_KMH) & after["dist"].notna() & ~after["in_pit"].astype(bool)]  # never a pit box
     return float(stopped["dist"].iloc[0]) if len(stopped) else float(onset["dist"])
 
 
