@@ -907,9 +907,10 @@ function carStates() {
     else s.status = null;
     s.level = s.status ? null : riskLevel(risk.get(s.drv));
   }
-  // pit cars at the bottom, the highest risk on top
-  const order = { PIT: 0, OUT: 1, STOPPED: 2 };
-  const rank = { low: 3, elevated: 4, high: 5 };
+  // pit cars at the bottom, then by risk; stopped and out cars on top, so a car passing
+  // the scene never hides the stricken car
+  const order = { PIT: 0, OUT: 4, STOPPED: 5 };
+  const rank = { low: 1, elevated: 2, high: 3 };
   out.sort((p, q) => (order[p.status] ?? rank[p.level]) - (order[q.status] ?? rank[q.level]));
   return out;
 }
