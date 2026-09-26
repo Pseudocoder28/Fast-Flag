@@ -1,10 +1,12 @@
 """Race control client: feeds the WebSocket stream into RaceControl, sends recs back.
 
 Run:  python -m src.racecontrol
+      python -m src.racecontrol --url ws://localhost:8001/stream
 """
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import sys
@@ -15,7 +17,7 @@ from src.racecontrol.engine import RaceControl
 
 URL = "ws://localhost:8000/stream"
 BACKOFF_START_S = 1.0
-BACKOFF_CAP_S = 30.0
+BACKOFF_CAP_S = 5.0      # local server: after a restart, recs flow again within 5 s
 
 
 def log(msg: str) -> None:
@@ -73,8 +75,11 @@ async def run_client(url: str) -> None:
 
 
 def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--url", default=URL, help=f"stream to join (default {URL})")
+    a = p.parse_args()
     try:
-        asyncio.run(run_client(URL))
+        asyncio.run(run_client(a.url))
     except KeyboardInterrupt:
         log("shutting down (Ctrl+C)")
 

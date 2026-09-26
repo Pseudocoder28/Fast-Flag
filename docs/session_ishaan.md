@@ -80,6 +80,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 
 **B6. Hardware (midnight to 5:00am, only after M2 passes)**
 - `src/bridge/`: subscribes to the stream and sends the Section 7.7 serial protocol at 115200 baud. Maps marshal sectors to 3 panel zones.
+- Which rec goes where (PROJECT_BRIEF.md 7.4): flag VSC, SC or RED is track-wide, send `G,<flag>`. A CLEAR rec with message `TRACK CLEAR` ends it, send `G,GREEN`. Every other rec is a sector flag, send `Z,<zone of msector>,<flag>`.
 - `firmware/uno_marshal/`: marshal panel (Section 11). 3 zones of green and yellow LEDs, red LED, SC/VSC LED, servo flag, buzzer through a BJT.
 - `firmware/nano_dash/`: in-car dash (Section 11). LCD message and flag, joystick press sends `ACK,<ms>`, second buzzer through a BJT.
 - Ollama narration only if everything else works (async, it never decides).

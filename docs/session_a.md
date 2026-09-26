@@ -65,6 +65,7 @@ Naman now also owns `src/racecontrol/`, `dashboard/` and `tests/test_racecontrol
 **A9. Race control: clearing and re-escalation**
 - Bug: the engine never clears an SC, so later crashes never escalate. Fix it with the clearing and hysteresis rules in PROJECT_BRIEF.md Section 6.5.
 - Done when: a test with two separate incidents in one race passes, and the second one escalates after the first clears.
+- Result: a flagged car stops holding its sector after 180 s without moving more than 3 m; track-wide flags hold 60 s and clear 5 s after every sector that caused or supported them is CLEAR; the stop timer pauses on a speed blip instead of being cancelled; any jump over 2 s resets. Headless reruns: on 2023_Australian, SC for Leclerc at 3772.5 (official 3805.2, none before) and Magnussen at 9405.5 (official 9450.2, none before). On 2021_Azerbaijan, Verstappen's crash now escalates to SC at 7283.25 (official 7367.0). Test: `test_two_incidents_second_escalates_after_first_clears`.
 
 **A10. Dashboard: car movement and the stuck car (`dashboard/` only)**
 - Stuck car: find the cause first. Same x/y in every tick = stopped or retired car, ticks stop arriving = data dropout, or `in_pit` is true. A stopped car stays on the map, clearly marked (grey ring plus a STOPPED or OUT label). No data for 5 s of replay time: fade it out. `in_pit` true: hide it or draw it in the pit lane.
