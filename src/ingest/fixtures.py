@@ -4,14 +4,19 @@ Race: 2023 Australian GP. Incident: car 23 (Albon) crashes at Turn 6 on lap 7,
 marshal sector 9 (official YELLOW at t=4390, SC at t=4402, RED at t=4560).
 
 - ticks and official events are real FastF1 data.
-- detections, risk and recs are hand-built from the real timing, only so B can
-  build against realistic shapes before the real detectors exist.
+- detections and recs are hand-built from the real timing, only so B can build
+  against realistic shapes before the real detectors exist.
+- risk comes from the real risk model (see real_risk). It replaced hand-built values
+  that all sat above the dashboard's high-risk line, so every car looked high risk on
+  the mock.
 
-Run: python -m src.ingest.fixtures
+Run: python -m src.ingest.fixtures                (everything, from the FastF1 cache)
+     python -m src.ingest.fixtures --risk-only    (only risk_sample.jsonl, from data/features and data/models)
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 from pathlib import Path
@@ -25,6 +30,7 @@ from src.ingest.official import official_events
 from src.ingest.reference import build_track_ref
 
 YEAR, EVENT, LOCATION = 2023, "Australia", "Melbourne"
+RID = "2023_Australian"
 T_START, T_END = 4240.0, 4570.0          # ~150 s before the crash to just after the red flag
 INCIDENT_DRV = "23"
 OUT = Path("fixtures")
@@ -98,21 +104,32 @@ def build_recs(dets: list[dict]) -> list[dict]:
     ]
 
 
-def build_risk(df: pd.DataFrame, t_impact: float, ms: int) -> list[dict]:
-    """Every car once per second. Low noisy baseline, the crashed car high after impact,
-    cars approaching the incident sector raised after impact. No fake precursor."""
-    rng = np.random.default_rng(7)
-    sec = df[(df.t % 1.0 == 0) & df.dist.notna()]
+def real_risk(t0: float = T_START, t1: float = T_END) -> list[dict]:
+    """One row per racing car per second, in the real server's shape. The values come
+    from the leave-one-race-out risk model, which never trained on this race
+    (data/features/<race>_risk_pred.parquet, from python -m src.predict.risk). The
+    production model did train on it and shows car 23 high 30 s before its crash, which
+    is memory, not prediction, so it must not appear on the mock. top_features: the
+    production model's explanation for the same row, as the real server streams it.
+    Rows the leave-one-race-out set has no forecast for (a retired car, a car after its
+    crash) are left out."""
+    from src.predict.pipeline import risk_processors
+    from src.replay.engine import Engine, RaceData
+    race = RaceData.load(RID)
+    procs = risk_processors(race)
+    if not procs:
+        raise SystemExit("no risk models in data/models: train them first (python -m src.predict.risk train)")
+    eng = Engine(race, procs)
+    eng.seek(t0)
+    live = [e["data"] for e in eng.advance(t1) if e["kind"] == "risk"]
+    loro = pd.read_parquet(Path("data") / "features" / f"{RID}_risk_pred.parquet", columns=["t", "drv", "p10", "p30"])
+    honest = {(round(float(t), 2), str(d)): (p10, p30) for t, d, p10, p30 in loro.itertuples(index=False)}
     out = []
-    for r in sec.itertuples():
-        r10 = float(rng.uniform(0.01, 0.08))
-        feats = ["tyre_life", "battle_density"]
-        if r.t >= t_impact and r.drv == INCIDENT_DRV:
-            r10, feats = 0.97, ["speed_dev", "decel"]
-        elif r.t >= t_impact and r.msector in (ms - 2, ms - 1, ms):
-            r10, feats = float(rng.uniform(0.3, 0.55)), ["closing_rate", "speed_dev"]
-        out.append({"t": round(float(r.t), 2), "drv": r.drv, "risk_10s": round(r10, 3),
-                    "risk_30s": round(min(1.0, r10 * 1.6 + 0.02), 3), "top_features": feats})
+    for r in live:
+        if (r["t"], r["drv"]) not in honest:
+            continue
+        p10, p30 = honest[(r["t"], r["drv"])]
+        out.append({**r, "risk_10s": round(float(p10), 4), "risk_30s": round(float(max(p30, p10)), 4)})
     return out
 
 
@@ -123,8 +140,17 @@ def write_jsonl(name: str, rows: list[dict]) -> None:
 
 
 def main() -> None:
-    import fastf1
+    ap = argparse.ArgumentParser(description="Build the Section 7.6 fixtures")
+    ap.add_argument("--risk-only", action="store_true",
+                   help="only rebuild risk_sample.jsonl, from data/features and data/models")
+    a = ap.parse_args()
     assert_not_holdout(YEAR, LOCATION)
+    OUT.mkdir(exist_ok=True)
+    if a.risk_only:
+        write_jsonl("risk_sample.jsonl", real_risk())
+        print(f"risk_sample.jsonl          {(OUT / 'risk_sample.jsonl').stat().st_size / 1e6:6.2f} MB")
+        return
+    import fastf1
     fastf1.Cache.enable_cache(str(Path("data") / "fastf1_cache"))
     fastf1.set_log_level(logging.ERROR)
     s = fastf1.get_session(YEAR, EVENT, "R")
@@ -132,12 +158,11 @@ def main() -> None:
     rid = race_id(YEAR, s.event["EventName"])
     ref = build_track_ref(s)
     df = merge_session(s, ref, T_START, T_END)
-    OUT.mkdir(exist_ok=True)
     dets = build_detections(df)
     write_jsonl("ticks_sample.jsonl", build_ticks(df))
     write_jsonl("detections_sample.jsonl", dets)
     write_jsonl("recs_sample.jsonl", build_recs(dets))
-    write_jsonl("risk_sample.jsonl", build_risk(df, dets[0]["t"], dets[0]["msector"]))
+    write_jsonl("risk_sample.jsonl", real_risk())
     write_jsonl("official_sample.jsonl", [e for e in official_events(s) if T_START <= e["t"] <= T_END])
     (OUT / "track_sample.json").write_text(json.dumps(ref.to_track_json(rid)), encoding="utf-8")
     for p in sorted(OUT.iterdir()):
