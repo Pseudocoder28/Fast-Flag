@@ -25,8 +25,35 @@
   </header>
 
   <main id="map-panel" class="panel">
-    <canvas id="track" aria-label="Track map with marshal sectors and cars"></canvas>
-    <div class="map-note">Cars coloured by predicted incident risk in the next 30 s</div>
+    <div class="map-wrap">
+      <canvas id="track" aria-label="Track map with marshal sectors and cars"></canvas>
+      <div class="map-note">Cars coloured by predicted incident risk in the next 30 s</div>
+    </div>
+
+    <section class="timeline" aria-label="Lead time over the race control feed">
+      <div class="tl-head">
+        <h2>Lead time <span class="h2-note">our recommendations vs the race control feed, last 90 s of replay</span></h2>
+        <span id="lead-summary" class="lead-summary"></span>
+      </div>
+      <canvas id="timeline"></canvas>
+    </section>
+
+    <div class="controls">
+      <button id="play" class="ctl" type="button" title="Play or pause (space)">Pause</button>
+      <div class="speeds" role="group" aria-label="Replay speed">
+        <button type="button" class="ctl" data-speed="1">1x</button>
+        <button type="button" class="ctl" data-speed="5">5x</button>
+        <button type="button" class="ctl" data-speed="10">10x</button>
+        <button type="button" class="ctl" data-speed="50">50x</button>
+      </div>
+      <button id="back30" class="ctl" type="button" title="Back 30 s">-30 s</button>
+      <button id="fwd30" class="ctl" type="button" title="Forward 30 s">+30 s</button>
+      <div id="seekbar" class="seekbar" title="Click to seek. Marks: official flags">
+        <div id="seek-ticks"></div>
+        <div id="seek-head"></div>
+      </div>
+      <span id="seek-end" class="mono seek-end">-</span>
+    </div>
   </main>
 
   <aside id="side">
@@ -51,8 +78,13 @@
     </section>
 
     <section class="card feed-card">
-      <h2>Feed <span class="h2-note">newest first, last 50</span></h2>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" role="tab" data-tab="feed" aria-selected="true">Feed</button>
+        <button type="button" class="tab" role="tab" data-tab="incidents" aria-selected="false">Incidents</button>
+        <span class="h2-note" id="tab-note">newest first, last 50</span>
+      </div>
       <ol id="feed"></ol>
+      <ol id="incidents" hidden></ol>
     </section>
   </aside>
 </div>

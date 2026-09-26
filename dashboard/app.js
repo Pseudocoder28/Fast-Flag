@@ -10,6 +10,13 @@ const RESET_JUMP_S = 2.0;      // same rule as engine.RESET_JUMP_S: a bigger jum
 const MARGIN_PX = 48;
 const FEED_MAX = 50;
 
+// lead-time timeline and jump-to-incident list
+const MATCH_BEFORE_S = 60;     // our rec pairs with an official flag from 60 s before it ...
+const MATCH_AFTER_S = 10;      // ... to 10 s after it (PROJECT_BRIEF.md 6.7)
+const TL_WINDOW_S = 90;        // the timeline shows the last 90 s of replay time
+const INCIDENT_GAP_S = 60;     // official flags further apart than this are separate incidents
+const JUMP_BEFORE_S = 30;      // a jump lands this long before race control's first message
+
 // car movement: ticks come every 0.25 s of replay time. At 1x that is one tick every
 // ~256 ms of wall time, at 10x the server sends bursts of 2 ticks every ~57 ms, at 50x
 // bursts of 10 ticks every ~74 ms. FastF1 position samples are irregular, so about 1 tick
@@ -64,6 +71,8 @@ const MAP_BG = "#101318";      // matches the map panel, used for the gap in the
 const TRACK_FLAGS = new Set(["VSC", "SC", "RED"]);   // track-wide recs (PROJECT_BRIEF.md 7.4)
 const CAR_FILL = { low: "#343c49", elevated: "#a56200", high: "#c2185b", stopped: "#4a4d52", pit: "#6b7480" };
 const RING_STOPPED = "#9aa0a6";
+const WATCH_COLOR = "#a99cff";  // ANOMALY: advisory only, never a flag, kept apart from flag and risk colours
+const WATCH_S = 10;             // a watched car keeps its dashed ring this long (replay time)
 const LABEL_FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
 const MONO_FONT = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
@@ -206,6 +215,17 @@ const lapEl = document.getElementById("lap");
 const clockEl = document.getElementById("clock");
 const speedEl = document.getElementById("speed");
 const raceEl = document.getElementById("race-name");
+const tlCanvas = document.getElementById("timeline");
+const tctx = tlCanvas.getContext("2d");
+const leadSummaryEl = document.getElementById("lead-summary");
+const playEl = document.getElementById("play");
+const speedButtons = [...document.querySelectorAll("[data-speed]")];
+const seekbarEl = document.getElementById("seekbar");
+const seekTicksEl = document.getElementById("seek-ticks");
+const seekHeadEl = document.getElementById("seek-head");
+const seekEndEl = document.getElementById("seek-end");
+const incidentsEl = document.getElementById("incidents");
+const tabNoteEl = document.getElementById("tab-note");
 
 let raceId = null;
 let segments = null;
@@ -216,6 +236,7 @@ let officialEvents = [];        // GET /official, used only for the state at or 
 
 const cars = new Map();         // drv -> car (see newCar)
 const risk = new Map();         // drv -> risk_30s
+const watchUntil = new Map();   // drv -> replay time until which an ANOMALY watch ring shows
 const sectorFlags = new Map();  // msector -> sector flag (CLEAR, YELLOW, DOUBLE_YELLOW)
 let trackFlag = null;           // our track-wide flag: CLEAR, VSC, SC or RED. null: not known yet,
                                 // recs only arrive on changes, so a page opened mid-incident has
@@ -231,6 +252,17 @@ let burstSpan = 0.25;           // replay seconds per server step, measured
 let dispT = null;               // replay time the map is drawn at
 let lastFrameWall = null;
 let feedCount = 0;
+
+let nSectors = 0;
+let ourEvents = [];             // our recs above CLEAR since the last jump: {t, flag, msector, trackWide}
+let officialSeen = [];          // official envelopes above CLEAR since the last jump, same shape
+let replay = { t_start: null, t_end: null, speed: null };   // from GET /status and POST /replay
+let lastSpeed = 1;              // speed to resume at after a pause
+let incidents = [];             // from GET /official, for the jump list
+let currentIncident = -1;
+let tlW = 0;
+let tlH = 0;
+let seekHeadPct = -1;
 
 // --- cars ------------------------------------------------------------------
 
@@ -295,9 +327,9 @@ function feedRow(kind, flag, title, meta, t) {
   li.className = `feed-row kind-${kind}`;
   li.dataset.flag = flag;
   const isFlag = flag in FLAG_COLORS;
-  const icon = isFlag ? flagIcon(flag, "#0b0d10") : detIcon("#d7dce2");
+  const icon = isFlag ? flagIcon(flag, "#0b0d10") : detIcon(kind === "watch" ? WATCH_COLOR : "#d7dce2");
   const badgeIcon = isFlag && flag === "RED" ? flagIcon(flag, "#ffffff") : icon;
-  const source = { rec: "Fast Flag", det: "Detection", official: "Race control" }[kind];
+  const source = { rec: "Fast Flag", det: "Detection", official: "Race control", watch: "Anomaly model" }[kind];
   li.innerHTML =
     `<div class="feed-top"><span class="badge" data-flag="${escapeHtml(flag)}">${badgeIcon}` +
     `${escapeHtml(FLAG_LABEL[flag] || flag)}</span><span class="feed-source">${source}</span>` +
@@ -318,6 +350,10 @@ function num(v, digits = 2) {
 
 function onRec(rec) {
   const conf = `confidence ${num(rec.confidence)}`;
+  if (rec.flag !== "CLEAR") {
+    ourEvents.push({ t: rec.t, flag: rec.flag, msector: rec.msector, trackWide: TRACK_FLAGS.has(rec.flag) });
+    renderLeadSummary();
+  }
   if (TRACK_FLAGS.has(rec.flag) || (rec.flag === "CLEAR" && rec.message === "TRACK CLEAR")) {
     trackFlag = rec.flag;
     renderTrackState(trackFlagEl, trackFlag);
@@ -331,6 +367,13 @@ function onRec(rec) {
 
 function onDetection(det) {
   const who = det.drivers.length > 1 ? `Cars ${det.drivers.join(", ")}` : `Car ${det.drivers[0]}`;
+  if (det.type === "ANOMALY") {
+    // advisory: the anomaly model flags unusual driving, race control raises no flag for it
+    for (const d of det.drivers) watchUntil.set(d, det.t + WATCH_S);
+    feedRow("watch", "WATCH", `${who}, sector ${det.msector}: unusual driving, watch`,
+            escapeHtml(det.evidence), det.t);
+    return;
+  }
   feedRow("det", det.type, `${who}, sector ${det.msector}`,
           `${escapeHtml(det.evidence)}, severity ${num(det.severity)}`, det.t);
 }
@@ -340,7 +383,17 @@ function onOfficial(ev) {
     officialFlag = ev.flag;
     renderTrackState(officialFlagEl, officialFlag);
   }
-  feedRow("official", ev.flag, ev.message, ev.msector === null ? "Track-wide" : `Sector ${ev.msector}`, ev.t);
+  let meta = ev.msector === null ? "Track-wide" : `Sector ${ev.msector}`;
+  if (ev.flag !== "CLEAR") {
+    const off = { t: ev.t, flag: ev.flag, msector: ev.msector, trackWide: ev.msector === null };
+    officialSeen.push(off);
+    const ours = matchFor(off);
+    if (ours && ours.t < off.t) {
+      meta += `, <span class="lead-good">Fast Flag <span class="mono">${(off.t - ours.t).toFixed(1)} s</span> earlier</span>`;
+    }
+  }
+  feedRow("official", ev.flag, ev.message, meta, ev.t);
+  renderLeadSummary();
 }
 
 function officialStateAt(t) {
@@ -385,6 +438,7 @@ function buildLegend() {
     [dot(CAR_FILL.elevated), "Risk elevated"],
     [dot(CAR_FILL.high), "Risk high"],
     [dot(CAR_FILL.stopped, "ring"), "Stopped or out"],
+    [dot(CAR_FILL.low, "watch"), "Watch (anomaly)"],
     [dot(CAR_FILL.pit, "pit"), "In pit lane"],
   ].map(([d, text]) => `<div class="legend-row">${d}<span>${text}</span></div>`).join("");
 }
@@ -398,9 +452,13 @@ function resetForJump() {
   renderTrackState(trackFlagEl, trackFlag);
   clearFeed();
   risk.clear();
+  watchUntil.clear();
   cars.clear();                 // every car is placed fresh: a seek snaps, never glides
   burstT = null;
   dispT = null;
+  ourEvents = [];
+  officialSeen = [];
+  renderLeadSummary();
   checkRace();                  // POST /replay can also load another race
 }
 
@@ -412,7 +470,10 @@ async function loadTrack() {
   raceId = track.race;
   raceEl.textContent = raceName(raceId);
   officialEvents = official.slice().sort((a, b) => a.t - b.t);
+  nSectors = track.msectors.length;
   segments = buildSegments(track);
+  buildIncidents();
+  buildSeekTicks();
   resizeCanvas();
   if (replayT !== null) {
     officialFlag = officialStateAt(replayT);
@@ -423,10 +484,289 @@ async function loadTrack() {
 async function checkRace() {
   try {
     const status = await (await fetch("/status")).json();
-    speedEl.textContent = status.speed > 0 ? `${status.speed}x` : "paused";
+    applyStatus(status);
     if (status.race !== raceId) await loadTrack();
   } catch (e) {
     // the next poll, jump or reconnect checks again
+  }
+}
+
+function applyStatus(status) {
+  const range = status.t_start !== replay.t_start || status.t_end !== replay.t_end;
+  replay = { t_start: status.t_start, t_end: status.t_end, speed: status.speed };
+  if (status.speed > 0) lastSpeed = status.speed;
+  speedEl.textContent = status.speed > 0 ? `${status.speed}x` : "paused";
+  playEl.textContent = status.speed > 0 ? "Pause" : "Play";
+  for (const b of speedButtons) b.classList.toggle("active", Number(b.dataset.speed) === status.speed);
+  seekEndEl.textContent = fmtTime(status.t_end);
+  if (range) {
+    buildSeekTicks();
+    buildIncidents();
+  }
+}
+
+// --- lead time: our recs next to the race control feed -------------------------
+
+function nearSector(a, b) {
+  // same or adjacent marshal sector, wrapping at the finish line
+  if (a === null || b === null || a === undefined || b === undefined) return false;
+  const d = Math.abs(a - b);
+  return d <= 1 || (nSectors > 0 && d === nSectors - 1);
+}
+
+function matchFor(off) {
+  // our first rec for an official flag, as the eval matches them (PROJECT_BRIEF.md 6.7):
+  // from MATCH_BEFORE_S before to MATCH_AFTER_S after it, track-wide with track-wide,
+  // sector flags with a sector flag in the same or an adjacent sector
+  for (const r of ourEvents) {
+    if (r.t < off.t - MATCH_BEFORE_S) continue;
+    if (r.t > off.t + MATCH_AFTER_S) break;
+    if (off.trackWide ? r.trackWide : !r.trackWide && nearSector(r.msector, off.msector)) return r;
+  }
+  return null;
+}
+
+function leadSummary() {
+  const n = officialSeen.length;
+  if (n === 0) return "No official flag since the last seek";
+  const leads = officialSeen.map(matchFor).map((r, i) => (r ? officialSeen[i].t - r.t : null));
+  const earlier = leads.filter((l) => l !== null && l > 0).sort((a, b) => a - b);
+  if (!earlier.length) return `Fast Flag first on <span class="mono">0</span> of <span class="mono">${n}</span> official flags`;
+  const mid = earlier.length / 2;
+  const median = earlier.length % 2 ? earlier[Math.floor(mid)] : (earlier[mid - 1] + earlier[mid]) / 2;
+  return `Fast Flag first on <span class="mono">${earlier.length}</span> of <span class="mono">${n}</span> official ` +
+    `flags since the last seek, median lead <span class="mono">${median.toFixed(1)} s</span>`;
+}
+
+function renderLeadSummary() {
+  leadSummaryEl.innerHTML = leadSummary();
+}
+
+function drawMarker(x, y, flag, lane) {
+  // lane.labelEnd: where the previous label in this lane ends, so labels never overlap
+  const c = FLAG_COLORS[flag] || FLAG_COLORS.CLEAR;
+  tctx.fillStyle = c;
+  if (flag === "DOUBLE_YELLOW") {
+    tctx.fillRect(x - 4, y - 8, 3, 16);
+    tctx.fillRect(x + 1, y - 8, 3, 16);
+  } else {
+    tctx.fillRect(x - 3, y - 8, 6, 16);
+  }
+  const text = { YELLOW: "Y", DOUBLE_YELLOW: "DY" }[flag] || flag;
+  tctx.font = `800 9.5px ${LABEL_FONT}`;
+  const w = tctx.measureText(text).width;
+  if (x + 6 < lane.labelEnd) return;
+  tctx.textAlign = "left";
+  tctx.textBaseline = "middle";
+  tctx.fillText(text, x + 6, y);
+  lane.labelEnd = x + 6 + w + 4;
+}
+
+function drawTimeline() {
+  tctx.clearRect(0, 0, tlW, tlH);
+  if (replayT === null || tlW === 0) return;
+  const left = 104;
+  const right = tlW - 10;
+  const t1 = replayT + 3;
+  const t0 = replayT - TL_WINDOW_S;
+  const x = (t) => left + ((t - t0) / (t1 - t0)) * (right - left);
+  const yOurs = 20;
+  const yOff = 56;
+
+  tctx.font = `800 9.5px ${LABEL_FONT}`;
+  tctx.textAlign = "left";
+  tctx.textBaseline = "middle";
+  tctx.fillStyle = "#a3abb6";
+  tctx.fillText("FAST FLAG", 0, yOurs);
+  tctx.fillText("RACE CONTROL", 0, yOff);
+  tctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+  tctx.lineWidth = 1;
+  for (const y of [yOurs, yOff]) {
+    tctx.beginPath();
+    tctx.moveTo(left, y + 0.5);
+    tctx.lineTo(right, y + 0.5);
+    tctx.stroke();
+  }
+  tctx.font = `600 9.5px ${MONO_FONT}`;
+  tctx.textAlign = "center";
+  tctx.fillStyle = "#6f7883";
+  for (let k = 15; k <= TL_WINDOW_S; k += 15) {
+    const gx = x(replayT - k);
+    tctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    tctx.beginPath();
+    tctx.moveTo(gx + 0.5, 8);
+    tctx.lineTo(gx + 0.5, yOff + 10);
+    tctx.stroke();
+    tctx.fillText(`-${k} s`, gx, tlH - 6);
+  }
+  const nx = x(replayT);
+  tctx.strokeStyle = "#ffffff";
+  tctx.beginPath();
+  tctx.moveTo(nx + 0.5, 6);
+  tctx.lineTo(nx + 0.5, yOff + 12);
+  tctx.stroke();
+  tctx.fillStyle = "#e8eaed";
+  tctx.fillText("now", nx, tlH - 6);
+
+  // pairs first, so the markers sit on top of the lines
+  for (const off of officialSeen) {
+    const ours = matchFor(off);
+    if (!ours || Math.max(off.t, ours.t) < t0) continue;
+    const ax = Math.max(x(ours.t), left);
+    const bx = x(off.t);
+    const lead = off.t - ours.t;
+    const good = lead > 0;
+    tctx.strokeStyle = good ? "rgba(47, 191, 113, 0.9)" : "rgba(163, 171, 182, 0.7)";
+    tctx.lineWidth = 1.5;
+    tctx.beginPath();
+    tctx.moveTo(ax, yOurs + 9);
+    tctx.lineTo(bx, yOff - 9);
+    tctx.stroke();
+    const label = good ? `+${lead.toFixed(1)} s` : `${lead.toFixed(1)} s`;
+    const lx = (ax + bx) / 2;
+    const ly = (yOurs + yOff) / 2;
+    tctx.font = `700 10px ${MONO_FONT}`;
+    const lw = tctx.measureText(label).width + 8;
+    tctx.fillStyle = "rgba(10, 12, 15, 0.9)";
+    tctx.beginPath();
+    tctx.roundRect(lx - lw / 2, ly - 7, lw, 14, 3);
+    tctx.fill();
+    tctx.textAlign = "center";
+    tctx.textBaseline = "middle";
+    tctx.fillStyle = good ? "#2fbf71" : "#a3abb6";
+    tctx.fillText(label, lx, ly + 0.5);
+  }
+  const oursLane = { labelEnd: -Infinity };
+  const offLane = { labelEnd: -Infinity };
+  for (const r of ourEvents) if (r.t >= t0) drawMarker(x(r.t), yOurs, r.flag, oursLane);
+  for (const o of officialSeen) if (o.t >= t0) drawMarker(x(o.t), yOff, o.flag, offLane);
+}
+
+// --- replay controls (POST /replay, for every viewer of this server) -----------
+
+async function postReplay(body) {
+  try {
+    const res = await fetch("/replay", {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+    });
+    if (res.ok) applyStatus(await res.json());
+  } catch (e) {
+    // the status poll shows the real state
+  }
+}
+
+function seekTo(t) {
+  if (replay.t_start === null) return;
+  postReplay({ seek_t: Math.min(Math.max(t, replay.t_start), replay.t_end) });
+}
+
+function togglePlay() {
+  postReplay({ speed: replay.speed > 0 ? 0 : lastSpeed || 1 });
+}
+
+function buildSeekTicks() {
+  seekTicksEl.innerHTML = "";
+  const { t_start: a, t_end: b } = replay;
+  if (a === null || b <= a) return;
+  for (const ev of officialEvents) {
+    if (ev.flag === "CLEAR" || ev.t < a || ev.t > b) continue;
+    const tick = document.createElement("span");
+    tick.className = "seek-tick";
+    tick.style.left = `${((ev.t - a) / (b - a)) * 100}%`;
+    tick.style.background = FLAG_COLORS[ev.flag] || FLAG_COLORS.CLEAR;
+    seekTicksEl.appendChild(tick);
+  }
+}
+
+function renderSeekHead() {
+  const { t_start: a, t_end: b } = replay;
+  if (a === null || replayT === null || b <= a) return;
+  const pct = Math.round(((replayT - a) / (b - a)) * 1000) / 10;
+  if (pct !== seekHeadPct) {
+    seekHeadPct = pct;
+    seekHeadEl.style.left = `${Math.min(Math.max(pct, 0), 100)}%`;
+  }
+}
+
+// --- jump to incident (GET /official) --------------------------------------------
+
+function buildIncidents() {
+  incidents = [];
+  const { t_start: a, t_end: b } = replay;
+  for (const ev of officialEvents) {
+    if (ev.flag === "CLEAR") continue;
+    if (a !== null && (ev.t < a || ev.t > b)) continue;   // before the start or after the end of the replay
+    const last = incidents[incidents.length - 1];
+    if (last && ev.t - last.tLast <= INCIDENT_GAP_S) {
+      last.tLast = ev.t;
+      last.events.push(ev);
+    } else {
+      incidents.push({ t: ev.t, tLast: ev.t, events: [ev] });
+    }
+  }
+  incidentsEl.innerHTML = "";
+  incidents.forEach((inc, i) => {
+    const flags = [...new Set(inc.events.map((e) => e.flag))];
+    const sectors = [...new Set(inc.events.map((e) => e.msector).filter((m) => m !== null))].sort((a, b) => a - b);
+    const where = sectors.length ? `Sector${sectors.length > 1 ? "s" : ""} ${sectors.join(", ")}` : "Track-wide";
+    const li = document.createElement("li");
+    li.className = "incident";
+    li.dataset.index = String(i);
+    li.innerHTML =
+      `<div class="incident-main"><div class="incident-flags">` +
+      flags.map((f) => `<span class="badge" data-flag="${f}">${flagIcon(f, f === "RED" ? "#ffffff" : "#0b0d10")}` +
+        `${FLAG_LABEL[f] || f}</span>`).join("") +
+      `</div><div class="incident-meta">${where}, ${inc.events.length} official message` +
+      `${inc.events.length > 1 ? "s" : ""}</div></div>` +
+      `<span class="incident-t">${fmtTime(inc.t)}</span><button type="button" class="ctl jump">Jump</button>`;
+    li.addEventListener("click", () => {
+      postReplay({ seek_t: Math.max(inc.t - JUMP_BEFORE_S, replay.t_start ?? inc.t - JUMP_BEFORE_S), speed: 1 });
+    });
+    incidentsEl.appendChild(li);
+  });
+  currentIncident = -1;
+}
+
+function renderCurrentIncident() {
+  // the incident whose window holds the replay time, highlighted in the list
+  let cur = -1;
+  if (replayT !== null) {
+    cur = incidents.findIndex((inc) => replayT >= inc.t - JUMP_BEFORE_S && replayT <= inc.tLast + INCIDENT_GAP_S);
+  }
+  if (cur === currentIncident) return;
+  incidentsEl.querySelector(".incident.current")?.classList.remove("current");
+  if (cur >= 0) incidentsEl.children[cur]?.classList.add("current");
+  currentIncident = cur;
+}
+
+function wireControls() {
+  playEl.addEventListener("click", togglePlay);
+  for (const b of speedButtons) b.addEventListener("click", () => postReplay({ speed: Number(b.dataset.speed) }));
+  document.getElementById("back30").addEventListener("click", () => replayT !== null && seekTo(replayT - 30));
+  document.getElementById("fwd30").addEventListener("click", () => replayT !== null && seekTo(replayT + 30));
+  seekbarEl.addEventListener("click", (e) => {
+    const r = seekbarEl.getBoundingClientRect();
+    const f = Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1);
+    seekTo(replay.t_start + f * (replay.t_end - replay.t_start));
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && e.target === document.body) {
+      e.preventDefault();
+      togglePlay();
+    }
+  });
+  for (const tab of document.querySelectorAll(".tab")) {
+    tab.addEventListener("click", () => {
+      const which = tab.dataset.tab;
+      for (const t of document.querySelectorAll(".tab")) {
+        t.classList.toggle("active", t === tab);
+        t.setAttribute("aria-selected", String(t === tab));
+      }
+      feedEl.hidden = which !== "feed";
+      incidentsEl.hidden = which !== "incidents";
+      tabNoteEl.textContent = which === "feed" ? "newest first, last 50"
+        : `jumps to ${JUMP_BEFORE_S} s before race control`;
+    });
   }
 }
 
@@ -441,6 +781,12 @@ function resizeCanvas() {
   canvas.height = Math.round(canvasH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (segments) transform = computeTransform(segments.pts, canvasW, canvasH, MARGIN_PX);
+  const tr = tlCanvas.getBoundingClientRect();
+  tlW = tr.width;
+  tlH = tr.height;
+  tlCanvas.width = Math.round(tlW * dpr);
+  tlCanvas.height = Math.round(tlH * dpr);
+  tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 window.addEventListener("resize", resizeCanvas);
 
@@ -596,6 +942,15 @@ function drawCar(s) {
     ctx.strokeStyle = RING_STOPPED;
     ctx.stroke();
   }
+  if (!stopped && (watchUntil.get(s.drv) ?? -Infinity) >= replayT) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, DOT_RADIUS_PX + 4, 0, Math.PI * 2);
+    ctx.setLineDash([4, 3]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = WATCH_COLOR;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
   ctx.fillStyle = "#ffffff";
   ctx.font = `700 13px ${LABEL_FONT}`;
   ctx.textAlign = "center";
@@ -644,8 +999,11 @@ function draw(now) {
   if (!segments || !transform) return;
   ctx.clearRect(0, 0, canvasW, canvasH);
   drawTrack();
+  drawTimeline();
   if (replayT === null) return;
   renderHeader();
+  renderSeekHead();
+  renderCurrentIncident();
   advanceDisplayClock(now);
   const states = carStates();
   for (const s of states) drawCar(s);
@@ -731,6 +1089,7 @@ async function init() {
   buildLegend();
   renderTrackState(trackFlagEl, trackFlag);
   renderTrackState(officialFlagEl, officialFlag);
+  wireControls();
   resizeCanvas();
   await loadTrack();
   connect();
