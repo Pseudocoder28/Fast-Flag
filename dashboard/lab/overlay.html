@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fast Flag broadcast overlay</title>
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+<div id="stage">
+  <header id="top">
+    <div id="wordmark" class="wordmark"><span class="fast">FAST</span><span class="flag">FLAG</span></div>
+    <div id="status"><span id="conn">connecting</span><span id="replay-t"></span></div>
+  </header>
+
+  <section id="clockbox" class="hidden" aria-live="polite">
+    <div class="clock-head">
+      <span id="clock-title">EXPOSURE CLOCK</span>
+      <span id="clock-flag" class="clock-flag"></span>
+    </div>
+    <div id="clock-value" class="clock-value">0.0<span class="unit">s</span></div>
+    <div id="clock-cars" class="clock-cars">CARS EXPOSED <b>0</b></div>
+    <div id="clock-result" class="clock-result"></div>
+    <ol id="ticker" class="ticker"></ol>
+    <div class="clock-note">Cars passing the stricken car at racing speed since our call, from tick data</div>
+  </section>
+
+  <section id="banners" aria-live="polite"></section>
+
+  <footer id="foot">
+    <span id="honesty">Replay of historical FastF1 data. Counterfactual.</span>
+  </footer>
+</div>
+<script src="overlay.js"></script>
+</body>
+</html>
