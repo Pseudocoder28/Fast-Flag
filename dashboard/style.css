@@ -703,6 +703,9 @@ html, body {
 .kind-det .badge { color: #d7dce2; }
 
 .feed-source {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -720,6 +723,7 @@ html, body {
 
 .feed-t {
   margin-left: auto;
+  flex: 0 0 auto;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-size: 11px;
