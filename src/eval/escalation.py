@@ -324,11 +324,14 @@ def outcome(row: pd.Series) -> str:
     return row["miss_kind"] if row["status"] == "missed" else row["status"]
 
 
-def plot(off: pd.DataFrame, summ: dict, path: Path) -> None:
+def plot(off: pd.DataFrame, summ: dict, path: Path, title: str | None = None, scope_note: str = IN_SAMPLE) -> None:
+    """Scorecard chart. title and scope_note default to the training-race wording (the A7
+    holdout run passes its own)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
+    from matplotlib.ticker import MaxNLocator
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8.2), facecolor=SURFACE,
                                    gridspec_kw={"height_ratios": [3.1, 1.9], "hspace": 0.55})
@@ -371,6 +374,7 @@ def plot(off: pd.DataFrame, summ: dict, path: Path) -> None:
     ax2.set_yticks(range(len(ESCALATIONS)))
     ax2.set_yticklabels([FLAG_NAME[f] for f in ESCALATIONS])
     ax2.set_xlabel("Official escalations", color=INK2)
+    ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax2.set_title("Outcome per official escalation", loc="left", fontsize=10.5, color=INK, pad=8)
     fig.legend(handles=[Patch(facecolor=c, edgecolor=SURFACE, label=lbl) for _, lbl, c, _ in SEGMENTS],
                loc="upper left", bbox_to_anchor=(0.19, 0.2), ncol=2, frameon=False, fontsize=8.5)
@@ -387,16 +391,19 @@ def plot(off: pd.DataFrame, summ: dict, path: Path) -> None:
             lbl.set_color(INK)
 
     c = summ["our_by_category"]
-    fig.text(0.02, 0.975, f"Escalation scorecard: {summ['official_escalations']} official VSC, SC and red flags in "
-             f"{summ['races']} training races", fontsize=13, color=INK, weight="bold", va="top")
+    title = title or (f"Escalation scorecard: {summ['official_escalations']} official VSC, SC and red flags in "
+                      f"{summ['races']} training races")
+    med = "" if summ["median_lead_s"] is None else f" (median {summ['median_lead_s']:.0f} s)"
+    per_hour = "" if summ["extra_per_hour"] is None else f" ({summ['extra_per_hour']:.2f} per race hour)"
+    fig.text(0.02, 0.975, title, fontsize=13, color=INK, weight="bold", va="top")
     fig.text(0.02, 0.94, f"Our race control recommended a neutralisation for {summ['matched']}, "
-             f"{summ['status']['earlier']} of them earlier (median {summ['median_lead_s']:.0f} s).\nIt also made "
-             f"{summ['extra']} escalations race control did not ({summ['extra_per_hour']:.2f} per race hour).",
+             f"{summ['status']['earlier']} of them earlier{med}.\nIt also made "
+             f"{summ['extra']} escalation{'' if summ['extra'] == 1 else 's'} race control did not{per_hour}.",
              fontsize=9.5, color=INK2, va="top", linespacing=1.4)
     fig.text(0.02, 0.015, f"Our {summ['our_escalations']} recommendations: {c['matched']} matched, "
              f"{c['during an official neutralisation']} during an official neutralisation, "
              f"{c['official yellows only']} where race control kept yellows only, {c['no official flag']} with no "
-             f"official flag. Replay of historical FastF1 data.\n{IN_SAMPLE}\n"
+             f"official flag. Replay of historical FastF1 data.\n{scope_note}\n"
              + COUNTERFACTUAL.replace(" Claim", "\nClaim"), fontsize=7.5, color=INK2, va="bottom", linespacing=1.4)
     fig.savefig(path, dpi=160, facecolor=SURFACE)
     plt.close(fig)

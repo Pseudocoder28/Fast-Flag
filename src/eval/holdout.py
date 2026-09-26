@@ -158,14 +158,18 @@ def risk_section(race: RaceData, dets: list[dict]) -> dict:
     return out
 
 
-def evaluate(rid: str, out_dir: Path, allow_holdout: bool) -> dict:
+def evaluate(rid: str, out_dir: Path, allow_holdout: bool, label: str = "", scope_note: str = "") -> dict:
+    """Every holdout section for one race, plus its charts in out_dir. label names the race on
+    the charts (e.g. "2026 Azerbaijan holdout"); scope_note says what kind of test it is."""
     from src.detect.detectors import NaiveThreshold
     from src.eval.case_study import crashes, plot as plot_crash
-    from src.eval.escalation import production_suite, race_scorecard, summarise as summarise_escalation, tables
+    from src.eval.escalation import (plot as plot_escalation, production_suite, race_scorecard,
+                                     summarise as summarise_escalation, tables)
     from src.eval.incidents import INCIDENT_FLAGS
-    from src.eval.latency_by_type import race_events, summary
+    from src.eval.latency_by_type import plot as plot_latency, race_events, summary
     from src.eval.run import score
     from src.replay.pipeline import all_processors
+    label = label or rid.replace("_", " ")
     race = RaceData.load(rid)
     eng = Engine(race, all_processors(race))               # frozen detectors, ANOMALY and risk
     dets = [e["data"] for e in eng.advance(eng.t_end) if e["kind"] == "detection"]
@@ -177,19 +181,32 @@ def evaluate(rid: str, out_dir: Path, allow_holdout: bool) -> dict:
                  "naive_speed_threshold": summarise(score(race, "baseline", base))}
     events, missing = race_events(rid, dets=dets, allow_holdout=allow_holdout)
     ev = pd.DataFrame(events)
-    latency = summary(ev, "flag", list(INCIDENT_FLAGS)).to_dict("records") if len(ev) else []
-    found, rec_source = crashes(rid, allow_holdout=allow_holdout)
+    by_flag = summary(ev, "flag", list(INCIDENT_FLAGS)) if len(ev) else pd.DataFrame()
     out_dir.mkdir(parents=True, exist_ok=True)
+    charts = []
+    pd.DataFrame(missing).to_csv(out_dir / f"latency_{rid}_no_onset.csv", index=False, encoding="utf-8")
+    if len(ev):
+        plot_latency(ev, by_flag, 1, len(missing), out_dir / f"latency_{rid}.png",
+                     subtitle=f"Replay of historical FastF1 data, {label}: {len(ev)} flag events with an "
+                              f"identifiable crash onset", source=f"latency_{rid}_no_onset.csv")
+        charts.append(f"latency_{rid}.png")
+    found, rec_source = crashes(rid, allow_holdout=allow_holdout)
     for c in found:
         plot_crash(c, out_dir / f"case_{rid}_car{c['car']}.png")
+        charts.append(f"case_{rid}_car{c['car']}.png")
     card = race_scorecard(rid, suite_for=production_suite, allow_holdout=allow_holdout)
     off, ours = tables([card])
+    esc = summarise_escalation([card])
     off.to_csv(out_dir / f"escalation_{rid}_official.csv", index=False, encoding="utf-8")
     ours.to_csv(out_dir / f"escalation_{rid}_ours.csv", index=False, encoding="utf-8")
-    return {"race": rid, "detection": detection, "latency_from_onset": latency,
+    plot_escalation(off, esc, out_dir / f"escalation_{rid}.png",
+                    title=f"Escalation scorecard, {label}: {esc['official_escalations']} official VSC, SC and red flags",
+                    scope_note=scope_note or label)
+    charts.append(f"escalation_{rid}.png")
+    return {"race": rid, "detection": detection, "latency_from_onset": by_flag.to_dict("records"),
             "latency_events": len(ev), "latency_no_onset": len(missing), "risk": risk_section(race, dets),
             "case_study": {"recommendation_source": rec_source, "crashes": found},
-            "escalation": summarise_escalation([card])}
+            "escalation": esc, "charts": charts}
 
 
 # ---- report
@@ -235,6 +252,8 @@ def report_md(res: dict, header: list[str]) -> str:
                   f"{e['status']['missed']}, already out {e['status']['already out']}.",
                   f"- Extra escalations race control never made: {e['extra']} = {num(e['extra_per_hour'], '.2f')} "
                   f"per race hour. Same first flag as race control: {e['same_first_flag']} of {e['matched']}."]
+    if res.get("charts"):
+        lines += ["", "## Charts", "", *[f"- {c}" for c in res["charts"]]]
     lines += ["", "## Crashes (timelines and exposure)", ""]
     for c in res["case_study"]["crashes"]:
         tl = c["timeline"]
@@ -279,7 +298,10 @@ def run(rid: str, reason: str | None) -> Path:
         build_race(rid, holdout=True)
     runs.append({"at": datetime.now().isoformat(timespec="seconds"), "commit": manifest["commit"], "reason": reason})
     log.write_text(json.dumps(runs, indent=2), encoding="utf-8")        # logged before anything is seen
-    res = evaluate(rid, CHARTS, allow_holdout=True)
+    race = rid.replace("_", " ")
+    res = evaluate(rid, CHARTS, allow_holdout=True, label=f"{race} holdout",
+                   scope_note=f"Holdout: code and models frozen at commit {manifest['commit'][:7]}; nothing was fitted "
+                              "or tuned on this race.")
     res |= {"freeze": {k: manifest[k] for k in ("frozen_at", "commit", "anomaly_threshold", "risk_threshold_p30")},
             "runs": runs}
     header = [f"# Holdout: {rid}", "",
@@ -296,7 +318,8 @@ def run(rid: str, reason: str | None) -> Path:
 def dry_run(rid: str) -> Path:
     if is_holdout_id(rid):
         raise SystemExit(f"{rid} is a holdout race: dry-run is for non-holdout races only")
-    res = evaluate(rid, DRY_DIR, allow_holdout=False)
+    res = evaluate(rid, DRY_DIR, allow_holdout=False, label=f"{rid.replace('_', ' ')} dry run",
+                   scope_note="Dry run on a race outside training and tuning, with the current models: not the holdout.")
     header = [f"# DRY RUN: {rid} (not a holdout)", "",
               "Replay of historical FastF1 data. Same pipeline and code path as the A7 holdout run, with the "
               "current models; written to data/dry_run/, never to docs/charts/."]
