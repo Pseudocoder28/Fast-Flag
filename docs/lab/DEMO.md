@@ -36,6 +36,22 @@ Pre-flight checklist:
 - Terminal 2 printed `connected`, terminal 3 printed `voice: connected`.
 - Do a full dry run once, then re-cue with the command above. Seeking back resets everything cleanly.
 
+### Race names and switching races
+
+- The real server: `python -m src.replay.server --race <race id>`, on port 8000. Other options: `--speed 0` starts paused, `--port 8001` uses another port, `--no-detect` and `--no-predict` turn off detections and risk.
+- A race id is `<year>_<event name without "Grand Prix", spaces as underscores>`: `2023_Australian`, `2024_Canadian`, `2023_Mexico_City`, `2024_São_Paulo`. `GET /races` lists every id the running server can switch to.
+- `POST /replay {"race": "2024_Canadian", "seek_t": 4980, "speed": 1}` switches race while the server runs, but only to the 20 training races in `GET /races`.
+- **`2021_Azerbaijan` is a case study, not a training race, so `POST /replay` answers 404 for it.** Start the server with `--race 2021_Azerbaijan`. If you switch away during rehearsal, restart the server to get back.
+- The holdout races (`2026_Azerbaijan`, `2026_Spanish`) need `--holdout`, and only for the A7 demo.
+
+### On Windows (Ishaan's laptop)
+
+- Same four steps, with `.venv\Scripts\python -m ...` instead of `python -m ...`. Everything runs on port 8000. Nothing extra to install, no Ollama.
+- The server needs `data\case_studies\2021_Azerbaijan*` (5 files, 75 MB), copied from Naman's `data` folder.
+- **The voice only speaks on a Mac** (it uses the built-in macOS `say`). On Windows it prints the lines instead. For a spoken demo, run the voice on Naman's Mac, pointed at the demo machine: `python -m src.lab.voice --url ws://<demo machine IP>:8000/stream`. The server must then be started with `--host 0.0.0.0` so the Mac can reach it.
+- The `curl` lines below are for macOS. In PowerShell, use for example:
+  `Invoke-RestMethod -Method Post -Uri http://localhost:8000/replay -ContentType 'application/json' -Body '{"speed": 0, "seek_t": 5268}'`
+
 ## Run of show
 
 Start: `curl -s -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 1}'`
