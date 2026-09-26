@@ -68,7 +68,7 @@ def test_no_jargon_without_a_definition() -> None:
     everything = text(incident()) + " ".join(d for _, d in HOW_TO_READ)
     for jargon in ("IsolationForest", "LightGBM", "onset", "telemetry", "ANOMALY", "msector", "PR-AUC"):
         assert jargon not in everything, jargon
-    assert "—" not in everything + " ".join(d for _, d in GLOSSARY), "no em dashes"
+    assert "\u2014" not in everything + " ".join(d for _, d in GLOSSARY), "no em dashes"
 
 
 def test_card_page_carries_the_explanation_below_the_card() -> None:
