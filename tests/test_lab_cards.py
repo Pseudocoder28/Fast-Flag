@@ -143,3 +143,17 @@ def test_an_alert_on_another_car_names_that_car() -> None:
     inc["markers"]["our_first_alert"].update(type="ANOMALY", drivers=["81"], on_onset_car=False)
     assert evidence_lines(inc)[0].startswith("+28.2 s ANOMALY (car 81, same sector) sev 0.37")
     assert any(e["what"] == "ANOMALY (car 81, same sector)" for e in events(inc))
+
+
+def test_served_gallery_links_back_and_says_earlier_or_later(tmp_path: Path) -> None:
+    from src.lab.cards import write_index
+    late = incident()
+    early = incident(car="27", onset_t=7177.5)
+    early["markers"]["our_escalation"]["t_after_onset"] = 7.0
+    early["markers"]["official_escalation"].update(t_after_onset=3.3, flag="VSC")
+    write_index([(late, card_name(late)), (early, "card_x")], tmp_path, DOC, png=False, back_link="/")
+    page = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert 'href="/"' in page and "Back to the pit wall" in page
+    assert "32.7 s later" in page and "3.7 s earlier" in page and "+-" not in page
+    assert ".png" not in page, "the served copy has no PNGs"
+    assert "Replay of historical FastF1 data" in page

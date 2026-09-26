@@ -6,7 +6,8 @@ Each card, sized for a 16:9 slide: header (race, lap, sector, car), a timeline s
 car's speed trace against its own normal speed, the detector evidence, our recommendation
 and its reason, the exposure numbers, a delay-cost mini chart and the honesty label.
 
-Run: python -m src.lab.cards                       (docs/lab/delay_cost.json -> docs/lab/cards/)
+Run: python -m src.lab.cards                       (docs/lab/delay_cost.json -> docs/lab/cards/, plus the
+                                                   HTML cards in dashboard/lab/cards/ for the pit wall's button)
      python -m src.lab.cards --only 2021_Azerbaijan
 """
 
@@ -29,6 +30,7 @@ from src.lab.delay_cost import alert_cars_note, n_cars  # noqa: E402
 
 IN_PATH = Path("docs/lab/delay_cost.json")
 OUT_DIR = Path("docs/lab/cards")
+WEB_DIR = Path("dashboard/lab/cards")  # served by the replay server at /lab/cards/ (HTML only, no PNGs)
 W, H = 1280, 720                      # card size in px, 16:9
 DPI = 100                             # PNG at exactly W x H px
 SURFACE, INK, INK2, INK3, GRID, WASH = "#fcfcfb", "#0b0b0b", "#52514e", "#8a8983", "#e4e3df", "#f0efec"
@@ -414,15 +416,73 @@ def wrap(text: str, width: int) -> str:
 
 # ---- index and main
 
-def write_index(cards: list[tuple[dict, str]], out_dir: Path, doc: dict) -> None:
-    rows = "".join(f'<li><a href="{name}.html">{html.escape(inc["race"].replace("_", " "))}: {html.escape(inc["driver"])} '
-                   f'(car {html.escape(inc["car"])}) at {inc["onset_t"]:.1f} s</a> <a href="{name}.png">png</a></li>'
-                   for inc, name in cards)
-    (out_dir / "index.html").write_text(
-        f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Fast Flag steward cards</title>'
-        f'<style>body{{font-family:system-ui,sans-serif;margin:32px;color:{INK}}}li{{margin:4px 0}}</style></head>'
-        f'<body><h1>Steward cards</h1><p>{html.escape(doc.get("note", ""))}</p><ul>{rows}</ul></body></html>\n',
-        encoding="utf-8")
+def index_row(inc: dict, name: str, png: bool) -> str:
+    m = inc["markers"]
+    ours = m["our_escalation"]
+    off = m["official_escalation"]
+    d = off["t_after_onset"] - ours["t_after_onset"] if ours and off else None
+    gap = "" if d is None else (f"{d:.1f} s later" if d >= 0.05 else
+                                f"{-d:.1f} s earlier" if d <= -0.05 else "same time")
+    cells = [
+        f'<a href="{html.escape(name)}.html">{html.escape(inc["driver"])} <span class="dim">car {html.escape(inc["car"])}</span></a>',
+        f'{inc["lap"] if inc.get("lap") is not None else "?"}',
+        f'{inc["onset_t"]:.1f}',
+        f'{html.escape(ours["flag"]) + " " + format(ours["t_after_onset"], "+.1f") + " s" if ours else "none"}',
+        f'{html.escape(off["flag"]) + " " + format(off["t_after_onset"], "+.1f") + " s" if off else "none"}',
+        gap,
+        f'{inc["curve"][-1] / inc["max_delay_s"]:.2f}',
+        f'<a href="{html.escape(name)}.png">png</a>' if png else "",
+    ]
+    return "<tr>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>"
+
+
+def write_index(cards: list[tuple[dict, str]], out_dir: Path, doc: dict, png: bool = True,
+                back_link: str | None = None) -> None:
+    """A gallery of every card, grouped by race. back_link: the page to return to (the
+    pit wall dashboard when served by the replay server)."""
+    by_race: dict[str, list[tuple[dict, str]]] = {}
+    for inc, name in cards:
+        by_race.setdefault(inc["race"], []).append((inc, name))
+    head = ("<tr><th>Crash</th><th>Lap</th><th>Onset t (s)</th><th>Our escalation</th><th>Official escalation</th>"
+            "<th>Race control vs our escalation</th><th>Cars per second of delay</th><th></th></tr>")
+    sections = "".join(
+        f'<h2>{html.escape(race.replace("_", " "))}'
+        f'{" <span class=dim>out of sample</span>" if race in doc.get("case_study_races", []) else ""}</h2>'
+        f'<table>{head}{"".join(index_row(inc, name, png) for inc, name in rows)}</table>'
+        for race, rows in by_race.items())
+    back = f'<a class="back" href="{html.escape(back_link)}">Back to the pit wall</a>' if back_link else ""
+    mean = sum(inc["curve"][-1] / inc["max_delay_s"] for inc, _ in cards) / max(len(cards), 1)
+    (out_dir / "index.html").write_text(f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fast Flag steward cards</title>
+<style>
+body {{ margin: 0; background: #0f1216; color: #e6e8eb; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }}
+main {{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 48px; }}
+h1 {{ font-size: 22px; margin: 8px 0 4px; }}
+h2 {{ font-size: 15px; margin: 28px 0 8px; letter-spacing: 0.02em; }}
+p {{ color: #aeb4bc; margin: 4px 0; max-width: 900px; line-height: 1.45; }}
+.note {{ display: inline-block; margin-top: 8px; padding: 4px 8px; border: 1px solid #2c323a; border-radius: 4px; font-size: 12px; }}
+.back {{ display: inline-block; margin-bottom: 8px; color: #e6e8eb; text-decoration: none; font: 700 11px system-ui, sans-serif;
+         letter-spacing: 0.06em; border: 1px solid #3a414b; border-radius: 6px; padding: 6px 10px; background: #171b21; }}
+.back:hover {{ border-color: rgba(255, 255, 255, 0.35); }}
+table {{ width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }}
+th, td {{ text-align: left; padding: 6px 10px; border-bottom: 1px solid #22272e; white-space: nowrap; }}
+th {{ color: #8b929b; font-weight: 600; font-size: 12px; }}
+td a {{ color: #ffd400; text-decoration: none; }}
+td a:hover {{ text-decoration: underline; }}
+.dim {{ color: #8b929b; font-weight: 400; }}
+.wrap {{ overflow-x: auto; }}
+</style></head>
+<body><main>
+{back}
+<h1>Steward cards</h1>
+<p>One card per crash: timeline, the car's speed against its own normal speed, the detector evidence, our
+recommendation, the official race control feed and the cost of every second of flag delay.
+{len(cards)} crashes, each second of delay averaged {mean:.2f} cars passing at racing speed.</p>
+<span class="note">{html.escape(doc.get("note", ""))}</span>
+<div class="wrap">{sections}</div>
+</main></body></html>
+""", encoding="utf-8")
 
 
 def main() -> None:
@@ -430,21 +490,34 @@ def main() -> None:
     p.add_argument("--in", dest="in_path", default=str(IN_PATH))
     p.add_argument("--out", default=str(OUT_DIR))
     p.add_argument("--only", default=None, help="only incidents of this race id")
+    p.add_argument("--web", default=str(WEB_DIR),
+                   help="also write the HTML cards and index here, served by the replay server at /lab/cards/ "
+                        "('' to skip)")
     a = p.parse_args()
     doc = json.loads(Path(a.in_path).read_text(encoding="utf-8"))
     out_dir = Path(a.out)
     out_dir.mkdir(parents=True, exist_ok=True)
+    web_dir = Path(a.web) if a.web else None
+    if web_dir:
+        web_dir.mkdir(parents=True, exist_ok=True)
+        for old in web_dir.glob("card_*.html"):      # a card that no longer exists must not stay online
+            old.unlink()
     cards = []
     for inc in doc["incidents"]:
         if a.only and inc["race"] != a.only:
             continue
         name = card_name(inc)
-        (out_dir / f"{name}.html").write_text(html_card(inc, doc), encoding="utf-8")
+        page = html_card(inc, doc)
+        (out_dir / f"{name}.html").write_text(page, encoding="utf-8")
+        if web_dir:
+            (web_dir / f"{name}.html").write_text(page, encoding="utf-8")
         png_card(inc, doc, out_dir / f"{name}.png")
         cards.append((inc, name))
         print(f"{name}: {inc['summary']}")
     write_index(cards, out_dir, doc)
-    print(f"{len(cards)} cards in {out_dir} (index.html)")
+    if web_dir:
+        write_index(cards, web_dir, doc, png=False, back_link="/")
+    print(f"{len(cards)} cards in {out_dir} (index.html)" + (f", HTML copies in {web_dir}" if web_dir else ""))
 
 
 if __name__ == "__main__":
