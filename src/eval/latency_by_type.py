@@ -85,14 +85,19 @@ def no_onset_reason(frame: pd.DataFrame, inc, n: int) -> str:
     return "no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 
 
-def race_events(rid: str) -> tuple[list[dict], list[dict]]:
-    assert_not_holdout(rid=rid)
+def race_events(rid: str, dets: list[dict] | None = None,
+                allow_holdout: bool = False) -> tuple[list[dict], list[dict]]:
+    """Onset-anchored latency events for one race. dets: precomputed detections (the
+    A7 holdout run passes the frozen production detections); by default the
+    detections come from an ANOMALY model trained on the other training races."""
+    if not allow_holdout:
+        assert_not_holdout(rid=rid)
     race = RaceData.load(rid)
     official, meta = race_files(rid)
     n = meta["n_msectors"]
     frame = add_own_ratio(race.frame, float(meta["lap_length_m"]))
     ons = onsets(frame, float(meta["lap_length_m"]))
-    dets = sorted(detections_loro(race), key=lambda d: d["t"])
+    dets = sorted(dets if dets is not None else detections_loro(race), key=lambda d: d["t"])
     incidents, _ = build_incidents(official, meta, suspended_times(race.frame), n)
     events, missing = [], []
     for inc in incidents:

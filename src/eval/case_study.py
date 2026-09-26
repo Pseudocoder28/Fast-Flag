@@ -155,8 +155,9 @@ def driver_names(race: RaceData) -> dict[str, str]:
         return {}
 
 
-def crashes(rid: str) -> tuple[list[dict], str]:
-    if is_holdout_id(rid):
+def crashes(rid: str, allow_holdout: bool = False) -> tuple[list[dict], str]:
+    """allow_holdout is only passed by the A7 holdout run (src.eval.holdout), after the freeze."""
+    if is_holdout_id(rid) and not allow_holdout:
         raise SystemExit(f"{rid} is a holdout race: it gets this analysis only in A7, after the freeze")
     race = RaceData.load(rid)
     official, meta = race_files(rid, race_dir(rid))
