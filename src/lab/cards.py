@@ -27,6 +27,7 @@ from matplotlib.ticker import MaxNLocator  # noqa: E402
 
 from src.eval.latency_by_type import ALERT_BEFORE_S  # noqa: E402
 from src.lab.delay_cost import alert_cars_note, n_cars  # noqa: E402
+from src.lab.explain import GLOSSARY, HOW_TO_READ, story  # noqa: E402
 
 IN_PATH = Path("docs/lab/delay_cost.json")
 OUT_DIR = Path("docs/lab/cards")
@@ -242,6 +243,21 @@ def svg_mini_curve(inc: dict, w: int, h: int) -> str:
 
 # ---- HTML card
 
+def explain_html(inc: dict) -> str:
+    """The plain-English section below the card (src.lab.explain): what happened, how to read
+    each chart, and the words used. Below the 1280x720 card, so the slide PNG is unchanged."""
+    paras = story(inc)
+    happened = "".join(f"<p>{html.escape(p)}</p>" for p in paras[:-1])
+    terms = lambda pairs: "".join(f"<dt>{html.escape(t)}</dt><dd>{html.escape(d)}</dd>" for t, d in pairs)  # noqa: E731
+    half = (len(GLOSSARY) + 1) // 2
+    return (f'<section class="explain" aria-label="Plain-English explanation">'
+            f'<h2>WHAT AM I LOOKING AT?</h2><div class="cols"><div>{happened}</div>'
+            f'<div><dl>{terms(HOW_TO_READ)}</dl></div></div>'
+            f'<h2 style="margin-top:14px">WORDS USED ON THIS CARD</h2><div class="cols">'
+            f'<dl>{terms(GLOSSARY[:half])}</dl><dl>{terms(GLOSSARY[half:])}</dl></div>'
+            f'<p class="limits">{html.escape(paras[-1])}</p></section>')
+
+
 def html_card(inc: dict, doc: dict) -> str:
     title, sub = header(inc)
     rec = recommendation(inc)
@@ -273,6 +289,14 @@ ul {{ margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.45; }}
 .rec-t {{ margin-left: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: {INK2}; }}
 .reason {{ margin-top: 4px; font-size: 13px; color: {INK}; }}
 .foot {{ position: absolute; left: 28px; right: 28px; bottom: 12px; font-size: 11px; color: {INK2}; border-top: 1px solid {GRID}; padding-top: 6px; }}
+.explain {{ width: {W}px; margin: 0 auto 32px; background: {SURFACE}; box-shadow: 0 8px 30px rgba(0,0,0,0.15); padding: 22px 28px 18px; box-sizing: border-box; font-size: 15px; line-height: 1.55; }}
+.explain h2 {{ font-size: 13px; margin: 0 0 8px; }}
+.explain .cols {{ display: grid; grid-template-columns: 1.25fr 1fr; gap: 0 36px; }}
+.explain p {{ margin: 0 0 10px; }}
+.explain dl {{ margin: 0; font-size: 13.5px; }}
+.explain dt {{ font-weight: 700; margin-top: 8px; }}
+.explain dd {{ margin: 2px 0 0; color: {INK2}; }}
+.explain .limits {{ color: {INK2}; font-size: 13.5px; border-top: 1px solid {GRID}; padding-top: 10px; margin-top: 6px; }}
 </style></head><body>
 <div class="card">
   <div class="head"><div><h1>{html.escape(title)}</h1><div class="sub">{html.escape(sub)}</div></div><div class="mark">FAST<b>FLAG</b></div></div>
@@ -297,6 +321,7 @@ ul {{ margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.45; }}
   </div>
   <div class="foot">{html.escape(honesty(inc, doc))} Onset rule: {html.escape(doc.get("onset_rule", ""))}</div>
 </div>
+{explain_html(inc)}
 </body></html>
 """
 
@@ -478,7 +503,8 @@ td a:hover {{ text-decoration: underline; }}
 <h1>Steward cards</h1>
 <p>One card per crash: timeline, the car's speed against its own normal speed, the detector evidence, our
 recommendation, the official race control feed and the cost of every second of flag delay.
-{len(cards)} crashes, each second of delay averaged {mean:.2f} cars passing at racing speed.</p>
+{len(cards)} crashes, each second of delay averaged {mean:.2f} cars passing at racing speed.
+Open a card and scroll down: every card has a plain-English explanation below it.</p>
 <span class="note">{html.escape(doc.get("note", ""))}</span>
 <div class="wrap">{sections}</div>
 </main></body></html>
