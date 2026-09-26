@@ -105,22 +105,71 @@ def test_race_control_first_says_nothing_about_lead_time() -> None:
 
 
 def test_official_in_adjacent_sector_confirms_and_only_once() -> None:
-    envs = [tick(100.0), det("d1", 100.0, ["18"], 20, "IMPACT"), rec(101.0, "YELLOW", 20, ["d1"]),
-            official(104.0, "DOUBLE_YELLOW", 21),      # race control flags the approach sector harder than us
+    envs = [tick(100.0, msector=21), det("d1", 100.0, ["18"], 20, "IMPACT"), rec(101.0, "YELLOW", 20, ["d1"]),
+            official(104.0, "DOUBLE_YELLOW", 21),      # race control flags the next sector, harder than us
             official(105.0, "YELLOW", 20), official(130.0, "YELLOW", 20)]
     texts = [u.text for u in narrate(envs)]
     assert texts == ["Yellow flag. Car 18, impact, sector 20.",
-                     "Race control confirms Yellow flag, 4.0 seconds after Fast Flag."]
+                     "Race control confirms Double yellow, 3.0 seconds after Fast Flag."]
 
 
-def test_track_wide_official_matches_only_our_track_wide_flag() -> None:
+def test_official_three_sectors_upstream_does_not_confirm() -> None:
+    envs = [tick(100.0, msector=21), det("d1", 100.0, ["18"], 20, "IMPACT"), rec(101.0, "YELLOW", 20, ["d1"]),
+            official(104.0, "YELLOW", 17)]
+    assert [u.text for u in narrate(envs)] == ["Yellow flag. Car 18, impact, sector 20."]
+
+
+def test_lead_is_measured_from_our_first_raise() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), rec(101.0, "YELLOW", 9, ["d1"]),
+            rec(103.0, "DOUBLE_YELLOW", 9, ["d1"]), official(105.0, "DOUBLE_YELLOW", 9)]
+    assert [u.text for u in narrate(envs)][-1] == "Race control confirms Double yellow, 4.0 seconds after Fast Flag."
+
+
+def test_track_wide_official_needs_our_track_wide_flag() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), rec(101.0, "DOUBLE_YELLOW", 9, ["d1"]),
+            rec(105.0, "SC", 9, []), official(114.0, "SC", None)]
+    assert [u.text for u in narrate(envs)][-2:] == ["Safety Car. Car 23, impact, sector 9.",
+                                                   "Race control confirms Safety Car, 9.0 seconds after Fast Flag."]
     envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), rec(101.0, "DOUBLE_YELLOW", 9, ["d1"]),
             official(110.0, "SC", None)]
-    assert [u.text for u in narrate(envs)] == ["Double yellow. Car 23, impact, sector 9."]
-    envs += [rec(111.0, "SC", 9, []), official(120.0, "SC", None)]
-    texts = [u.text for u in narrate(envs)]
-    assert texts[-2:] == ["Safety Car. Car 23, impact, sector 9.",
-                          "Race control confirms Safety Car, 9.0 seconds after Fast Flag."]
+    assert [u.text for u in narrate(envs)] == ["Double yellow. Car 23, impact, sector 9."], "we never called SC"
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), rec(101.0, "SC", 9, ["d1"]),
+            official(110.0, "RED", None)]
+    assert [u.text for u in narrate(envs)] == ["Safety Car. Car 23, impact, sector 9."], "an SC does not confirm a red"
+
+
+def test_race_control_first_stays_first_when_it_reissues_the_flag() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), official(101.0, "YELLOW", 9),
+            rec(102.0, "YELLOW", 9, ["d1"]), official(105.0, "YELLOW", 9)]
+    assert [u.text for u in narrate(envs)] == ["Yellow flag. Car 23, impact, sector 9."]
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), rec(101.0, "DOUBLE_YELLOW", 9, ["d1"]),
+            official(110.0, "SC", None), rec(111.0, "SC", 9, []), official(120.0, "SC", None)]
+    assert [u.text for u in narrate(envs)][-1] == "Safety Car. Car 23, impact, sector 9."
+
+
+def test_tie_is_not_a_lead() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "IMPACT"), rec(101.0, "YELLOW", 9, ["d1"]),
+            official(101.0, "YELLOW", 9)]
+    assert [u.text for u in narrate(envs)] == ["Yellow flag. Car 23, impact, sector 9."]
+
+
+def test_sector_level_up_is_spoken_under_a_safety_car() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "STOPPED"), rec(100.0, "YELLOW", 9, ["d1"]),
+            rec(110.0, "VSC", 9, []), det("d2", 115.0, ["4"], 9, "STOPPED"),
+            rec(115.0, "DOUBLE_YELLOW", 9, ["d1", "d2"])]
+    assert [u.text for u in narrate(envs)][-1] == "Double yellow. Cars 4 and 23, stopped, sector 9."
+
+
+def test_silent_anomaly_corroboration_keeps_the_physical_cause() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23"], 9, "STOPPED"), det("d2", 101.0, ["23"], 9, "ANOMALY"),
+            rec(100.0, "DOUBLE_YELLOW", 9, ["d1"]), rec(101.0, "DOUBLE_YELLOW", 9, ["d1", "d2"]),
+            rec(104.0, "SC", 9, [])]
+    assert [u.text for u in narrate(envs)][-1] == "Safety Car. Car 23, stopped, sector 9."
+
+
+def test_car_numbers_are_sanitised_for_say() -> None:
+    envs = [tick(100.0), det("d1", 100.0, ["23", "[[slnc 5000]]"], 9, "MULTI"), rec(101.0, "YELLOW", 9, ["d1"])]
+    assert [u.text for u in narrate(envs)] == ["Yellow flag. Cars 23 and slnc5000, multi-car, sector 9."]
 
 
 def test_global_escalation_without_sources_uses_sector_cause() -> None:
@@ -189,6 +238,8 @@ def test_malformed_input_never_raises() -> None:
 class FakeBackend:
     """Each phrase 'runs' for duration seconds of the fake clock."""
 
+    instant = False
+
     def __init__(self, duration: float = 1.5) -> None:
         self.duration, self.now = duration, 0.0
         self.started: list[str] = []
@@ -205,9 +256,12 @@ class FakeBackend:
         handle["stopped"] = True
         self.stopped.append(handle["text"])
 
+    def error(self, handle: object) -> str | None:
+        return None
+
 
 def utt(text: str, rank: int, interrupt: bool = False, key: str | None = None, seq: int = 0) -> Utterance:
-    return Utterance(text=text, rank=rank, interrupt=interrupt, key=key, seq=seq)
+    return Utterance(text=text, rank=rank, interrupt=interrupt, keys=frozenset({key} if key else ()), seq=seq)
 
 
 def run_speaker(speaker: Speaker, backend: FakeBackend, events: list[tuple[float, Utterance | None]],
@@ -262,8 +316,9 @@ def test_most_urgent_queued_phrase_goes_first() -> None:
                                 (0.1, utt("Race control confirms Yellow flag, 1.0 seconds after Fast Flag.", 1, False, None, 2)),
                                 (0.2, utt("Yellow flag. Sector 5.", 1, True, "5", 3)),
                                 (0.3, utt("Double yellow. Sector 7.", 2, True, "7", 4))], 8.0)
-    assert [t for _, t in starts] == ["Yellow flag. Sector 1.", "Double yellow. Sector 7.", "Race control confirms "
-                                      "Yellow flag, 1.0 seconds after Fast Flag.", "Yellow flag. Sector 5."]
+    # level-ups go before confirmations, whatever their rank
+    assert [t for _, t in starts] == ["Yellow flag. Sector 1.", "Double yellow. Sector 7.", "Yellow flag. Sector 5.",
+                                      "Race control confirms Yellow flag, 1.0 seconds after Fast Flag."]
 
 
 def test_queued_lower_level_for_same_scope_is_dropped() -> None:
@@ -275,20 +330,35 @@ def test_queued_lower_level_for_same_scope_is_dropped() -> None:
     assert [t for _, t in starts] == ["Yellow flag. Sector 1.", "Double yellow. Sector 9."]
 
 
-def test_stale_queued_phrase_is_dropped() -> None:
+def test_stale_confirmation_is_dropped_but_level_ups_never_are() -> None:
     b = FakeBackend(duration=MAX_WAIT_S + 5)
     s = Speaker(b)
     starts = run_speaker(s, b, [(0.0, utt("Safety Car. Sector 9.", 4, True, "track", 1)),
-                                (1.0, utt("Yellow flag. Sector 2.", 1, True, "2", 2))], MAX_WAIT_S + 10)
-    assert [t for _, t in starts] == ["Safety Car. Sector 9."]
+                                (1.0, utt("Race control confirms Safety Car, 8.7 seconds after Fast Flag.", 4, False, None, 2)),
+                                (1.0, utt("Yellow flag. Sector 2.", 1, True, "2", 3))], MAX_WAIT_S + 10)
+    assert [t for _, t in starts] == ["Safety Car. Sector 9.", "Yellow flag. Sector 2."]
 
 
-def test_print_backend_paces_and_never_runs(capsys) -> None:
+def test_higher_level_while_idle_skips_the_gap_and_lower_waits() -> None:
+    b = FakeBackend(duration=0.5)
+    s = Speaker(b)
+    starts = run_speaker(s, b, [(0.0, utt("Yellow flag. Sector 1.", 1, True, "1", 1)),
+                                (1.0, utt("Safety Car. Sector 1.", 4, True, "track", 2)),
+                                (1.5, utt("Yellow flag. Sector 5.", 1, True, "5", 3))], 5.0)
+    assert starts == [(0.0, "Yellow flag. Sector 1."), (1.0, "Safety Car. Sector 1."), (3.0, "Yellow flag. Sector 5.")]
+    assert b.stopped == []
+
+
+def test_gap_is_two_seconds() -> None:
+    assert MIN_GAP_S == 2.0
+
+
+def test_print_backend_prints_everything_without_pacing(capsys) -> None:
     s = Speaker(PrintBackend())
-    for k, now in enumerate((0.0, 0.5, 1.0)):
-        s.push(utt(f"Yellow flag. Sector {k}.", 1, True, str(k), k), now)
-    assert s.step(0.0) == ["Yellow flag. Sector 0."]
-    assert s.step(1.0) == [] and s.step(MIN_GAP_S) == ["Yellow flag. Sector 1."]
+    for k in range(8):
+        s.push(utt(f"Yellow flag. Sector {k}.", 1, True, str(k), k), 0.0)
+    out = [x for now in range(8) for x in s.step(now * 0.1 + 30.0)]
+    assert out == [f"Yellow flag. Sector {k}." for k in range(8)], "nothing is paced or dropped when printing"
     assert s.current is None
     assert "Yellow flag. Sector 0." in capsys.readouterr().out
 
