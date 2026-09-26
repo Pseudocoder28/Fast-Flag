@@ -1,0 +1,81 @@
+"""Ingest: causal as-of join, no future leakage in features, track geometry helpers."""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from src.ingest.build import flag_matches
+from src.ingest.features import add_car_dynamics
+from src.ingest.merge import add_gaps, asof
+from src.ingest.reference import TrackRef
+
+
+def circle_ref(radius: float = 500.0, n: int = 600) -> TrackRef:
+    a = np.linspace(0, 2 * np.pi, n, endpoint=False)
+    xy = np.column_stack([radius * np.cos(a), radius * np.sin(a)])
+    step = 2 * np.pi * radius / n
+    msectors = [{"id": 1, "start_dist": 0.0, "end_dist": 1000.0},
+                {"id": 2, "start_dist": 1000.0, "end_dist": 2000.0},
+                {"id": 3, "start_dist": 2000.0, "end_dist": 0.0}]
+    pit = np.column_stack([np.linspace(-100, 100, 50), np.full(50, -radius - 20)])
+    return TrackRef(xy, np.arange(n) * step, n * step, msectors, [], np.full(400, 250.0), pit)
+
+
+def test_asof_never_uses_future_samples() -> None:
+    t = np.array([0.0, 1.0, 2.0])
+    v = np.array([10.0, 20.0, 30.0])
+    out = asof(np.array([0.5, 1.0, 1.5, 3.5]), t, v)
+    assert out[:3].tolist() == [10.0, 20.0, 20.0]
+    assert np.isnan(out[3])          # latest sample is 1.5 s old: stale, never extrapolated
+
+
+def test_features_identical_when_future_is_removed() -> None:
+    rng = np.random.default_rng(0)
+    t = np.arange(0, 60, 0.25)
+    rows = []
+    for drv in ("1", "44"):
+        rows.append(pd.DataFrame({
+            "t": t, "drv": drv, "speed": rng.uniform(80, 300, len(t)), "ref_speed": 250.0,
+            "lat_off": rng.normal(0, 1, len(t)), "throttle": rng.uniform(0, 100, len(t)),
+            "brake": rng.integers(0, 2, len(t)).astype(float), "gap_ahead_m": rng.uniform(5, 200, len(t)),
+            "ahead_drv": "44" if drv == "1" else "1"}))
+    full = pd.concat(rows, ignore_index=True)
+    cut = 30.0
+    a = add_car_dynamics(full.copy())
+    b = add_car_dynamics(full[full["t"] <= cut].copy())
+    cols = ["speed_dev", "speed_ratio", "dspeed_1s", "lat_off_std_2s", "throttle_std_2s", "closing_rate"]
+    a = a[a["t"] <= cut].set_index(["t", "drv"]).sort_index()[cols]
+    b = b.set_index(["t", "drv"]).sort_index()[cols]
+    pd.testing.assert_frame_equal(a, b)
+
+
+def test_project_msector_and_json_round_trip() -> None:
+    ref = circle_ref()
+    dist, lat = ref.project(np.array([500.0, 0.0]), np.array([0.0, 510.0]))
+    assert abs(dist[0]) < 1 or abs(dist[0] - ref.length) < 1
+    assert abs(lat[1]) > 9                  # 10 m outside the circle
+    assert ref.msector_of(np.array([10.0, 1500.0, 2500.0])).tolist() == [1, 2, 3]
+    back = TrackRef.from_json(ref.to_json())
+    assert back.length == ref.length and len(back.pit_xy) == len(ref.pit_xy)
+
+
+def test_near_pit_needs_pit_lane_and_offset() -> None:
+    ref = circle_ref()
+    x, y = np.array([0.0, 0.0]), np.array([-520.0, -500.0])
+    _, lat = ref.project(x, y)
+    assert ref.near_pit(x, y, lat).tolist() == [True, False]
+
+
+def test_gaps_wrap_around_the_line() -> None:
+    df = pd.DataFrame({"t": [0.0] * 3, "drv": ["1", "2", "3"], "dist": [0.0, 100.0, 4000.0],
+                       "in_pit": [False] * 3})
+    out = add_gaps(df, length=4200.0).set_index("drv")
+    assert out.loc["3", "gap_ahead_m"] == 200.0 and out.loc["3", "ahead_drv"] == "1"
+    assert out.loc["1", "gap_behind_m"] == 200.0
+
+
+def test_flag_matches_upstream_sectors() -> None:
+    assert flag_matches(18, 16, 20) and flag_matches(18, 18, 20) and flag_matches(17, 18, 20)
+    assert not flag_matches(18, 15, 20)
+    assert flag_matches(1, 20, 20) and flag_matches(20, 1, 20)   # wraps at the line
