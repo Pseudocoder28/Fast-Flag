@@ -69,6 +69,7 @@ class Config:
     stop_lap_ratio: float = 0.5       # STOPPED also needs speed below this share of last lap's
     impact_lap_ratio: float = 0.6     # IMPACT is confirmed only below this share of last lap's
     anomaly_sustain: int = 2          # ticks above threshold
+    anomaly_slow_ratio: float | None = 0.85   # and slower than the field or than its own last lap
     on_line_m: float = 8.0
 
 
@@ -168,7 +169,8 @@ class DetectorSuite:
                              if "heading_err" in cols else np.nan, float(cols["dspeed_1s"][i]))
             out += self.slowdown(t, c, drv, speed, ratio, lap, msector, float(cols["dspeed_min_2s"][i]))
             if score is not None and status in ("1", "2") and self.anomaly_threshold is not None:
-                out += self.anomaly(t, c, drv, msector, float(score[i]))
+                slow = cfg.anomaly_slow_ratio is None or min(ratio, lap if np.isfinite(lap) else 9) < cfg.anomaly_slow_ratio
+                out += self.anomaly(t, c, drv, msector, float(score[i]) if slow else np.nan)
         return out
 
     # ---- detectors

@@ -12,6 +12,7 @@ KINDS = {"tick", "detection", "risk", "rec", "official"}
 def test_http_endpoints() -> None:
     with TestClient(create_app(autoplay=False)) as c:
         assert c.get("/track").json()["ref_line"]
+        assert c.get("/races").json() == [c.get("/track").json()["race"]]
         assert c.get("/official").json()[0]["flag"]
         st = c.post("/replay", json={"speed": 10, "seek_t": 4380.0}).json()
         assert st["speed"] == 10 and st["t"] == 4380.0
