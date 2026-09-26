@@ -16,6 +16,7 @@ import pandas as pd
 
 WIN_1S = 4               # samples in 1 s at 250 ms
 WIN_2S = 8
+WIN_5S = 20
 MIN_SPEED_MS = 1.0       # avoid dividing by ~0 when converting gaps to seconds
 NEUTRAL_STATUS = {"4", "5", "6", "7"}  # SC, red, VSC, VSC ending
 
@@ -34,7 +35,8 @@ def add_car_dynamics(df: pd.DataFrame) -> pd.DataFrame:
     df["brake_throttle"] = ((df["brake"] > 0) & (df["throttle"] > 10)).astype(float)
     same_ahead = df["ahead_drv"].notna() & (df["ahead_drv"] == g["ahead_drv"].shift(WIN_1S))
     closing = g["gap_ahead_m"].shift(WIN_1S) - df["gap_ahead_m"]
-    df["closing_rate"] = closing.where(same_ahead)            # m/s, positive = catching the car ahead
+    # m/s, positive = catching the car ahead; over 100 m/s is the gap wrapping at the line, not physics
+    df["closing_rate"] = closing.where(same_ahead & (closing.abs() <= 100))
     df = add_windows(df, g)
     return df.sort_values(["t", "drv"])
 
@@ -136,6 +138,35 @@ def add_lap_info(df: pd.DataFrame, laps: pd.DataFrame) -> pd.DataFrame:
     return out.drop(columns=["t_lap", "stint_first_lap"])
 
 
+def add_lap_pace(df: pd.DataFrame, laps: pd.DataFrame) -> pd.DataFrame:
+    """last_lap_delta: the driver's last completed lap time vs the median of the 3
+    laps before it (0.05 = 5% slower). Known from the moment that lap ends."""
+    lp = laps.dropna(subset=["LapTime", "Time"]).copy()
+    lp["drv"] = lp["DriverNumber"].astype(str)
+    lp["t_end"] = lp["Time"].dt.total_seconds()
+    lp["lap_s"] = lp["LapTime"].dt.total_seconds()
+    lp = lp.sort_values(["drv", "t_end"])
+    med3 = lp.groupby("drv")["lap_s"].transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
+    lp["last_lap_delta"] = lp["lap_s"] / med3 - 1
+    lp = lp[["t_end", "drv", "last_lap_delta"]].sort_values("t_end")
+    out = pd.merge_asof(df.sort_values("t"), lp, left_on="t", right_on="t_end", by="drv", direction="backward")
+    return out.drop(columns=["t_end"])
+
+
+def add_long_windows(df: pd.DataFrame) -> pd.DataFrame:
+    """5 s backward windows for the risk model (Section 6.4: rolling windows of 2 to 5 s)."""
+    df = df.sort_values(["drv", "t"])
+    g = df.groupby("drv", sort=False)
+    for col, how, name in [("rel_ratio", "min", "rel_ratio_min_5s"), ("lap_ratio", "mean", "lap_ratio_mean_5s"),
+                           ("lap_ratio", "min", "lap_ratio_min_5s"), ("lat_off", "std", "lat_off_std_5s"),
+                           ("throttle", "std", "throttle_std_5s"), ("brake_throttle", "mean", "brake_throttle_5s"),
+                           ("dspeed_1s", "min", "dspeed_min_5s"), ("closing_rate", "max", "closing_rate_max_5s"),
+                           ("heading_err", "max", "heading_max_5s")]:
+        if col in df:
+            df[name] = rolling(g, col, how, WIN_5S)
+    return df.sort_values(["t", "drv"])
+
+
 def add_weather(df: pd.DataFrame, weather: pd.DataFrame | None) -> pd.DataFrame:
     if weather is None or not len(weather):
         df["air_temp"] = df["track_temp"] = df["rainfall"] = np.nan
@@ -197,8 +228,10 @@ def add_features(df: pd.DataFrame, session, ref=None) -> pd.DataFrame:
     df = add_battle(df)
     df = add_lap_info(df, session.laps)
     df = add_weather(df, getattr(session, "weather_data", None))
+    df = add_lap_pace(df, session.laps)
     df = add_race_context(df)
     df = add_field_state(df)
+    df = add_long_windows(df)
     return df.sort_values(["t", "drv"]).reset_index(drop=True)
 
 

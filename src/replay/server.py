@@ -2,7 +2,7 @@
 
 Run: python -m src.replay.server                          (2023_Australian, with detectors)
      python -m src.replay.server --race 2024_Canadian
-     python -m src.replay.server --no-detect                (ticks and official events only)
+     python -m src.replay.server --no-detect --no-predict   (ticks and official events only)
      python -m src.replay.server --race 2026_Azerbaijan --holdout   (A7 demo only)
 
 Endpoints (identical to the mock server, plus GET /races):
@@ -181,16 +181,17 @@ def main() -> None:
     p.add_argument("--race", default=DEFAULT_RACE)
     p.add_argument("--holdout", action="store_true", help="allow loading holdout races (A7 demo only)")
     p.add_argument("--speed", type=float, default=1.0)
-    p.add_argument("--no-detect", action="store_true", help="stream ticks and official events only")
+    p.add_argument("--no-detect", action="store_true", help="no detection envelopes")
+    p.add_argument("--no-predict", action="store_true", help="no risk envelopes")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
     a = p.parse_args()
     if is_holdout_id(a.race) and not a.holdout:
         p.error(f"{a.race} is a holdout race: add --holdout")
-    make = no_processors
-    if not a.no_detect:
-        from src.detect.pipeline import detection_processors
-        make = detection_processors
+    from functools import partial
+
+    from src.replay.pipeline import all_processors
+    make = partial(all_processors, detect=not a.no_detect, predict=not a.no_predict)
     app = create_app(RaceData.load(a.race), make_processors=make, allow_holdout=a.holdout)
     app.state.replay.speed = a.speed
     uvicorn.run(app, host=a.host, port=a.port)

@@ -38,8 +38,9 @@ PROFILE_TICKS = 4000
 
 
 def build_processors(race: RaceData) -> list:
-    from src.detect.pipeline import detection_processors, load_anomaly, load_config
-    return detection_processors(race), load_config(), load_anomaly()
+    from src.detect.pipeline import load_anomaly, load_config
+    from src.replay.pipeline import all_processors
+    return all_processors(race), load_config(), load_anomaly()
 
 
 def anomaly_per_tick_ms(race: RaceData, model, n: int = 300) -> dict | None:
