@@ -102,3 +102,16 @@ def test_backward_position_glitch_is_held() -> None:
                       "lat_off": 0.0, "speed": 100.0})
     out = hold_position_glitches(f.copy(), length=5000.0)
     assert out["dist"].tolist() == [0.0, 10, 20, 20, 30]      # the out-of-order sample is replaced
+
+
+def test_safety_car_messages_of_every_season() -> None:
+    from src.ingest.official import classify
+
+    def row(msg: str) -> pd.Series:
+        return pd.Series({"Category": "SafetyCar", "Message": msg, "Flag": None})
+
+    assert classify(row("SAFETY CAR DEPLOYED")) == "SC"
+    assert classify(row("VIRTUAL SAFETY CAR DEPLOYED")) == "VSC"       # 2023 to 2025
+    assert classify(row("VSC DEPLOYED")) == "VSC"                       # 2026
+    for ignored in ("VSC ENDING", "VIRTUAL SAFETY CAR ENDING", "SAFETY CAR IN THIS LAP"):
+        assert classify(row(ignored)) is None

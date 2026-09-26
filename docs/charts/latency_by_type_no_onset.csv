@@ -79,14 +79,14 @@ race,t_official,flag,sectors,reason
 2026_Belgian,3759.9,DOUBLE_YELLOW,"[7, 8]",car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Belgian,3793.9,DOUBLE_YELLOW,"[15, 16]","field not racing (SC, VSC, restart or procession)"
 2026_Belgian,4377.9,DOUBLE_YELLOW,[7],car already slow or stopped before the window (re-flag of an earlier stoppage)
-2026_Belgian,5476.9,SC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
+2026_Belgian,5476.9,VSC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Belgian,5488.9,DOUBLE_YELLOW,"[18, 19]","field not racing (SC, VSC, restart or procession)"
-2026_Belgian,5721.9,SC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
+2026_Belgian,5721.9,VSC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Belgian,5732.9,DOUBLE_YELLOW,"[15, 16]","field not racing (SC, VSC, restart or procession)"
 2026_Belgian,5789.9,YELLOW,"[15, 16]","field not racing (SC, VSC, restart or procession)"
 2026_British,3382.51,YELLOW,[7],lap 1 or 2: no clean reference laps yet
 2026_British,3494.51,YELLOW,[8],lap 1 or 2: no clean reference laps yet
-2026_British,5360.51,SC,[],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
+2026_British,5360.51,VSC,[],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_British,5373.51,DOUBLE_YELLOW,[11],car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_British,5386.51,DOUBLE_YELLOW,[11],"field not racing (SC, VSC, restart or procession)"
 2026_British,8375.51,SC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
@@ -95,15 +95,15 @@ race,t_official,flag,sectors,reason
 2026_Canadian,5180.53,YELLOW,[11],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Canadian,6038.53,DOUBLE_YELLOW,"[9, 10]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Canadian,6041.53,YELLOW,"[9, 10]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
-2026_Canadian,6069.53,SC,"[9, 10]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
-2026_Canadian,7812.53,SC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
+2026_Canadian,6069.53,VSC,"[9, 10]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
+2026_Canadian,7812.53,VSC,[],car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Canadian,7814.53,DOUBLE_YELLOW,[12],car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Dutch,3493.22,DOUBLE_YELLOW,"[16, 17, 18]",lap 1 or 2: no clean reference laps yet
 2026_Dutch,5326.22,YELLOW,[13],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Dutch,5584.22,YELLOW,[3],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Dutch,10682.22,DOUBLE_YELLOW,"[7, 8]","field not racing (SC, VSC, restart or procession)"
-2026_Italian,3597.82,DOUBLE_YELLOW,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,3597.82,YELLOW,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
+2026_Italian,3597.82,DOUBLE_YELLOW,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,3613.82,SC,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,5998.82,YELLOW,"[7, 8]",car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Miami,4198.26,DOUBLE_YELLOW,[16],car already slow or stopped before the window (re-flag of an earlier stoppage)

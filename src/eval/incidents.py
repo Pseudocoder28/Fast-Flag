@@ -63,7 +63,12 @@ class Incident:
         return not self.sectors
 
 
-def race_files(rid: str, root: Path = FEATURES) -> tuple[list[dict], dict]:
+def race_files(rid: str, root: Path | None = None) -> tuple[list[dict], dict]:
+    """Official events and metadata of a built race, from wherever it was built
+    (data/features, data/case_studies or data/holdout)."""
+    if root is None:
+        from src.replay.engine import race_dir
+        root = race_dir(rid)
     official = json.loads((root / f"{rid}_official.json").read_text(encoding="utf-8"))
     meta = json.loads((root / f"{rid}_meta.json").read_text(encoding="utf-8"))
     return official, meta

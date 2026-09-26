@@ -155,8 +155,9 @@ def driver_names(race: RaceData) -> dict[str, str]:
         return {}
 
 
-def crashes(rid: str) -> tuple[list[dict], str]:
-    if is_holdout_id(rid):
+def crashes(rid: str, allow_holdout: bool = False) -> tuple[list[dict], str]:
+    """allow_holdout is only passed by the A7 holdout run (src.eval.holdout), after the freeze."""
+    if is_holdout_id(rid) and not allow_holdout:
         raise SystemExit(f"{rid} is a holdout race: it gets this analysis only in A7, after the freeze")
     race = RaceData.load(rid)
     official, meta = race_files(rid, race_dir(rid))
@@ -219,9 +220,37 @@ def crashes(rid: str) -> tuple[list[dict], str]:
 
 # ---- chart
 
+def place_labels(points: list[tuple[float, float, str]], xu: float, yu: float,
+                 obstacles: list[tuple[float, float]] = ()) -> list[tuple[float, float, str, str]]:
+    """Greedy, collision-free label spots for dots. xu, yu: data units per inch. Tries right,
+    left, above, below and the diagonals; skips a label that fits nowhere. obstacles: other
+    dots that labels must not cover. Returns (x, y, text, ha)."""
+    dots = [(x, y) for x, y, _ in points] + list(obstacles)
+    boxes = [(x - 0.06 * xu, y - 0.06 * yu, x + 0.06 * xu, y + 0.06 * yu) for x, y in dots]
+    out = []
+    for x, y, text in points:
+        w, h = (0.07 * len(text) + 0.06) * xu, 0.12 * yu
+        for dx, dy, ha in ((0.08 * xu, 0, "left"), (-0.08 * xu, 0, "right"), (0, 0.15 * yu, "center"),
+                           (0, -0.15 * yu, "center"), (0.08 * xu, 0.13 * yu, "left"), (0.08 * xu, -0.13 * yu, "left"),
+                           (-0.08 * xu, 0.13 * yu, "right"), (-0.08 * xu, -0.13 * yu, "right")):
+            x0 = x + dx if ha == "left" else x + dx - w if ha == "right" else x - w / 2
+            box = (x0, y + dy - h / 2, x0 + w, y + dy + h / 2)
+            if all(box[2] < b[0] or box[0] > b[2] or box[3] < b[1] or box[1] > b[3] for b in boxes):
+                boxes.append(box)
+                out.append((x + dx, y + dy, text, ha))
+                break
+    return out
+
+
+WINDOW_STYLE = {"W1": ("#b8b6b0", "W1 onset to our first alert"), "W2": (ORANGE, "W2 our first alert to official yellow"),
+                "W3": (BLUE, "W3 our escalation to official escalation"),
+                "context:": ("#d6d4ce", "context: official yellow to official escalation")}
+
+
 def plot(c: dict, path: Path) -> None:
-    """Timeline: shaded windows, event lines, and every car passing the crash site
-    (highlighted and named in W1 to W3, grey for the after-yellow context)."""
+    """Timeline chart. Top strip: one bar per window (they can overlap in time). Below:
+    every car passing the crash site, once, at its speed as % of its own normal speed
+    there; blue and named if it passed inside W1 to W3, grey if only after the yellow."""
     tl, t0 = c["timeline"], c["timeline"]["onset"]
     rel = lambda t: t - t0  # noqa: E731
     rec = tl["our_escalation_recommendation"]
@@ -232,61 +261,55 @@ def plot(c: dict, path: Path) -> None:
         events.append((f"our {rec['flag']} recommendation", rec["t"]))
     events = sorted([(n, t) for n, t in events if t is not None], key=lambda e: e[1])
     x_max = max(rel(t) for _, t in events) + 8
-    fig, ax = plt.subplots(figsize=(11, 6), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.4), dpi=150)
     fig.patch.set_facecolor(SURFACE)
     ax.set_facecolor(SURFACE)
-    washes = {"W1": (WASH, 1.0), "W2": (ORANGE, 0.12), "W3": (BLUE, 0.12), "context:": ("#f6f5f2", 1.0)}
-    narrow_count = 0                                   # narrow windows get their labels stacked, left of the window
-    # context first, underneath; the counterfactual windows W1 to W3 are drawn on top of it
-    for w in sorted(c["windows"], key=lambda w: not w["name"].startswith("context")):
-        if not w["seconds"] or w["seconds"] <= 0:
-            continue
+    # timeline strip
+    for row, w in enumerate(c["windows"]):
         key = w["name"].split()[0]
-        color, alpha = washes[key]
-        a, b = rel(w["start"]), rel(w["end"])
-        ax.axvspan(a, b, color=color, alpha=alpha, lw=0, zorder=0 if key == "context:" else 0.5)
-        label = f"after the yellow: {w['cars_passing']} cars" if key == "context:" else f"{key}: {w['cars_passing']} cars"
-        narrow = b - a < 0.08 * (x_max + 5)
-        y = 113 if key == "context:" else (123 - 9 * narrow_count if narrow else 123)
-        narrow_count += narrow and key != "context:"
-        ax.text(a - 0.4 if narrow else (a + b) / 2, y, label, ha="right" if narrow else "center", va="bottom",
-                fontsize=8.5, color=INK2)
+        color, label = WINDOW_STYLE[key]
+        y = 138 - 8 * row
+        cars = "n/a" if w["cars_passing"] is None else f"{w['cars_passing']} cars"
+        if w["seconds"] and w["seconds"] > 0:
+            a, b = rel(w["start"]), rel(w["end"])
+            ax.plot([a, b], [y, y], color=color, lw=6, solid_capstyle="butt", zorder=2)
+            ax.text(a, y + 1.6, f"{label}: {cars} ({b - a:.1f} s)", va="bottom", ha="left", fontsize=7.5, color=INK)
+        else:
+            ax.text(-4.5, y, f"{label}: {cars} ({w['note'].split(':')[0] if w['note'] else 'empty'})", va="center",
+                    fontsize=7.5, color=INK2)
+    ax.axhline(106, color=GRID, lw=1, zorder=1)
     ax.axhline(100, color=GRID, lw=1, zorder=1)
     ax.text(x_max, 101, "normal speed at this point", ha="right", va="bottom", fontsize=7.5, color=INK2)
-    level, last_x = 0, -1e9
+    level, last_x, max_level = 0, -1e9, 0
     for label, t in events:
         x = rel(t)
         level = level + 1 if x - last_x < 0.07 * (x_max + 5) else 0
-        last_x = x
-        ax.axvline(x, color=INK2, lw=0.8, zorder=1)
+        last_x, max_level = x, max(max_level, level)
+        ax.plot([x, x], [-4, 106], color=INK2, lw=0.8, zorder=1)
         right = x > 0.8 * x_max
         ax.annotate(f"{label} {x:+.1f} s", (x, 0), xycoords=("data", "axes fraction"),
                     xytext=(-3 if right else 3, -14 - 12 * level), textcoords="offset points",
                     ha="right" if right else "left", va="top", fontsize=7.5, color=INK)
-    story = [p for w in c["windows"] if not w["name"].startswith("context") for p in w["passes"]]
-    context = [p for w in c["windows"] if w["name"].startswith("context") for p in w["passes"]]
-    for p in context:
-        if p["pct_of_own_normal"] is not None:
-            ax.scatter(rel(p["t"]), p["pct_of_own_normal"], s=36, color="#b8b6b0", edgecolors=SURFACE,
-                       linewidths=1.5, zorder=2)
-    label_w = 0.075 * (x_max + 5)                      # rough width of a "HAM 91%" label in data units
-    last = {1: [-1e9, 0], -1: [-1e9, 0]}              # per side (above = 1, below = -1): last x, level
-    for k, p in enumerate(sorted(story, key=lambda p: p["t"])):
-        if p["pct_of_own_normal"] is None:
-            continue
-        x, y = rel(p["t"]), p["pct_of_own_normal"]
-        side = 1 if k % 2 == 0 else -1
-        lx, lv = last[side]
-        level = lv + 1 if x - lx < label_w else 0
-        last[side] = [x, level]
-        ax.scatter(x, y, s=64, color=BLUE, edgecolors=SURFACE, linewidths=2, zorder=3)
-        ax.annotate(f"{p['driver']} {y:.0f}%", (x, y), xytext=(0, side * (9 + 11 * level)), textcoords="offset points",
-                    ha="center", va="bottom" if side > 0 else "top", fontsize=7.5, color=INK,
-                    arrowprops={"arrowstyle": "-", "color": GRID, "lw": 0.8} if level else None)
+    story_w = [w for w in c["windows"] if not w["name"].startswith("context")]
+    story = {(p["car"], p["t"]): p for w in story_w for p in w["passes"]}          # each pass once
+    context = {(p["car"], p["t"]): p for w in c["windows"] if w["name"].startswith("context") for p in w["passes"]}
+    grey = [(rel(p["t"]), p["pct_of_own_normal"]) for key, p in context.items()
+            if key not in story and p["pct_of_own_normal"] is not None]
+    for x, y in grey:
+        ax.scatter(x, y, s=36, color="#b8b6b0", edgecolors=SURFACE, linewidths=1.5, zorder=3)
+    pts = [(rel(p["t"]), p["pct_of_own_normal"], p["driver"]) for p in sorted(story.values(), key=lambda p: p["t"])
+           if p["pct_of_own_normal"] is not None]
+    for x, y, _ in pts:
+        ax.scatter(x, y, s=64, color=BLUE, edgecolors=SURFACE, linewidths=2, zorder=4)
+    xu = (x_max + 5) / (11 * (0.98 - 0.08))            # data units per inch, from the figure layout below
+    yu = (143 + 4) / (6.4 * (0.87 - 0.27))
+    for x, y, text, ha in place_labels(pts, xu, yu, grey):
+        ax.text(x, y, text, ha=ha, va="center", fontsize=7.5, color=INK, zorder=5)
     ax.set_xlim(-5, x_max)
-    ax.set_ylim(-4, 132)
+    ax.set_ylim(-4, 143)
+    ax.set_yticks(range(0, 101, 20))
     ax.set_ylabel("Speed passing the crash site\n(% of the car's own normal speed there)", fontsize=8.5, color=INK2)
-    ax.set_xlabel("Seconds after the crash onset", fontsize=9, color=INK2, labelpad=44)
+    ax.set_xlabel("Seconds after the crash onset", fontsize=9, color=INK2, labelpad=18 + 12 * max_level)
     ax.grid(axis="y", color=GRID, lw=0.6)
     ax.set_axisbelow(True)
     for side in ("top", "right", "left"):
@@ -302,12 +325,12 @@ def plot(c: dict, path: Path) -> None:
     else:
         pending = " Our race control engine made no VSC, SC or red recommendation for this crash, so W3 is empty."
     fig.text(0.01, 0.945, "Replay of historical FastF1 data. Each dot is a car passing the spot where the crashed car "
-             "came to rest: blue and named inside W1 to W3, grey after the official yellow." + pending,
-             fontsize=8.5, color=INK2, va="top", wrap=True)
-    fig.text(0.01, 0.012, f"{COUNTERFACTUAL}\n{OUT_OF_SAMPLE}\nW1: onset to our first alert (unavoidable). "
-             "W2: our first alert to the official yellow. W3: our escalation recommendation to the official "
-             "escalation.", fontsize=7.5, color=INK2, va="bottom")
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.86, bottom=0.27)
+             "came to rest (once): blue and named if it passed inside W1 to W3, grey if only after the official "
+             "yellow." + pending, fontsize=8.5, color=INK2, va="top", wrap=True)
+    fig.text(0.01, 0.012, f"{COUNTERFACTUAL}\n{OUT_OF_SAMPLE}\nWindows can overlap: a car passing between our "
+             "escalation and the official yellow counts in W2 and W3. Every car, time and speed is in case_studies.json.",
+             fontsize=7.5, color=INK2, va="bottom")
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.87, bottom=0.27)
     fig.savefig(path, facecolor=SURFACE)
     plt.close(fig)
 

@@ -1,0 +1,63 @@
+race,t,flag,msector,reason,category
+2023_Australian,3772.5,SC,5,car 16 stopped on track for 3.0 s,matched
+2023_Australian,4391.75,SC,9,car 23 stopped on track for 3.0 s,matched
+2023_Australian,9405.5,SC,6,car 20 stopped on track for 3.0 s,matched
+2023_Australian,10757.0,RED,2,multi-car incident,matched
+2023_Mexico_City,6484.25,SC,10,car 20 stopped on track for 3.0 s,matched
+2023_Mexico_City,8022.0,SC,14,multi-car incident,during an official neutralisation
+2023_Mexico_City,10736.0,SC,14,car 18 stopped on track for 3.0 s,official yellows only
+2023_Monaco,8027.75,SC,7,car 55 stopped on track for 3.0 s,official yellows only
+2023_Monaco,8038.5,RED,7,multi-car incident,official yellows only
+2023_Monaco,8350.5,SC,17,car 20 stopped on track for 3.0 s,official yellows only
+2023_Monaco,8537.0,SC,2,car 20 stopped on track for 3.0 s,official yellows only
+2023_Monaco,8677.25,SC,7,car 23 stopped on track for 3.0 s,official yellows only
+2023_Monaco,9426.75,SC,7,car 22 stopped on track for 3.0 s,official yellows only
+2023_Monaco,9689.25,SC,2,car 2 stopped on track for 3.0 s,no official flag
+2024_Canadian,801.25,SC,6,car 2 stopped on track for 3.0 s,official yellows only
+2024_Canadian,2436.0,SC,4,car 2 stopped on track for 3.0 s,matched
+2024_Canadian,4988.75,SC,6,car 11 stopped on track for 3.0 s,official yellows only
+2024_Canadian,5067.75,RED,6,multi-car incident,matched
+2024_Canadian,6281.25,SC,9,car 22 stopped on track for 3.0 s,official yellows only
+2024_Mexico_City,3384.0,SC,3,car 22 stopped on track for 3.0 s,matched
+2024_Qatar,3309.25,RED,3,multi-car incident,matched
+2024_Qatar,3854.75,SC,3,car 30 stopped on track for 3.0 s,official yellows only
+2024_Qatar,7092.75,SC,15,car 11 stopped on track for 3.0 s,during an official neutralisation
+2024_Qatar,7184.5,SC,11,car 27 stopped on track for 3.0 s,matched
+2024_São_Paulo,4395.25,SC,10,car 11 stopped on track for 3.0 s,official yellows only
+2024_São_Paulo,6582.25,SC,2,car 27 stopped on track for 3.0 s,matched
+2024_São_Paulo,9042.75,SC,7,car 50 stopped on track for 3.0 s,official yellows only
+2024_São_Paulo,9308.0,SC,8,car 55 stopped on track for 3.0 s,matched
+2024_São_Paulo,9803.75,SC,13,car 14 stopped on track for 3.0 s,official yellows only
+2025_Australian,4316.25,SC,8,car 7 stopped on track for 3.0 s,matched
+2025_Australian,7646.25,SC,9,car 14 stopped on track for 3.0 s,matched
+2025_Australian,8188.75,SC,20,multi-car incident,during an official neutralisation
+2025_Australian,8967.0,SC,19,car 81 stopped on track for 3.0 s,official yellows only
+2025_Australian,9044.5,SC,18,car 87 stopped on track for 3.0 s,official yellows only
+2025_Australian,9206.0,SC,2,car 30 stopped on track for 3.0 s,matched
+2025_Azerbaijan,3504.5,SC,7,car 81 stopped on track for 3.0 s,matched
+2025_Azerbaijan,5465.25,SC,7,car 43 stopped on track for 3.0 s,official yellows only
+2025_Belgian,8415.25,SC,15,multi-car incident,during an official neutralisation
+2025_Belgian,8421.25,RED,16,multi-car incident,during an official neutralisation
+2025_British,3794.25,SC,2,car 5 stopped on track for 3.0 s,official yellows only
+2025_British,3900.75,SC,10,car 5 stopped on track for 3.0 s,matched
+2025_British,5605.0,SC,10,car 6 stopped on track for 3.0 s,matched
+2025_British,8380.25,RED,7,multi-car incident,official yellows only
+2025_Dutch,8607.0,SC,12,car 4 stopped on track for 3.0 s,matched
+2025_Miami,3572.25,SC,14,car 7 stopped on track for 3.0 s,matched
+2025_Miami,6480.5,SC,16,car 5 stopped on track for 3.0 s,matched
+2026_Australian,4671.0,SC,13,car 6 stopped on track for 3.0 s,matched
+2026_Australian,5312.25,SC,20,car 77 stopped on track for 3.0 s,matched
+2026_Belgian,3400.25,SC,7,car 63 stopped on track for 3.0 s,matched
+2026_British,3384.5,RED,7,multi-car incident,official yellows only
+2026_British,6920.5,SC,10,car 27 stopped on track for 3.0 s,matched
+2026_British,7819.0,SC,14,car 3 stopped on track for 3.0 s,matched
+2026_Canadian,6867.5,SC,11,car 1 stopped on track for 3.0 s,official yellows only
+2026_Canadian,8521.0,SC,1,car 27 stopped on track for 3.0 s,official yellows only
+2026_Dutch,3493.5,RED,18,multi-car incident,official yellows only
+2026_Dutch,5276.25,SC,16,multi-car incident,no official flag
+2026_Dutch,9438.75,SC,5,car 31 stopped on track for 3.0 s,matched
+2026_Italian,3648.0,SC,7,car 16 stopped on track for 3.0 s,during an official neutralisation
+2026_Italian,5686.75,SC,1,multi-car incident,no official flag
+2026_Italian,5887.0,SC,1,multi-car incident,no official flag
+2026_Italian,7855.25,SC,3,car 18 stopped on track for 3.0 s,matched
+2026_Miami,3904.75,SC,16,car 6 stopped on track for 3.0 s,matched

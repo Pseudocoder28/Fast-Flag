@@ -1,10 +1,22 @@
 """Race control engine: per-sector flag state machine + global (VSC/SC/RED) state.
 
-Pure logic, no I/O. See src/racecontrol/PLAN_B1.md for the design.
+Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
+- Flags escalate at once and only come down after a hold, so they do not flicker.
+- A sector returns to CLEAR once no flagged car has remained in it for
+  SECTOR_CLEAR_AFTER_S. A flagged car stops counting as in the sector when it
+  drives out, enters the pit lane, sends no data for STALE_CAR_S, or has not moved
+  for PARKED_CAR_S. The last rule matters: a retired car keeps reporting its last
+  position for the rest of the session, so without it its sector, and any SC it
+  caused, would never clear and a later crash could never escalate.
+- A track-wide flag (VSC, SC, RED) holds at least GLOBAL_MIN_HOLD_S and clears
+  GLOBAL_CLEAR_AFTER_S after every sector that caused or supported it is CLEAR.
+- A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
+  wipes all flag state.
 """
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 # --- thresholds -------------------------------------------------------------
@@ -23,8 +35,11 @@ SC_STOPPED_HOLD_S = 3.0
 VSC_STOPPED_HOLD_S = 10.0
 STOPPED_SPEED_KMH = 30.0
 STALE_CAR_S = 120.0
+PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot ...
+PARKED_CAR_S = 180.0       # ... for this long counts as recovered (about recovery time)
 MIN_HOLD_S = 2.0
 SECTOR_CLEAR_AFTER_S = 5.0
+GLOBAL_MIN_HOLD_S = 60.0
 GLOBAL_CLEAR_AFTER_S = 5.0
 RISK_SC_SUPPORT = 0.5
 RISK_CONF_BOOST = 0.1
@@ -52,7 +67,8 @@ class SectorState:
 class GlobalState:
     flag: str = "CLEAR"
     since_t: float = 0.0
-    cause_sector: int | None = None
+    cause_sector: int | None = None                           # first cause, used as the rec msector
+    cause_sectors: set[int] = field(default_factory=set)      # every sector that caused or supports it
     confidence: float = 0.0
     reason: str = ""
     empty_since_t: float | None = None
@@ -122,19 +138,13 @@ class RaceControl:
 
     def on_tick(self, tick: dict) -> tuple[list[dict], bool]:
         new_t = tick["t"]
-        did_reset = self.t is not None and new_t < self.t - RESET_JUMP_S
+        did_reset = self.t is not None and abs(new_t - self.t) > RESET_JUMP_S
         if did_reset:
             self._reset_state()
         self.t = new_t
 
         for car in tick["cars"]:
-            self.car_state[car["drv"]] = {
-                "msector": car["msector"],
-                "speed": car["speed"],
-                "lat_off": car["lat_off"],
-                "in_pit": car["in_pit"],
-                "t": new_t,
-            }
+            self._update_car(car, new_t)
 
         recs: list[dict] = []
         recs.extend(self._check_sustained_stop())
@@ -154,8 +164,8 @@ class RaceControl:
         drv = det["drivers"][0]
         car = self.car_state.get(drv, {})
 
-        if car.get("in_pit") and dtype in ("STOPPED", "DROPOUT"):
-            return []
+        if (car.get("in_pit") or self._parked(car)) and dtype in ("STOPPED", "DROPOUT"):
+            return []   # in the pit lane, or a retired car that already counts as recovered
         if dtype == "DROPOUT" and self.global_.flag in ("SC", "VSC", "RED"):
             return []
 
@@ -191,6 +201,39 @@ class RaceControl:
     def on_risk(self, risk: dict) -> list[dict]:
         self.risk[risk["drv"]] = risk
         return []
+
+    # --- car state --------------------------------------------------------
+
+    def _update_car(self, car: dict, t: float) -> None:
+        prev = self.car_state.get(car["drv"])
+        x, y = car["x"], car["y"]
+        if prev is None or math.hypot(x - prev["anchor"][0], y - prev["anchor"][1]) > PARKED_MOVE_M:
+            anchor, moved_t = (x, y), t
+        else:
+            anchor, moved_t = prev["anchor"], prev["moved_t"]
+        self.car_state[car["drv"]] = {
+            "msector": car["msector"],
+            "speed": car["speed"],
+            "lat_off": car["lat_off"],
+            "in_pit": car["in_pit"],
+            "t": t,
+            "anchor": anchor,       # where the car was when it last moved more than PARKED_MOVE_M
+            "moved_t": moved_t,
+        }
+
+    def _stale(self, car: dict) -> bool:
+        return self.t - car["t"] > STALE_CAR_S
+
+    def _parked(self, car: dict) -> bool:
+        """Not moved for PARKED_CAR_S: a retired car, treated as recovered."""
+        return "moved_t" in car and self.t - car["moved_t"] >= PARKED_CAR_S
+
+    def _holds_sector(self, drv: str, msector: int) -> bool:
+        """True while a flagged car still counts as being in the sector."""
+        car = self.car_state.get(drv)
+        if car is None or car["in_pit"] or car["msector"] != msector:
+            return False
+        return not self._stale(car) and not self._parked(car)
 
     # --- detection handling ---------------------------------------------
 
@@ -279,6 +322,7 @@ class RaceControl:
             return []
 
         if GLOBAL_RANK[target] <= GLOBAL_RANK[self.global_.flag]:
+            self.global_.cause_sectors.add(msector)   # supports the flag already out
             return []
 
         reason = "multi-car incident"
@@ -288,9 +332,12 @@ class RaceControl:
     def _escalate_global(
         self, t: float, msector: int, target: str, conf: float, reason: str, det_id: str | None
     ) -> list[dict]:
+        if self.global_.flag == "CLEAR":
+            self.global_.cause_sector = msector
+            self.global_.cause_sectors = set()
+        self.global_.cause_sectors.add(msector)
         self.global_.flag = target
         self.global_.since_t = t
-        self.global_.cause_sector = msector
         self.global_.confidence = conf
         self.global_.reason = reason
         self.global_.empty_since_t = None
@@ -302,23 +349,24 @@ class RaceControl:
     def _check_sustained_stop(self) -> list[dict]:
         recs: list[dict] = []
         for msector, sec in self.sectors.items():
-            if sec.stopped_since_t is None or sec.stopped_driver is None:
+            if sec.stopped_driver is None:
                 continue
             car = self.car_state.get(sec.stopped_driver)
             if car is None:
                 continue
-            if car["in_pit"]:
+            if not self._holds_sector(sec.stopped_driver, msector):
+                # drove out, pitted, no data or parked long enough to count as recovered
                 sec.stopped_since_t = None
                 sec.stopped_driver = None
                 sec.stopped_severity = None
-                continue
-            if self.t - car["t"] > STALE_CAR_S:
                 continue
             if car["speed"] > STOPPED_SPEED_KMH:
+                # moving again: pause the hold but keep watching the car, so one noisy
+                # speed sample cannot cancel the escalation of a car that stays put
                 sec.stopped_since_t = None
-                sec.stopped_driver = None
-                sec.stopped_severity = None
                 continue
+            if sec.stopped_since_t is None:
+                sec.stopped_since_t = self.t
 
             elapsed = self.t - sec.stopped_since_t
             on_track = abs(car["lat_off"]) <= ON_TRACK_LAT_OFF_M
@@ -328,7 +376,10 @@ class RaceControl:
             elif (not on_track) and elapsed >= VSC_STOPPED_HOLD_S:
                 target = "VSC"
 
-            if target is None or GLOBAL_RANK[target] <= GLOBAL_RANK[self.global_.flag]:
+            if target is None:
+                continue
+            if GLOBAL_RANK[target] <= GLOBAL_RANK[self.global_.flag]:
+                self.global_.cause_sectors.add(msector)   # supports the flag already out
                 continue
 
             conf = min(MAX_CONF, sec.stopped_severity or 0.0)
@@ -347,17 +398,7 @@ class RaceControl:
             if self.t - sec.since_t < MIN_HOLD_S:
                 continue
 
-            holds = False
-            for drv in sec.cause_drivers:
-                car = self.car_state.get(drv)
-                if car is None:
-                    continue
-                if self.t - car["t"] > STALE_CAR_S:
-                    continue
-                if car["msector"] == msector:
-                    holds = True
-                    break
-
+            holds = any(self._holds_sector(drv, msector) for drv in sec.cause_drivers)
             if holds:
                 sec.empty_since_t = None
                 continue
@@ -388,14 +429,14 @@ class RaceControl:
     def _check_global_clearing(self) -> list[dict]:
         if self.global_.flag == "CLEAR":
             return []
-        if self.t - self.global_.since_t < MIN_HOLD_S:
+        if self.t - self.global_.since_t < GLOBAL_MIN_HOLD_S:
             return []
 
         cause_sector = self.global_.cause_sector
-        cause = self.sectors.get(cause_sector) if cause_sector is not None else None
-        cause_flag = cause.flag if cause is not None else "CLEAR"
-
-        if cause_flag != "CLEAR":
+        still_flagged = any(
+            s in self.sectors and self.sectors[s].flag != "CLEAR" for s in self.global_.cause_sectors
+        )
+        if still_flagged:
             self.global_.empty_since_t = None
             return []
         if self.global_.empty_since_t is None:
@@ -410,6 +451,7 @@ class RaceControl:
         )
         self.global_.flag = "CLEAR"
         self.global_.since_t = self.t
+        self.global_.cause_sectors = set()
         self.global_.confidence = 0.0
         self.global_.reason = ""
         self.global_.empty_since_t = None

@@ -228,7 +228,10 @@
               "evidence": "lost 169 km/h in 1 s (267 to 0 km/h), with brakes on"
             },
             "official_yellow": 7297.99,
-            "our_escalation_recommendation": "none: our race control engine made no VSC, SC or red recommendation for this crash",
+            "our_escalation_recommendation": {
+              "t": 7283.25,
+              "flag": "SC"
+            },
             "official_escalation": {
               "t": 7366.99,
               "flag": "SC"
@@ -326,12 +329,141 @@
             },
             {
               "name": "W3 our escalation recommendation -> official escalation (headline)",
-              "start": null,
+              "start": 7283.25,
               "end": 7366.99,
-              "seconds": null,
-              "cars_passing": null,
-              "passes": [],
-              "note": "none: our race control engine made no VSC, SC or red recommendation for this crash"
+              "seconds": 83.74,
+              "cars_passing": 16,
+              "passes": [
+                {
+                  "car": "44",
+                  "driver": "HAM",
+                  "t": 7283.85,
+                  "speed_kmh": 294.0,
+                  "own_normal_kmh": 322.0,
+                  "pct_of_own_normal": 91.3
+                },
+                {
+                  "car": "5",
+                  "driver": "VET",
+                  "t": 7288.53,
+                  "speed_kmh": 316.6,
+                  "own_normal_kmh": 318.0,
+                  "pct_of_own_normal": 99.6
+                },
+                {
+                  "car": "10",
+                  "driver": "GAS",
+                  "t": 7291.94,
+                  "speed_kmh": 314.2,
+                  "own_normal_kmh": 313.1,
+                  "pct_of_own_normal": 100.4
+                },
+                {
+                  "car": "16",
+                  "driver": "LEC",
+                  "t": 7294.46,
+                  "speed_kmh": 308.6,
+                  "own_normal_kmh": 317.6,
+                  "pct_of_own_normal": 97.2
+                },
+                {
+                  "car": "22",
+                  "driver": "TSU",
+                  "t": 7295.62,
+                  "speed_kmh": 321.5,
+                  "own_normal_kmh": 318.6,
+                  "pct_of_own_normal": 100.9
+                },
+                {
+                  "car": "4",
+                  "driver": "NOR",
+                  "t": 7298.13,
+                  "speed_kmh": 273.4,
+                  "own_normal_kmh": 320.0,
+                  "pct_of_own_normal": 85.4
+                },
+                {
+                  "car": "55",
+                  "driver": "SAI",
+                  "t": 7299.96,
+                  "speed_kmh": 251.1,
+                  "own_normal_kmh": 323.6,
+                  "pct_of_own_normal": 77.6
+                },
+                {
+                  "car": "3",
+                  "driver": "RIC",
+                  "t": 7301.4,
+                  "speed_kmh": 255.2,
+                  "own_normal_kmh": 321.0,
+                  "pct_of_own_normal": 79.5
+                },
+                {
+                  "car": "14",
+                  "driver": "ALO",
+                  "t": 7305.16,
+                  "speed_kmh": 305.4,
+                  "own_normal_kmh": 317.0,
+                  "pct_of_own_normal": 96.4
+                },
+                {
+                  "car": "7",
+                  "driver": "RAI",
+                  "t": 7305.69,
+                  "speed_kmh": 326.8,
+                  "own_normal_kmh": 340.5,
+                  "pct_of_own_normal": 96.0
+                },
+                {
+                  "car": "99",
+                  "driver": "GIO",
+                  "t": 7306.93,
+                  "speed_kmh": 321.3,
+                  "own_normal_kmh": 329.0,
+                  "pct_of_own_normal": 97.6
+                },
+                {
+                  "car": "77",
+                  "driver": "BOT",
+                  "t": 7309.1,
+                  "speed_kmh": 242.2,
+                  "own_normal_kmh": 321.0,
+                  "pct_of_own_normal": 75.4
+                },
+                {
+                  "car": "63",
+                  "driver": "RUS",
+                  "t": 7311.84,
+                  "speed_kmh": 265.4,
+                  "own_normal_kmh": 323.0,
+                  "pct_of_own_normal": 82.2
+                },
+                {
+                  "car": "9",
+                  "driver": "MAZ",
+                  "t": 7315.48,
+                  "speed_kmh": 314.2,
+                  "own_normal_kmh": 307.1,
+                  "pct_of_own_normal": 102.3
+                },
+                {
+                  "car": "6",
+                  "driver": "LAT",
+                  "t": 7321.46,
+                  "speed_kmh": 231.2,
+                  "own_normal_kmh": 324.0,
+                  "pct_of_own_normal": 71.3
+                },
+                {
+                  "car": "47",
+                  "driver": "MSC",
+                  "t": 7352.31,
+                  "speed_kmh": 125.2,
+                  "own_normal_kmh": 316.0,
+                  "pct_of_own_normal": 39.6
+                }
+              ],
+              "note": ""
             },
             {
               "name": "context: official yellow -> official escalation (not a counterfactual)",

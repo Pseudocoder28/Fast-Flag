@@ -57,5 +57,28 @@ def test_numbers_md_builds_from_the_committed_charts() -> None:
     text = build()
     assert "replay of historical FastF1 data" in text
     for section in ("## Detection, headline", "## Latency from crash onset", "## Risk model", "## Case studies",
-                    "## Holdout"):
+                    "## Escalation scorecard", "## Holdout"):
         assert section in text
+
+
+def test_track_wide_state_follows_escalations_track_clear_and_resets() -> None:
+    from src.eval.escalation import track_wide_at, track_wide_changes
+    recs = [{"t": 10.0, "flag": "SC", "msector": 3, "message": "SAFETY CAR DEPLOYED"},
+            {"t": 40.0, "flag": "CLEAR", "msector": 3, "message": "CLEAR IN TRACK SECTOR 3"},   # sector only: SC stays
+            {"t": 80.0, "flag": "CLEAR", "msector": 3, "message": "TRACK CLEAR"},
+            {"t": 100.0, "flag": "VSC", "msector": 7, "message": "VIRTUAL SAFETY CAR DEPLOYED"}]
+    changes = track_wide_changes(recs, resets=[120.0])
+    assert track_wide_at(changes, 5.0) == ("CLEAR", None, None)
+    assert track_wide_at(changes, 50.0) == ("SC", 10.0, 3)
+    assert track_wide_at(changes, 90.0)[0] == "CLEAR"
+    assert track_wide_at(changes, 110.0) == ("VSC", 100.0, 7)
+    assert track_wide_at(changes, 130.0)[0] == "CLEAR"        # an engine reset wipes the flag
+
+
+def test_impact_rule_is_scored_against_always_sc() -> None:
+    from src.eval.escalation import OFFICIAL_COLUMNS, impact_rule
+    rows = [("SC", "IMPACT STOPPED"), ("SC", "STOPPED"), ("VSC", "STOPPED"), ("VSC", "")]
+    off = pd.DataFrame([{**dict.fromkeys(OFFICIAL_COLUMNS), "official_flag": f, "onset_car": "1",
+                         "onset_car_alerts": a} for f, a in rows])
+    r = impact_rule(off)
+    assert r["right_with_impact_rule"] == 3 and r["right_with_current_rule"] == 2

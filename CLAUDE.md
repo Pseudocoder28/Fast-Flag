@@ -28,6 +28,7 @@ Short rules and contracts. `PROJECT_BRIEF.md` is the single source of truth for 
 - racecontrol publishes by sending `rec` envelopes on the same socket, and the server rebroadcasts them.
 - HTTP: `POST /replay`, `GET /track`, `GET /official`, `GET /status`, `GET /races`, dashboard served at `/`. The mock server implements all of these, plus `--no-recs`.
 - `RaceControl.on_tick(tick)` returns `(recs, did_reset)`. `on_detection` and `on_risk` return a list of recs.
+- Recs with flag VSC, SC or RED are track-wide (`msector` is the sector that caused them). A CLEAR rec with message `TRACK CLEAR` ends them, other CLEAR recs clear one sector.
 - Parked until after M2: the proposed `human` envelope. It is not in the contract, so nothing sends or handles it yet.
 - Units: seconds (SessionTime), metres, km/h. `drv` is the car number as a string.
 - `official` data: `{t, category, message, flag, scope, msector, drivers}`, `msector` null when track-wide. Tick: cars with no fresh data are omitted, `gap_ahead_m` is -1.0 when unknown.

@@ -14,8 +14,8 @@ The onset car of an official incident is the car with the earliest onset in the 
 |:--------------|---------:|----------:|--------------:|-----------:|-----------:|----------------:|-------------:|-------------:|----------------:|
 | YELLOW        |       45 |        43 |          2.93 |       1.01 |       8.77 |            1.5  |         0.5  |         2.75 |            0.79 |
 | DOUBLE_YELLOW |       36 |        33 |         12.76 |       2.43 |      60.13 |            1.5  |         0.5  |         2.75 |            0.85 |
-| VSC           |        5 |         5 |         48.16 |      31.43 |     108.41 |            2.5  |         1.5  |         9    |            1    |
-| SC            |       22 |        21 |         24.65 |      21.16 |      56.66 |            1.25 |         0.75 |         2.75 |            1    |
+| VSC           |       13 |        12 |         35.01 |      23.03 |      59.38 |            2.62 |         1.88 |         8.75 |            1    |
+| SC            |       14 |        14 |         23.74 |      19.3  |      57.54 |            0.75 |         0.5  |         1.94 |            1    |
 | RED           |        2 |         2 |        173.05 |     172.99 |     173.11 |            0.5  |         0.5  |         0.5  |            1    |
 
 ## By our alert type
@@ -31,10 +31,10 @@ The onset car of an official incident is the car with the earliest onset in the 
 
 | reason                                                                              |   DOUBLE_YELLOW |   RED |   SC |   VSC |   YELLOW |
 |:------------------------------------------------------------------------------------|----------------:|------:|-----:|------:|---------:|
-| car already slow or stopped before the window (re-flag of an earlier stoppage)      |              20 |     3 |    7 |     1 |       11 |
+| car already slow or stopped before the window (re-flag of an earlier stoppage)      |              20 |     3 |    4 |     4 |       11 |
 | field not racing (SC, VSC, restart or procession)                                   |               8 |     0 |    0 |     1 |        3 |
 | lap 1 or 2: no clean reference laps yet                                             |              15 |     0 |    6 |     2 |       15 |
-| no car collapsed below 50% (debris, weather, or a car that went off and kept going) |               8 |     0 |    4 |     1 |       10 |
+| no car collapsed below 50% (debris, weather, or a car that went off and kept going) |               8 |     0 |    2 |     3 |       10 |
 
 Every one is listed in latency_by_type_no_onset.csv.
 

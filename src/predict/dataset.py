@@ -87,24 +87,27 @@ def label(df: pd.DataFrame, first: dict[str, float], unattributed: list, n: int)
     return out
 
 
+def labelled_rows(race: RaceData, dets: list[dict]) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    """Racing ticks with labels (y10/y20/y30) and their feature matrix, for any built race.
+    Uses race.frame["anomaly_score"] if the caller attached one."""
+    first, unattributed, n = incident_times(race, dets)
+    df = label(race.frame[racing_rows(race.frame)], first, unattributed, n)
+    return df, feature_matrix(df), {"cars_with_incident": len(first), "unattributed": len(unattributed)}
+
+
 def build(rid: str) -> dict:
     assert_not_holdout(rid=rid)
     race = RaceData.load(rid)
     others = [r for r in available_races() if r != rid]
     attach_scores(race.frame, train_anomaly(others))       # ANOMALY trained without this race
-    dets = detections(race)
-    first, unattributed, n = incident_times(race, dets)
-    df = race.frame[racing_rows(race.frame)]
-    df = label(df, first, unattributed, n)
-    x = feature_matrix(df)
+    df, x, info = labelled_rows(race, detections(race))
     rng = np.random.default_rng(zlib.crc32(rid.encode()))
     pos = df[f"y{max(HORIZONS)}"].to_numpy() == 1
     x["train_keep"] = pos | (rng.random(len(df)) < NEG_SAMPLE)
     for c in ["t", "drv", "msector"] + [f"y{h}" for h in HORIZONS]:
         x[c] = df[c].to_numpy()
     x.to_parquet(FEATURES_DIR / f"{rid}_risk.parquet", index=False)
-    return {"race": rid, "rows": len(x), "cars_with_incident": len(first), "unattributed": len(unattributed),
-            **{f"pos{h}": int(x[f"y{h}"].sum()) for h in HORIZONS}}
+    return {"race": rid, "rows": len(x), **info, **{f"pos{h}": int(x[f"y{h}"].sum()) for h in HORIZONS}}
 
 
 def main() -> None:
