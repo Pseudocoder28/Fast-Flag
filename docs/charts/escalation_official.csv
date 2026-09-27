@@ -1,30 +1,30 @@
 race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_t,our_flag,our_top,miss_kind,onset_car,onset_car_alerts,detail,official_red_t,our_red_t
-2023_Australian,3764.18,3805.18,SC,SC,5,earlier,32.68,3772.5,SC,SC,,,,car 16 stopped for 3.0 s after an impact,,3882.75
-2023_Australian,4390.18,4402.18,SC,RED,9,earlier,10.43,4391.75,SC,SC,,23,IMPACT STOPPED,car 23 stopped for 3.0 s after an impact,4560.18,4508.75
+2023_Australian,3764.18,3805.18,SC,SC,5,earlier,32.68,3772.5,SC,SC,,,,car 16 stopped for 3.0 s after an impact,,
+2023_Australian,4390.18,4402.18,SC,RED,9,earlier,10.43,4391.75,SC,SC,,23,IMPACT STOPPED,car 23 stopped for 3.0 s after an impact,4560.18,
 2023_Australian,6454.18,6454.18,VSC,VSC,track-wide,missed,,,,,car collapse seen,63,STOPPED,car 63 collapsed 31 s before the first official message; we showed double yellow but did not escalate,,
 2023_Australian,9389.18,9450.18,SC,SC,4,earlier,37.68,9412.5,VSC,VSC,,20,STOPPED,"car 20 stopped for 10.0 s, no impact detected",,
 2023_Australian,9605.18,9605.18,RED,RED,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),9605.18,
 2023_Australian,10752.18,10764.18,RED,RED,2 4,earlier,7.18,10757.0,RED,RED,,,,multi-car incident,10764.18,10757.0
 2023_Mexico_City,4084.92,4084.92,VSC,VSC,track-wide,missed,,,,,no car collapse,,,"field not racing (SC, VSC, restart or procession)",,
-2023_Mexico_City,6483.92,6503.92,SC,RED,9 10,earlier,19.67,6484.25,SC,SC,,20,IMPACT STOPPED,car 20 stopped for 3.0 s after an impact,6652.92,6601.25
-2024_Canadian,2435.0,2480.0,SC,SC,3 4,earlier,44.0,2436.0,SC,SC,,2,IMPACT STOPPED,car 2 stopped for 3.0 s after an impact,,2553.0
+2023_Mexico_City,6483.92,6503.92,SC,RED,9 10,earlier,19.67,6484.25,SC,SC,,20,IMPACT STOPPED,car 20 stopped for 3.0 s after an impact,6652.92,
+2024_Canadian,2435.0,2480.0,SC,SC,3 4,earlier,44.0,2436.0,SC,SC,,2,IMPACT STOPPED,car 2 stopped for 3.0 s after an impact,,
 2024_Canadian,5064.0,5093.0,SC,SC,5 6,earlier,25.25,5067.75,RED,RED,,55,MULTI STOPPED,multi-car incident,,5067.75
-2024_Mexico_City,3380.85,3417.85,SC,SC,3 4,earlier,33.85,3384.0,SC,SC,,,,car 22 stopped for 3.0 s after an impact,,3501.0
+2024_Mexico_City,3380.85,3417.85,SC,SC,3 4,earlier,33.85,3384.0,SC,SC,,,,car 22 stopped for 3.0 s after an impact,,
 2024_Qatar,3306.81,3349.81,SC,SC,3,earlier,40.56,3309.25,RED,RED,,,,multi-car incident,,3309.25
 2024_Qatar,6468.81,6468.81,SC,SC,track-wide,missed,,,,,car collapse seen,44,,car 44 collapsed 20 s before the first official message; we made no recommendation,,
-2024_Qatar,7179.81,7180.81,VSC,SC,12,later,-3.69,7184.5,SC,SC,,27,IMPACT STOPPED,car 27 stopped for 3.0 s after an impact,,7301.5
+2024_Qatar,7179.81,7180.81,VSC,SC,12,later,-3.69,7184.5,SC,SC,,27,IMPACT STOPPED,car 27 stopped for 3.0 s after an impact,,
 2024_São_Paulo,6579.25,6618.25,VSC,VSC,2,earlier,36.0,6582.25,SC,SC,,27,IMPACT STOPPED,car 27 stopped for 3.0 s after an impact,,
 2024_São_Paulo,6890.25,6890.25,SC,SC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
 2024_São_Paulo,7143.25,7159.25,RED,RED,14,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),7159.25,
 2024_São_Paulo,9308.25,9311.25,SC,SC,8 9,earlier,3.25,9308.0,SC,SC,,55,IMPACT STOPPED,car 55 stopped for 3.0 s after an impact,,
-2025_Australian,4324.38,4328.38,SC,SC,8,earlier,12.13,4316.25,SC,SC,,,,car 7 stopped for 3.0 s after an impact,,4429.5
-2025_Australian,7646.38,7666.38,SC,SC,10,earlier,20.13,7646.25,SC,SC,,14,IMPACT STOPPED,car 14 stopped for 3.0 s after an impact,,7763.25
-2025_Australian,9217.38,9223.38,SC,SC,2,earlier,17.38,9206.0,SC,SC,,,,car 30 stopped for 3.0 s after an impact,,9323.0
-2025_Azerbaijan,3500.92,3529.92,SC,SC,6 7,earlier,25.42,3504.5,SC,SC,,,,car 81 stopped for 3.0 s after an impact,,3621.5
+2025_Australian,4324.38,4328.38,SC,SC,8,earlier,12.13,4316.25,SC,SC,,,,car 7 stopped for 3.0 s after an impact,,
+2025_Australian,7646.38,7666.38,SC,SC,10,earlier,20.13,7646.25,SC,SC,,14,IMPACT STOPPED,car 14 stopped for 3.0 s after an impact,,
+2025_Australian,9217.38,9223.38,SC,SC,2,earlier,17.38,9206.0,SC,SC,,,,car 30 stopped for 3.0 s after an impact,,
+2025_Azerbaijan,3500.92,3529.92,SC,SC,6 7,earlier,25.42,3504.5,SC,SC,,,,car 81 stopped for 3.0 s after an impact,,
 2025_British,3422.39,3487.39,VSC,VSC,6,missed,,,,,no car collapse,,,lap 1 or 2: no clean reference laps yet,,
 2025_British,3895.39,3958.39,VSC,VSC,10,earlier,50.64,3907.75,VSC,VSC,,,,"car 5 stopped for 10.0 s, no impact detected",,
 2025_British,4878.39,4893.39,SC,SC,12,missed,,,,,no car collapse,,,"no car collapsed below 50% (debris, weather, or a car that went off and kept going)",,
-2025_British,5600.39,5614.39,SC,SC,10,earlier,9.39,5605.0,SC,SC,,6,IMPACT STOPPED,car 6 stopped for 3.0 s after an impact,,5717.75
+2025_British,5600.39,5614.39,SC,SC,10,earlier,9.39,5605.0,SC,SC,,6,IMPACT STOPPED,car 6 stopped for 3.0 s after an impact,,
 2025_Dutch,5099.99,5114.99,SC,SC,4 5,missed,,,,,car collapse seen,44,STOPPED,car 44 collapsed 2 s before the first official message; we showed double yellow but did not escalate,,
 2025_Dutch,5867.99,5867.99,VSC,VSC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
 2025_Dutch,7523.99,7531.99,SC,SC,4 5,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
@@ -35,13 +35,13 @@ race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_
 2026_Australian,4681.38,4681.38,VSC,VSC,track-wide,earlier,3.38,4678.0,VSC,VSC,,6,STOPPED,"car 6 stopped for 10.0 s, no impact detected",,
 2026_Australian,5311.38,5328.38,VSC,VSC,20,earlier,9.13,5319.25,VSC,VSC,,77,STOPPED,"car 77 stopped for 10.0 s, no impact detected",,
 2026_Australian,6673.38,6673.38,VSC,VSC,track-wide,missed,,,,,car collapse seen,63,IMPACT,car 63 collapsed 59 s before the first official message; we showed yellow but did not escalate,,
-2026_Belgian,3398.9,3448.9,SC,SC,4 5 6 7,earlier,48.65,3400.25,SC,SC,,,,car 63 stopped for 3.0 s after an impact,,3517.25
+2026_Belgian,3398.9,3448.9,SC,SC,4 5 6 7,earlier,48.65,3400.25,SC,SC,,,,car 63 stopped for 3.0 s after an impact,,
 2026_Belgian,5476.9,5476.9,VSC,VSC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
 2026_Belgian,5721.9,5721.9,VSC,VSC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
 2026_British,5360.51,5360.51,VSC,VSC,track-wide,missed,,,,,no car collapse,,,"no car collapsed below 50% (debris, weather, or a car that went off and kept going)",,
 2026_British,6920.51,6947.51,VSC,VSC,10,earlier,20.01,6927.5,VSC,VSC,,27,ANOMALY STOPPED,"car 27 stopped for 10.0 s, no impact detected",,
-2026_British,7815.51,7835.51,SC,SC,15,earlier,16.51,7819.0,SC,SC,,3,IMPACT STOPPED,car 3 stopped for 3.0 s after an impact,,7936.0
-2026_British,8375.51,8375.51,SC,SC,track-wide,already out,,7936.0,RED,,,,,"our RED out since 440 s before, cause sector 14",,
+2026_British,7815.51,7835.51,SC,SC,15,earlier,16.51,7819.0,SC,SC,,3,IMPACT STOPPED,car 3 stopped for 3.0 s after an impact,,
+2026_British,8375.51,8375.51,SC,SC,track-wide,already out,,7819.0,SC,,,,,"our SC out since 557 s before, cause sector 14",,
 2026_Canadian,6038.53,6069.53,VSC,VSC,9 10,missed,,,,,no car collapse,,,"no car collapsed below 50% (debris, weather, or a car that went off and kept going)",,
 2026_Canadian,7293.53,7293.53,VSC,VSC,track-wide,missed,,,,,car collapse seen,77,STOPPED,car 77 collapsed 23 s before the first official message; we showed double yellow but did not escalate,,
 2026_Canadian,7812.53,7812.53,VSC,VSC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,

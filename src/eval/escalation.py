@@ -430,8 +430,7 @@ def red_text(r: dict) -> str:
     lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
     return (f"- Red flags, per official escalation until race control's TRACK CLEAR: race control called "
             f"{r['both'] + r['race_control_only']}, we called {r['both']} of them{lead}, and {r['ours_only']} that race "
-            "control handled without a red flag (mostly our red for a crashed car still at its crash site after "
-            "2 minutes).")
+            "control handled without a red flag.")
 
 
 def pairs_text(pairs: dict[str, int]) -> str:
