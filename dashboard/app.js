@@ -39,6 +39,8 @@ const SNAP_JUMP_M = 200;       // a bigger move between two ticks is drawn as a 
 const STILL_MOVE_M = 3;        // a car that stays within this distance of one spot ...
 const STOPPED_AFTER_S = 3;     // ... for this long is marked STOPPED
 const OUT_AFTER_S = 60;        // ... and after this long OUT (retired: its data freezes)
+const RETIRED_AFTER_S = 120;   // still this long and no longer part of a flagged incident: out of the race ...
+const RETIRE_FADE_S = 3;       // ... it fades off the map over this long (it comes back if it moves again)
 const FIELD_STILL_MIN = 5;     // this many still cars at once is a grid or a restart, not a stop
 const FADE_AFTER_S = 5;        // no data for this long: fade the car out ...
 const FADE_S = 2;              // ... over this long
@@ -446,7 +448,8 @@ function buildLegend() {
     [dot(CAR_FILL.stricken, "stricken"), "In an incident"],
     [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 4px ${FLAG_COLORS.YELLOW}`), "In a yellow sector"],
     [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px ${FLAG_COLORS.SC}`), "Under our SC or VSC"],
-    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 4px ${RISK_HALO.high}77`), "Risk halo"],
+    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 5px ${RISK_HALO.elevated}73`), "Elevated risk"],
+    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 5px ${RISK_HALO.high}73`), "High risk"],
     [dot(CAR_FILL.stopped, "ring"), "Stopped or out"],
     [dot(CAR_FILL.low, "watch"), "Watch (anomaly)"],
     [dot(CAR_FILL.pit, "pit"), "In pit lane"],
@@ -899,12 +902,18 @@ function carStates() {
   const out = [];
   let onTrack = 0;
   let still = 0;
+  let freshAll = 0;
+  let stillAll = 0;
   for (const [drv, car] of cars) {
     const age = replayT - car.seenT;
     if (age >= FADE_AFTER_S + FADE_S) continue;
     const alpha = age <= FADE_AFTER_S ? 1 : 1 - (age - FADE_AFTER_S) / FADE_S;
     const fresh = age < 1;      // stopped means fresh ticks keep showing the same spot, not missing data
     const stillFor = replayT - car.movedT;
+    if (fresh) {
+      freshAll++;
+      if (stillFor >= STOPPED_AFTER_S) stillAll++;
+    }
     if (!car.inPit && fresh) {
       onTrack++;
       if (stillFor >= STOPPED_AFTER_S) still++;
@@ -912,6 +921,8 @@ function carStates() {
     out.push({ drv, car, alpha, fresh, stillFor });
   }
   const fieldStill = still >= FIELD_STILL_MIN && still >= onTrack / 2;
+  // the whole field stopped (a red flag in the pit lane, the grid): nobody is out of the race
+  const fieldStopped = stillAll >= FIELD_STILL_MIN && stillAll >= freshAll / 2;
   for (const s of out) {
     if (s.car.inPit) s.status = "PIT";
     else if (fieldStill || !s.fresh) s.status = null;
@@ -923,12 +934,17 @@ function carStates() {
     const zone = sectorFlags.get(s.car.msector);
     s.zone = s.status !== "PIT" && isFlagged(zone) ? zone : null;
     s.level = riskLevel(risk.get(s.drv));
+    // out of the race: still this long, on track or in its garage, no longer part of a flagged
+    // incident, while the rest of the field keeps moving. It fades off the map.
+    if (!fieldStopped && s.fresh && s.stillFor >= RETIRED_AFTER_S && !s.stricken) {
+      s.alpha *= Math.max(0, 1 - (s.stillFor - RETIRED_AFTER_S) / RETIRE_FADE_S);
+    }
   }
   // pit cars at the bottom, then running cars, then cars in a flagged sector, stopped and
   // out cars, and the stricken car on top: a car passing the scene never hides it
   const layer = (s) => (s.status === "PIT" ? 0 : s.stricken ? 5 : s.status ? 4 : s.zone ? 3 : 1);
   out.sort((p, q) => layer(p) - layer(q));
-  return out;
+  return out.filter((s) => s.alpha > 0.02);
 }
 
 function isFlagged(flag) {
