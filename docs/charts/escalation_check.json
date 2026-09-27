@@ -1,0 +1,144 @@
+{
+  "races": 20,
+  "race_hours": 30.12,
+  "official_escalations": 33,
+  "status": {
+    "earlier": 22,
+    "later": 0,
+    "already out": 1,
+    "missed": 10
+  },
+  "matched": 22,
+  "median_lead_s": 32.6,
+  "lead_iqr_s": [
+    21.7,
+    48.4
+  ],
+  "same_first_flag": 14,
+  "flag_pairs": {
+    "SC->SC": 6,
+    "SC->VSC": 4,
+    "VSC->SC": 4,
+    "VSC->VSC": 8
+  },
+  "by_official_flag": {
+    "VSC": {
+      "official": 18,
+      "earlier": 12,
+      "later": 0,
+      "already out": 1,
+      "missed": 5,
+      "median_lead_s": 32.6
+    },
+    "SC": {
+      "official": 15,
+      "earlier": 10,
+      "later": 0,
+      "already out": 0,
+      "missed": 5,
+      "median_lead_s": 33.7
+    },
+    "RED": {
+      "official": 0,
+      "earlier": 0,
+      "later": 0,
+      "already out": 0,
+      "missed": 0,
+      "median_lead_s": null
+    }
+  },
+  "missed_kind": {
+    "car collapse seen": 3,
+    "no car collapse": 7
+  },
+  "our_escalations": 49,
+  "our_by_category": {
+    "matched": 23,
+    "during an official neutralisation": 2,
+    "official yellows only": 15,
+    "escalated incident, outside the match window": 0,
+    "no official flag": 9,
+    "red while race control kept its SC or VSC": 0
+  },
+  "extra": 24,
+  "extra_per_hour": 0.8,
+  "extra_by_flag": {
+    "VSC": 9,
+    "SC": 13,
+    "RED": 2
+  },
+  "our_by_flag": {
+    "VSC": 21,
+    "SC": 25,
+    "RED": 3
+  },
+  "red_check": {
+    "both": 0,
+    "race_control_only": 2,
+    "median_lead_s": null
+  },
+  "our_reds": {
+    "total": 3,
+    "late_race": 3,
+    "time_based": 0,
+    "multi_car": 0,
+    "with_race_control_red": 0,
+    "without_race_control_red": 3,
+    "time_based_without": 0
+  },
+  "track_clears_under_neutral": 0,
+  "engine_resets": 0,
+  "stopped_lateral_offset": {
+    "stopped_car_rows": 466715,
+    "share_within_1m": 0.9611,
+    "rows_beyond_threshold": 0,
+    "episodes_beyond_threshold": [],
+    "off_line_threshold_m": 8.0
+  },
+  "impact_signal": {
+    "escalations_with_onset_car": 17,
+    "official_sc_or_red_with_impact": 2,
+    "official_sc_or_red": 7,
+    "official_vsc_without_impact": 8,
+    "official_vsc": 10,
+    "right_with_impact_rule": 10,
+    "right_if_always_sc": 7
+  },
+  "check_races": [
+    "2023_Las_Vegas",
+    "2023_Singapore",
+    "2026_Monaco",
+    "2024_Azerbaijan",
+    "2026_Austrian",
+    "2023_Dutch",
+    "2024_Monaco",
+    "2024_Australian",
+    "2024_Chinese",
+    "2026_Chinese",
+    "2023_Japanese",
+    "2026_Barcelona",
+    "2025_S\u00e3o_Paulo",
+    "2023_Azerbaijan",
+    "2024_Abu_Dhabi",
+    "2023_Canadian",
+    "2023_S\u00e3o_Paulo",
+    "2025_Las_Vegas",
+    "2025_Saudi_Arabian",
+    "2025_Emilia_Romagna"
+  ],
+  "runs": [
+    {
+      "at": "2026-09-27T03:09:49",
+      "commit": "013bd259cbcb820125132ea73bcfea19317ffda1",
+      "reason": null,
+      "models": {
+        "anomaly.joblib": "b0e05575e85f27eeefc55f1fd6f9e75684e9995216d918ba0603e434852868b8",
+        "detector_config.json": "bc71d84e6507504757608a455f232b0279852361b936771ff20924ee575ed6ae",
+        "risk_10.txt": "2792abb98a40f6313e3bc1846d5f0adce3b7c7fbfc357bf5c1011b6ee76aa6e7",
+        "risk_20.txt": "9a5f6694a03b0d4a00c83dbcb321484f8e3d4261c622bb7029fd0e916253f4ab",
+        "risk_30.txt": "b6c72dab1cf3a53eeb79c1c8e9dcb112a0371fa09049a9bf91bd1187bca86e4e",
+        "risk_meta.json": "f38ba7377efa26e7a27219b71bc257b1c4daf21e1cc4d08fea9d1d05c997cb43"
+      }
+    }
+  ]
+}
