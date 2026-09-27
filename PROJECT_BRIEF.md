@@ -156,6 +156,7 @@ WebSocket ws://localhost:8000/stream
 - Strict causality: at time t, nothing from t' > t is available to any consumer.
 - Controls: speed (1x, 5x, 10x, 50x), seek to time, pause.
 - Owns the FastAPI WebSocket server and envelope (Section 7.5).
+- Precomputed race (27 Sept, the server's default; `--live` keeps the old path): our detectors, risk model and race control run once over the whole race at startup, strictly tick by tick, cached in data/timeline/ (src/replay/timeline.py), and the server plays the result back and sends our recs itself (a separately started race control client is ignored). After a seek over 2 s it sends the tick at the new time, then every official message, detection and rec before it to pages that joined with `?catchup=1`, so a page shows what a continuous run shows at that time: no wiped flags, no cold detectors. Proposed optional contract additions, pending Ishaan's OK: `/stream?catchup=1`, `GET /cars` (cars out of the race at the replay time: no data for 60 s, or within 3 m for 60 s while the field moves) and `cars` and `mode` in `GET /status`. Nothing existing changes for clients that do not use them.
 
 ### 6.3 Detection (A)
 Reactive but fast. Each detector outputs the Detection contract.
@@ -168,6 +169,7 @@ Reactive but fast. Each detector outputs the Detection contract.
 - **ANOMALY (ML, must-have, never cut):** IsolationForest trained only on normal racing windows from training races (clean laps, not in pit, green track status). Score each car's rolling 2 to 5 s window of features (speed deviation from reference, lateral offset, throttle/brake pattern, deceleration). This is the AI floor of the product: if prediction is cut at M2, the product still has a learned model at its core, which Ampere requires.
 - **Safety Car and VSC periods (track status 4 or 6):** every car is slow, so compare speed against the current field median instead of the reference profile, otherwise STOPPED and ANOMALY fire for every car. Track status is known at time t, so this is causal.
 - Baseline to beat: a naive "speed < X km/h" threshold. We must show our detectors beat it.
+- Fixes of 27 Sept, found on the 2021 Azerbaijan replay and checked on the 20 training races (false alarms 94 to 66, incidents 83 to 82 of 146, docs/charts/detect_eval.md): STOPPED fires only below 60 km/h (a car at the pit limiter on a 325 km/h straight is 25% of reference but moving); IMPACT "without braking" means no brake sample in the whole second of the drop; after a suspension of 60 s or more the detectors stay in grid mode until the field forms up (at most 240 s: the lap to the grid is not racing); nothing fires after race control's CHEQUERED FLAG. 2021 Azerbaijan is therefore no longer out of sample for the detector rules; the ML models never saw it.
 
 ### 6.4 Prediction (A)
 **Targets:**
@@ -219,6 +221,7 @@ Consumes detections + risk, maintains a per-sector flag state machine, emits Rec
 - Alert feed: time, car(s), sector, recommendation, confidence, reason.
 - Lead-time timeline: our alerts vs official race control messages.
 - Replay controls: speed, seek, jump-to-incident list.
+- Cars out of the race (27 Sept): the cars in GET /cars leave the map on the pit wall and the overlay and are listed beside it (crashed, stopped, in the garage, no data); while a crashed car's incident sector is flagged, a red triangle marks where it stopped. After a seek or reconnect the pages rebuild from the server's history, so colours, flags and the out list are the continuous-run state.
 
 ### 6.7 Evaluation (A builds, B visualizes)
 - **Official events** = race control messages with Flag in {YELLOW, DOUBLE YELLOW, RED} or SC/VSC deployment messages. Ignore BLUE, track limits, DRS, investigations.
