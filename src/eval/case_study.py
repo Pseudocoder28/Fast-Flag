@@ -70,17 +70,20 @@ def run_pipeline(race: RaceData) -> tuple[list[dict], list[dict] | None, str]:
     eng = Engine(race, all_processors(race))
     envs = eng.advance(eng.t_end)
     dets = sorted((e["data"] for e in envs if e["kind"] == "detection"), key=lambda d: d["t"])
-    recs, source = recommendations(envs)
+    from src.racecontrol.engine import race_laps_from_track
+    recs, source = recommendations(envs, race_laps_from_track(race.track))
     return dets, recs, source
 
 
-def recommendations(envelopes: list[dict]) -> tuple[list[dict] | None, str]:
+def recommendations(envelopes: list[dict], race_laps: int | None = None) -> tuple[list[dict] | None, str]:
+    """Our recs for the envelopes. race_laps: the race length for the late-race red flag
+    (src.racecontrol.engine.race_laps_from_track)."""
     try:
         from src.racecontrol.engine import RaceControl
     except Exception as e:  # not on this branch yet
         return None, (f"pending: the race control engine (src/racecontrol, Ishaan) is not importable here "
                       f"({type(e).__name__}); rerun once it is on main")
-    rc = RaceControl()
+    rc = RaceControl(race_laps=race_laps)
     recs = []
     for env in envelopes:
         handler = {"tick": rc.on_tick, "detection": rc.on_detection, "risk": rc.on_risk}.get(env["kind"])

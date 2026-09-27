@@ -114,12 +114,26 @@ def test_an_engine_reset_ends_the_flag_so_the_next_sc_is_an_escalation() -> None
 
 
 def test_every_red_we_send_is_counted_by_cause_and_by_race_control_red() -> None:
-    from src.eval.escalation import OURS_COLUMNS, our_reds
-    rows = [("RED", "car 1 stopped at its crash site for 2 min", True),
+    from src.eval.escalation import OURS_COLUMNS, our_reds, red_text
+    rows = [("RED", "SC out for a live incident with about 3 laps left: a red flag", True),
+            ("RED", "car 1 stopped at its crash site for 2 min", True),
             ("RED", "car 2 stopped at its crash site for 2 min", False),
             ("RED", "multi-car crash in sector 4", False),
             ("SC", "car 3 stopped after an impact", None)]
     ours = pd.DataFrame([{**dict.fromkeys(OURS_COLUMNS), "flag": f, "reason": why, "race_control_red": rc}
                          for f, why, rc in rows])
-    assert our_reds(ours) == {"total": 3, "time_based": 2, "multi_car": 1, "with_race_control_red": 1,
+    assert our_reds(ours) == {"total": 4, "late_race": 1, "time_based": 2, "multi_car": 1, "with_race_control_red": 2,
                               "without_race_control_red": 2, "time_based_without": 1}
+    late_only = our_reds(ours.iloc[[0, 4]])
+    text = red_text({"both": 1, "race_control_only": 4, "median_lead_s": 12.0}, late_only)
+    assert "we sent 1 red flag (1 late in the race);" in text and "crash site" not in text   # no empty kinds
+
+
+def test_a_red_already_out_counts_like_an_escalation_already_out() -> None:
+    from src.eval.escalation import red_out_since
+    changes = [(10.0, "SC", 3), (40.0, "RED", 3), (60.0, "RED", 3), (90.0, "SC", 3), (100.0, "RED", 5),
+               (130.0, "CLEAR", None)]
+    assert red_out_since(changes, 70.0) == 40.0       # from the first red of the run, not its restatement
+    assert red_out_since(changes, 95.0) is None       # a downgrade ended it
+    assert red_out_since(changes, 120.0) == 100.0
+    assert red_out_since(changes, 140.0) is None      # TRACK CLEAR
