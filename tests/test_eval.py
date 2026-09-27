@@ -92,3 +92,14 @@ def test_onset_is_the_start_of_the_last_chain_of_collapses_before_the_first_mess
     assert onset_cars(cand, onset) == {"27", "55", "4"}   # car 30 slowed 70 s earlier: not part of this incident
     late = pd.DataFrame({"t": [182.0, 184.0], "drv": ["1", "2"]})
     assert pick_onset(late, t_first=180.0)["drv"] == "1"  # none before the message: the first just after it
+
+
+def test_a_downgrade_is_not_an_escalation() -> None:
+    from src.eval.escalation import escalation_recs
+    recs = [{"t": 1.0, "flag": "SC", "message": "SAFETY CAR DEPLOYED"},
+            {"t": 2.0, "flag": "RED", "message": "RED FLAG"},              # soft red
+            {"t": 3.0, "flag": "RED", "message": "RED FLAG"},              # a pile-up's own red: same level, counts
+            {"t": 4.0, "flag": "SC", "message": "SAFETY CAR DEPLOYED"},    # downgrade when the soft red ends
+            {"t": 5.0, "flag": "CLEAR", "message": "TRACK CLEAR"},
+            {"t": 6.0, "flag": "VSC", "message": "VIRTUAL SAFETY CAR DEPLOYED"}]
+    assert [r["t"] for r in escalation_recs(recs)] == [1.0, 2.0, 3.0, 6.0]

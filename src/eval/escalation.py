@@ -96,6 +96,21 @@ def replay(race: RaceData, suite: Processor) -> tuple[list[dict], list[dict], li
     return dets, recs, resets
 
 
+def escalation_recs(recs: list[dict]) -> list[dict]:
+    """Our VSC, SC and RED recs that raise or restate our track-wide flag. A lower one sent
+    while a higher flag is out is a downgrade (race control re-sends the SC when its soft red
+    ends), not a new call, so it is neither an escalation nor an extra."""
+    out, level = [], -1
+    for r in recs:
+        if r["flag"] == "CLEAR" and r["message"] == "TRACK CLEAR":
+            level = -1
+        elif r["flag"] in ESCALATIONS:
+            if RANK[r["flag"]] >= level:
+                out.append(r)
+            level = RANK[r["flag"]]
+    return out
+
+
 def track_wide_changes(recs: list[dict], resets: list[float]) -> list[tuple[float, str, int | None]]:
     """(t, flag, cause sector) each time our track-wide flag changes: VSC, SC or RED out,
     CLEAR on TRACK CLEAR or on an engine reset. Stable sort keeps the emission order."""
@@ -171,7 +186,7 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
     frame = add_own_ratio(race.frame, length)
     ons = onsets(frame, length)
     status = frame.drop_duplicates("t").set_index("t")["track_status"].sort_index()
-    esc = [r for r in recs if r["flag"] in ESCALATIONS]
+    esc = escalation_recs(recs)
     changes = track_wide_changes(recs, resets)
 
     official_rows, matched_ids = [], set()
@@ -430,7 +445,8 @@ def red_text(r: dict) -> str:
     lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
     return (f"- Red flags, per official escalation until race control's TRACK CLEAR: race control called "
             f"{r['both'] + r['race_control_only']}, we called {r['both']} of them{lead}, and {r['ours_only']} that race "
-            "control handled without a red flag.")
+            "control handled without a red flag (mostly our red for a crashed car still at its crash site after "
+            "2 minutes: the data cannot see barrier damage, debris or medical needs).")
 
 
 def pairs_text(pairs: dict[str, int]) -> str:

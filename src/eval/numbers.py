@@ -251,8 +251,9 @@ def escalation() -> list[str]:
             *red_line(e.get("red_check")),
             "- Race control changed after the holdout run (26 Sept): a crashed car still at its crash site keeps "
             "our flag out until race control's track status is green, so we never recommend green before race "
-            "control does. The holdout section below is from the engine frozen before that. Red flags by time at a "
-            "crash site were tried and removed (PROJECT_BRIEF 6.5); the pit wall shows a crash-site clock as advice.",
+            "control does, and a crashed car still at its crash site after 2 minutes gets a red flag that never blocks "
+            "another incident's escalation (PROJECT_BRIEF 6.5). The holdout section below is from the engine frozen "
+            "before that.",
             ""]
 
 

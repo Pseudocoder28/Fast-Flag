@@ -53,10 +53,10 @@
     "car collapse seen": 7,
     "no car collapse": 14
   },
-  "our_escalations": 58,
+  "our_escalations": 74,
   "our_by_category": {
     "matched": 29,
-    "during an official neutralisation": 5,
+    "during an official neutralisation": 21,
     "official yellows only": 20,
     "escalated incident, outside the match window": 0,
     "no official flag": 4
@@ -71,13 +71,13 @@
   "our_by_flag": {
     "VSC": 17,
     "SC": 33,
-    "RED": 8
+    "RED": 24
   },
   "red_check": {
-    "both": 1,
-    "race_control_only": 4,
-    "ours_only": 2,
-    "median_lead_s": 7.2
+    "both": 3,
+    "race_control_only": 2,
+    "ours_only": 13,
+    "median_lead_s": 51.4
   },
   "engine_resets": 0,
   "stopped_lateral_offset": {
