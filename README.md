@@ -22,8 +22,8 @@ FormulaTech Hacks 2026 · Track 1: Safety Diagnosis · Ampere: AI for motorsport
 
 - **Safety Car and VSC calls:** we recommended both of race control's escalations, both earlier, with a median lead of **44 s**.
 - **Few false alarms:** we caught 7 of 10 incidents at **0.6 false alarms per race hour**. A plain speed threshold needs 16.6 per hour to catch 8.
-- **On 20 training races (2023 to 2026):** for the Safety Car, race control took a median 22.5 s and we took 1.0 s. For the VSC it was 35.0 s against 2.8 s. We caught 25 of the 27 VSC and Safety Car events that followed a visible crash, and were earlier in every one of them.
-- **On 20 more races never used for tuning (check races, run once):** we recommended 22 of race control's 33 VSC and Safety Car calls, all 22 earlier than the race control feed, with a median lead of **32.6 s**, and made 0.76 escalations per race hour that race control never made ([`docs/charts/escalation_check.md`](docs/charts/escalation_check.md)).
+- **On 20 training races (2023 to 2026):** for the Safety Car, race control took a median 22.5 s and we took 1.0 s. For the VSC it was 35.0 s against 2.8 s. We caught 24 of the 27 VSC and Safety Car events that followed a visible crash, and were earlier in every one of them.
+- **On 20 more races never used for tuning (check races; the same result on the frozen rules and after the 27 Sept fixes):** we recommended 22 of race control's 33 VSC and Safety Car calls, all 22 earlier than the race control feed, with a median lead of **32.6 s**, and made 0.76 escalations per race hour that race control never made ([`docs/charts/escalation_check.md`](docs/charts/escalation_check.md)).
 - **Why seconds matter:** across 62 crashes, **every second a flag waits, about 0.12 cars drive past the crash at racing speed.**
 
 ![Crash to first flag on the 2026 Azerbaijan holdout](docs/charts/latency_2026_Azerbaijan.png)

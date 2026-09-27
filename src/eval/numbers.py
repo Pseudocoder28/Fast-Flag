@@ -330,8 +330,10 @@ def lab_delay_cost() -> list[str]:
                    f"a gap of {off['t_after_onset'] - ours['t_after_onset']:.1f} s. Cars at racing speed by the official "
                    f"{off['flag']}: {by_off} counted from onset, {by_off - by_ours} counted from our {ours['flag']} call "
                    "(as the overlay's Exposure Clock does).")
-    out.append("- 2021 Azerbaijan is out of sample twice: our models never saw it, and 2021 cars ran under different "
-               "rules. Say \"earlier than the race control feed\", never \"earlier than the marshals\".")
+    out.append("- 2021 Azerbaijan: our machine learning models never saw it and 2021 cars ran under different rules, "
+               "but the detector rules were corrected on its replay on 27 Sept, so it is not out of sample for them. "
+               "This cost of delay predates those fixes. Say \"earlier than the race control feed\", never \"earlier "
+               "than the marshals\".")
     return out + [""]
 
 
