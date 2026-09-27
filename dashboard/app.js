@@ -39,8 +39,9 @@ const SNAP_JUMP_M = 200;       // a bigger move between two ticks is drawn as a 
 const STILL_MOVE_M = 3;        // a car that stays within this distance of one spot ...
 const STOPPED_AFTER_S = 3;     // ... for this long is marked STOPPED
 const OUT_AFTER_S = 60;        // ... and after this long OUT (retired: its data freezes)
-const RETIRED_AFTER_S = 120;   // still this long and no longer part of a flagged incident: out of the race ...
-const RETIRE_FADE_S = 3;       // ... it fades off the map over this long (it comes back if it moves again)
+const RETIRED_AFTER_S = 120;   // still this long while the field moves, and no longer part of a flagged incident:
+                               // out of the race ...
+const RETIRE_FADE_S = 3;       // ... it fades off the map over this long and stays off until it moves again
 const FIELD_STILL_MIN = 5;     // this many still cars at once is a grid or a restart, not a stop
 const FADE_AFTER_S = 5;        // no data for this long: fade the car out ...
 const FADE_S = 2;              // ... over this long
@@ -245,12 +246,14 @@ let officialEvents = [];        // GET /official, used only for the state at or 
 const cars = new Map();         // drv -> car (see newCar)
 const risk = new Map();         // drv -> risk_30s
 const watchUntil = new Map();   // drv -> replay time until which an ANOMALY watch ring shows
-const involved = new Map();     // drv -> sector of its latest physical detection (stricken while that sector is flagged)
+const involved = new Map();     // drv -> sector of its latest physical detection (stricken while that sector is
+                                // flagged; forgotten when that sector is cleared)
 const sectorFlags = new Map();  // msector -> sector flag (CLEAR, YELLOW, DOUBLE_YELLOW)
 let trackFlag = null;           // our track-wide flag: CLEAR, VSC, SC or RED. null: not known yet,
                                 // recs only arrive on changes, so a page opened mid-incident has
                                 // to wait for the next track-wide rec or a seek (reset)
 let officialFlag = null;        // official track-wide flag at the replay time (null before the first tick)
+let lastFieldStopT = -Infinity; // replay time the whole field was last stopped (a red flag queue, the grid)
 let replayT = null;             // SessionTime of the latest tick
 let replayLap = null;
 let lastTickWall = -Infinity;   // performance.now() of the latest tick
@@ -284,6 +287,7 @@ function newCar(c, t) {
     seenT: t,                    // replay time of the latest tick with this car
     anchorX: c.x, anchorY: c.y,  // where the car was when it last moved STILL_MOVE_M
     movedT: t,
+    retired: false,              // faded off the map as out of the race, until it moves again
   };
 }
 
@@ -321,6 +325,7 @@ function updateCar(c, t) {
     car.anchorX = c.x;
     car.anchorY = c.y;
     car.movedT = t;
+    car.retired = false;
   }
 }
 
@@ -376,6 +381,10 @@ function onRec(rec) {
             `${escapeHtml(rec.reason)}, from sector <span class="mono">${rec.msector}</span>, ${conf}`, rec.t);
   } else {
     sectorFlags.set(rec.msector, rec.flag);
+    if (rec.flag === "CLEAR") {
+      // that incident is over: its cars are no longer stricken if the sector is flagged again
+      for (const [d, m] of involved) if (m === rec.msector) involved.delete(d);
+    }
     feedRow("rec", rec.flag, rec.message, `${escapeHtml(rec.reason)}, ${conf}`, rec.t);
   }
 }
@@ -472,6 +481,7 @@ function resetForJump() {
   risk.clear();
   watchUntil.clear();
   involved.clear();
+  lastFieldStopT = -Infinity;
   cars.clear();                 // every car is placed fresh: a seek snaps, never glides
   burstT = null;
   dispT = null;
@@ -910,6 +920,7 @@ function carStates() {
   let freshAll = 0;
   let stillAll = 0;
   for (const [drv, car] of cars) {
+    if (car.retired) continue;  // out of the race: off the map, and not part of the field counts
     const age = replayT - car.seenT;
     if (age >= FADE_AFTER_S + FADE_S) continue;
     const alpha = age <= FADE_AFTER_S ? 1 : 1 - (age - FADE_AFTER_S) / FADE_S;
@@ -927,7 +938,7 @@ function carStates() {
   }
   const fieldStill = still >= FIELD_STILL_MIN && still >= onTrack / 2;
   // the whole field stopped (a red flag in the pit lane, the grid): nobody is out of the race
-  const fieldStopped = stillAll >= FIELD_STILL_MIN && stillAll >= freshAll / 2;
+  if (stillAll >= FIELD_STILL_MIN && stillAll >= freshAll / 2) lastFieldStopT = replayT;
   for (const s of out) {
     if (s.car.inPit) s.status = "PIT";
     else if (fieldStill || !s.fresh) s.status = null;
@@ -939,10 +950,14 @@ function carStates() {
     const zone = sectorFlags.get(s.car.msector);
     s.zone = s.status !== "PIT" && isFlagged(zone) ? zone : null;
     s.level = riskLevel(risk.get(s.drv));
-    // out of the race: still this long, on track or in its garage, no longer part of a flagged
-    // incident, while the rest of the field keeps moving. It fades off the map.
-    if (!fieldStopped && s.fresh && s.stillFor >= RETIRED_AFTER_S && !s.stricken) {
-      s.alpha *= Math.max(0, 1 - (s.stillFor - RETIRED_AFTER_S) / RETIRE_FADE_S);
+    // out of the race: still this long while the rest of the field keeps moving (a car queued in
+    // the pit lane under a red flag counts only from the restart), on track or in its garage, no
+    // longer part of a flagged incident. It fades off the map and stays off until it moves again,
+    // even when its data stops or the field lines up on the grid.
+    const retireFor = replayT - Math.max(s.car.movedT, lastFieldStopT);
+    if (s.fresh && retireFor >= RETIRED_AFTER_S && !s.stricken) {
+      s.alpha *= Math.max(0, 1 - (retireFor - RETIRED_AFTER_S) / RETIRE_FADE_S);
+      if (s.alpha <= 0.02) s.car.retired = true;
     }
   }
   // pit cars at the bottom, then running cars, then cars in a flagged sector, stopped and
