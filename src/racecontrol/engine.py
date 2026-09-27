@@ -17,6 +17,11 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   a crash is never hidden behind another car's stop. Lateral offset cannot make this
   call: FastF1 positions of stopped cars sit on the racing line even in run-off
   (docs/charts/escalation.md).
+- A stopped car that rolls on into another sector at FOLLOW_STOP_KMH or less (a car
+  losing power crawls over a sector boundary before it stops) takes its stop and its
+  sector flag along, so its VSC or SC still comes. Before this (27 Sept), its old sector
+  cleared behind it and no VSC came: 3 of race control's neutralisations on the training
+  races (2023 Australia, 2025 Netherlands, 2025 Miami) were missed that way.
 - ANOMALY is an advisory: it never raises a flag on its own (86 of its 89 alerts on
   the training races matched no official incident, docs/charts/detect_eval.md). It
   only raises the confidence of a sector that a physical detection flagged within
@@ -74,6 +79,7 @@ SC_STOPPED_HOLD_S = 3.0      # stopped after an impact: SC after this long
 VSC_STOPPED_HOLD_S = 10.0    # stopped without one: VSC after this long
 IMPACT_BEFORE_STOP_S = 30.0  # an IMPACT or MULTI this long before the stop still counts
 STOPPED_SPEED_KMH = 30.0
+FOLLOW_STOP_KMH = 80.0       # a stopped car that rolls into another sector this slowly takes its flag along
 STALE_CAR_S = 120.0
 PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot ...
 PARKED_CAR_S = 180.0       # ... for this long counts as recovered (about recovery time)
@@ -583,6 +589,7 @@ class RaceControl:
         once its hold has run. The highest call is escalated, once per tick; every sector
         whose call the flag already out covers supports that flag (it holds it up)."""
         calls = []   # (rank, target, msector, drv, stop, elapsed, impact), in sector then drv order
+        moves = []   # (from sector, drv, stop): stopped cars that rolled on into another sector
         for msector, sec in self.sectors.items():
             for drv in sorted(sec.stops):
                 stop = sec.stops[drv]
@@ -590,6 +597,8 @@ class RaceControl:
                 if car is None:
                     continue
                 if not self._holds_sector(drv, msector):
+                    if self._rolled_on(car, msector):
+                        moves.append((msector, drv, stop))
                     del sec.stops[drv]   # drove out, pitted, no data or parked long enough to count as recovered
                     continue
                 if car["speed"] > STOPPED_SPEED_KMH:
@@ -610,10 +619,12 @@ class RaceControl:
                     calls.append((GLOBAL_RANK["SC"], "SC", msector, drv, stop, elapsed, impact))
                 elif not impact and elapsed >= VSC_STOPPED_HOLD_S:
                     calls.append((GLOBAL_RANK["VSC"], "VSC", msector, drv, stop, elapsed, impact))
-        if not calls:
-            return []
-
         recs: list[dict] = []
+        for msector, drv, stop in moves:
+            recs.extend(self._follow_stop(msector, drv, stop))
+        if not calls:
+            return recs
+
         rank, target, msector, drv, stop, elapsed, impact = max(calls, key=lambda c: c[0])
         if rank > GLOBAL_RANK[self.global_.flag]:
             conf = min(MAX_CONF, stop.severity)
@@ -623,11 +634,38 @@ class RaceControl:
                 reason = f"car {drv} stopped for {elapsed:.1f} s after an impact"
             else:
                 reason = f"car {drv} stopped for {elapsed:.1f} s, no impact detected"
-            recs = self._escalate_global(self.t, msector, target, conf, reason, None)
+            recs.extend(self._escalate_global(self.t, msector, target, conf, reason, None))
         for c in calls:
             if c[0] <= GLOBAL_RANK[self.global_.flag]:
                 self.global_.cause_sectors.add(c[2])
         return recs
+
+    def _rolled_on(self, car: dict, msector: int) -> bool:
+        """A stopped car that left its sector still slow, on track and with fresh data: it
+        rolled on (a car losing power often crawls over a sector boundary before it stops),
+        so it is still the hazard. Driving off at speed, pitting or retiring is not."""
+        return (car["msector"] != msector and not car["in_pit"] and not self._stale(car)
+                and not self._parked(car) and car["speed"] <= FOLLOW_STOP_KMH)
+
+    def _follow_stop(self, old: int, drv: str, stop: Stop) -> list[dict]:
+        """Move a stopped car's stop, and its sector's flag, to the sector it rolled into.
+        The hold keeps running, so the VSC or SC comes as if it had stopped there; the old
+        sector clears as usual once no flagged car holds it."""
+        new = self.car_state[drv]["msector"]
+        src = self.sectors[old]
+        dst = self.sectors.setdefault(new, SectorState())
+        dst.stops.setdefault(drv, stop)
+        dst.cause_drivers.add(drv)
+        dst.empty_since_t = None
+        if SECTOR_RANK[src.flag] <= SECTOR_RANK[dst.flag]:
+            return []
+        dst.flag = src.flag
+        dst.since_t = self.t
+        dst.confidence = src.confidence
+        dst.reason = f"car {drv} stopped, rolled on from sector {old}"
+        dst.cause_detection_ids = list(src.cause_detection_ids)
+        return [self._make_rec(self.t, new, dst.flag, dst.confidence, dst.reason,
+                               _sector_message(dst.flag, new), dst.cause_detection_ids)]
 
     def _impact_since(self, drv: str, t0: float) -> bool:
         """Our IMPACT or MULTI detection involved the car at or after t0 (and, as detections
