@@ -8,12 +8,15 @@ from pathlib import Path
 from tests.test_contracts import check_rec
 
 from src.racecontrol.engine import (
+    CRASH_SITE_MOVE_M,
     GLOBAL_CLEAR_AFTER_S,
     GLOBAL_MIN_HOLD_S,
     GLOBAL_RANK,
     IMPACT_BEFORE_STOP_S,
     MIN_HOLD_S,
+    OFFICIAL_GREEN_S,
     PARKED_CAR_S,
+    RED_CRASH_SITE_S,
     RESET_JUMP_S,
     SC_STOPPED_HOLD_S,
     SECTOR_CLEAR_AFTER_S,
@@ -48,13 +51,15 @@ def make_tick(t: float, cars: list[dict], lap: int = 1, track_status: str = "1")
     return {"t": t, "lap": lap, "track_status": track_status, "cars": cars}
 
 
-def tick_until(rc: RaceControl, t_from: float, t_to: float, cars) -> list[dict]:
+def tick_until(rc: RaceControl, t_from: float, t_to: float, cars, track_status="1") -> list[dict]:
     """Tick every TICK_S after t_from up to and including t_to, like the real stream (a gap
-    over RESET_JUMP_S would count as a seek). cars is a list, or a function of t. Returns recs."""
+    over RESET_JUMP_S would count as a seek). cars is a list, or a function of t; so is
+    track_status (race control's official status). Returns recs."""
     recs: list[dict] = []
     for i in range(1, round((t_to - t_from) / TICK_S) + 1):
         t = t_from + i * TICK_S
-        out, did_reset = rc.on_tick(make_tick(t, cars(t) if callable(cars) else cars))
+        status = track_status(t) if callable(track_status) else track_status
+        out, did_reset = rc.on_tick(make_tick(t, cars(t) if callable(cars) else cars, track_status=status))
         assert not did_reset
         recs.extend(out)
     return recs
@@ -709,3 +714,47 @@ def test_all_recs_match_contract_shape() -> None:
     all_recs_valid(recs)
     for r in recs:
         assert isinstance(r["msector"], int)
+
+
+# --- crash sites: held until race control is green, red flag by time at the site --------
+
+
+def crash_scene() -> tuple[RaceControl, list[dict]]:
+    """Car 33 crashes in sector 5 at t=10 (IMPACT at 9, STOPPED at 10); car 44 keeps racing."""
+    rc = RaceControl()
+    rc.on_tick(make_tick(9.0, [make_car("33", 5, x=100.0), moving_car("44", 2, 9.0)]))
+    return rc, crash(rc, 10.0, "33", 5)
+
+
+def stopped_33(x: float = 100.0):
+    return lambda t: [make_car("33", 5, speed=0.0, x=x), moving_car("44", 2, t)]
+
+
+def test_crash_site_holds_sc_past_parked_until_race_control_is_green() -> None:
+    rc, recs = crash_scene()
+    sc_from_20 = lambda t: "4" if t >= 20.0 else "1"      # race control: SC from t=20
+    recs += tick_until(rc, 10.0, 400.0, stopped_33(), track_status=sc_from_20)
+    flags = [(r["t"], r["flag"]) for r in recs if r["flag"] in ("SC", "RED", "CLEAR")]
+    assert flags[0] == (10.0 + SC_STOPPED_HOLD_S, "SC")
+    red = [r for r in recs if r["flag"] == "RED"]
+    assert len(red) == 1 and red[0]["t"] == 10.0 + RED_CRASH_SITE_S and "crash site" in red[0]["reason"]
+    assert not any(r["flag"] == "CLEAR" for r in recs)     # parked for 390 s, but race control is not green
+    after = tick_until(rc, 400.0, 480.0, stopped_33(), track_status="1")
+    track_clear = [r for r in after if r["message"] == "TRACK CLEAR"]
+    assert len(track_clear) == 1 and track_clear[0]["t"] >= 400.0 + OFFICIAL_GREEN_S
+    assert "race control" in track_clear[0]["reason"]
+
+
+def test_crash_site_released_when_the_car_is_moved_away() -> None:
+    rc, recs = crash_scene()
+    craned = lambda t: stopped_33(100.0 if t < 60.0 else 100.0 + CRASH_SITE_MOVE_M + 10.0)(t)
+    recs += tick_until(rc, 10.0, 200.0, craned, track_status="4")
+    assert not any(r["flag"] == "RED" for r in recs)        # moved at t=60: no longer a crash site
+
+
+def test_no_red_while_race_control_has_not_reacted() -> None:
+    rc, recs = crash_scene()
+    recs += tick_until(rc, 10.0, 260.0, stopped_33(), track_status="1")
+    assert not any(r["flag"] == "RED" for r in recs)
+    clear = [r for r in recs if r["message"] == "TRACK CLEAR"]
+    assert clear and clear[0]["t"] >= 10.0 + PARKED_CAR_S  # never reacted: released as before

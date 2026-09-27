@@ -21,6 +21,18 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   the training races matched no official incident, docs/charts/detect_eval.md). It
   only raises the confidence of a sector that a physical detection flagged within
   ANOMALY_CORROBORATION_WINDOW_S. The dashboard shows it as a watch marker.
+- A car that stopped after an impact is a crash site. It holds its sector, and so any
+  VSC or SC it caused, even after it has not moved for PARKED_CAR_S: FastF1 keeps
+  reporting a crashed car's last position long after marshals recover it, so "not
+  moving" says nothing about the recovery (docs/charts/escalation.md). A crash site is
+  released when the car moves CRASH_SITE_MOVE_M away, its data stops, or race control's
+  own track status (in every tick) has been green for OFFICIAL_GREEN_S after race control
+  reacted to it. If race control never reacts, it is released after PARKED_CAR_S as
+  before. So we never recommend green while race control still neutralises a crash:
+  lifting a neutralisation is race control's call, only raising one is ours.
+- Red flag by time at the crash site: a crashed car still stopped at its crash site
+  RED_CRASH_SITE_S after it stopped, once race control has reacted to the crash, calls
+  for a red flag (recovery under the Safety Car is not happening quickly).
 - A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
   wipes all flag state.
 """
@@ -47,6 +59,10 @@ STOPPED_SPEED_KMH = 30.0
 STALE_CAR_S = 120.0
 PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot ...
 PARKED_CAR_S = 180.0       # ... for this long counts as recovered (about recovery time)
+CRASH_SITE_MOVE_M = 20.0   # a crashed car this far from where it stopped was driven or craned away
+OFFICIAL_GREEN_S = 20.0    # race control's track status green this long after it reacted: incident over
+RED_CRASH_SITE_S = 120.0   # a crashed car still at its crash site this long after stopping: red flag
+RED_CRASH_SITE_CONF = 0.7  # a judgement call, not a physical signal: lower confidence
 MIN_HOLD_S = 2.0
 SECTOR_CLEAR_AFTER_S = 5.0
 GLOBAL_MIN_HOLD_S = 60.0
@@ -65,6 +81,19 @@ class Stop:
     first_t: float            # when this stop was first detected: the impact lookback starts here
     since_t: float | None     # start of the current hold, None while the car moves (paused)
     severity: float
+    crash_site_done: bool = False   # this stop already made its crash site (at most one per stop)
+
+
+@dataclass
+class CrashSite:
+    """A car that stopped after an impact: a hazard until it is moved, its data stops, or
+    race control's own track status is back to green after it reacted to the crash."""
+    msector: int
+    stop_t: float             # when the car stopped at the site
+    x: float
+    y: float
+    reacted: bool = False     # race control's track status left green after the crash
+    green_since: float | None = None
 
 
 @dataclass
@@ -88,6 +117,7 @@ class GlobalState:
     confidence: float = 0.0
     reason: str = ""
     empty_since_t: float | None = None
+    held_for_race_control: bool = False   # a crash site kept it out until race control's status was green
 
 
 def _sector_message(flag: str, msector: int) -> str:
@@ -118,6 +148,9 @@ class RaceControl:
         self.car_state: dict[str, dict] = {}
         self.risk: dict[str, dict] = {}
         self.impact_t: dict[str, float] = {}      # drv -> latest IMPACT or MULTI detection with that car
+        self.official_status = "1"                # race control's track status in the latest tick
+        self.crash_sites: dict[str, CrashSite] = {}
+        self.green_released: set[int] = set()     # sectors whose crash site race control's green released
         self.last_physical_by_sector: dict[int, list[tuple[float, str]]] = {}
         # rec id counter is not reset here, ids stay unique across a reset
 
@@ -162,6 +195,8 @@ class RaceControl:
 
         for car in tick["cars"]:
             self._update_car(car, new_t)
+        self.official_status = str(tick.get("track_status", "1"))
+        self._update_crash_sites()
 
         recs: list[dict] = []
         recs.extend(self._check_sustained_stop())
@@ -255,11 +290,38 @@ class RaceControl:
         return "moved_t" in car and self.t - car["moved_t"] >= PARKED_CAR_S
 
     def _holds_sector(self, drv: str, msector: int) -> bool:
-        """True while a flagged car still counts as being in the sector."""
+        """True while a flagged car still counts as being in the sector. A crash site holds
+        it even when parked (see the module docstring)."""
         car = self.car_state.get(drv)
         if car is None or car["in_pit"] or car["msector"] != msector:
             return False
-        return not self._stale(car) and not self._parked(car)
+        if self._stale(car):
+            return False
+        site = self.crash_sites.get(drv)
+        if site is not None and site.msector == msector:
+            return True
+        return not self._parked(car)
+
+    def _update_crash_sites(self) -> None:
+        """Follow race control's track status for every crash site and release the sites
+        that are over: moved away, no data, race control green again, or never reacted."""
+        green = self.official_status == "1"
+        for drv in list(self.crash_sites):
+            site = self.crash_sites[drv]
+            car = self.car_state.get(drv)
+            if not green:
+                site.reacted, site.green_since = True, None
+            elif site.green_since is None:
+                site.green_since = self.t
+            moved = car is not None and math.hypot(car["anchor"][0] - site.x,
+                                                   car["anchor"][1] - site.y) > CRASH_SITE_MOVE_M
+            over = (site.reacted and site.green_since is not None
+                    and self.t - site.green_since >= OFFICIAL_GREEN_S)
+            ignored = not site.reacted and self.t - site.stop_t >= PARKED_CAR_S
+            if car is None or self._stale(car) or car["in_pit"] or moved or over or ignored:
+                if over:
+                    self.green_released.add(site.msector)
+                del self.crash_sites[drv]
 
     # --- detection handling ---------------------------------------------
 
@@ -342,6 +404,7 @@ class RaceControl:
         if self.global_.flag == "CLEAR":
             self.global_.cause_sector = msector
             self.global_.cause_sectors = set()
+            self.global_.held_for_race_control = False
         self.global_.cause_sectors.add(msector)
         self.global_.flag = target
         self.global_.since_t = t
@@ -377,7 +440,14 @@ class RaceControl:
 
                 elapsed = self.t - stop.since_t
                 impact = self._impact_since(drv, stop.first_t - IMPACT_BEFORE_STOP_S)
-                if impact and elapsed >= SC_STOPPED_HOLD_S:
+                site = self.crash_sites.get(drv)
+                if impact and elapsed >= SC_STOPPED_HOLD_S and not stop.crash_site_done:
+                    ax, ay = car["anchor"]
+                    site = self.crash_sites[drv] = CrashSite(msector, stop.first_t, ax, ay)
+                    stop.crash_site_done = True
+                if site is not None and site.reacted and self.t - site.stop_t >= RED_CRASH_SITE_S:
+                    calls.append((GLOBAL_RANK["RED"], "RED", msector, drv, stop, self.t - site.stop_t, "site"))
+                elif impact and elapsed >= SC_STOPPED_HOLD_S:
                     calls.append((GLOBAL_RANK["SC"], "SC", msector, drv, stop, elapsed, impact))
                 elif not impact and elapsed >= VSC_STOPPED_HOLD_S:
                     calls.append((GLOBAL_RANK["VSC"], "VSC", msector, drv, stop, elapsed, impact))
@@ -390,8 +460,13 @@ class RaceControl:
             conf = min(MAX_CONF, stop.severity)
             if self.risk.get(drv, {}).get("risk_30s", 0.0) >= RISK_SC_SUPPORT:
                 conf = min(MAX_CONF, conf + RISK_CONF_BOOST)
-            reason = (f"car {drv} stopped for {elapsed:.1f} s after an impact" if impact
-                      else f"car {drv} stopped for {elapsed:.1f} s, no impact detected")
+            if impact == "site":
+                conf = RED_CRASH_SITE_CONF
+                reason = f"car {drv} still stopped at its crash site {elapsed:.0f} s after it stopped"
+            elif impact:
+                reason = f"car {drv} stopped for {elapsed:.1f} s after an impact"
+            else:
+                reason = f"car {drv} stopped for {elapsed:.1f} s, no impact detected"
             recs = self._escalate_global(self.t, msector, target, conf, reason, None)
         for c in calls:
             if c[0] <= GLOBAL_RANK[self.global_.flag]:
@@ -422,9 +497,15 @@ class RaceControl:
             if self.t - sec.empty_since_t < SECTOR_CLEAR_AFTER_S:
                 continue
 
+            by_race_control = msector in self.green_released
+            self.green_released.discard(msector)
+            if by_race_control and msector in self.global_.cause_sectors:
+                self.global_.held_for_race_control = True
+            reason = ("crash site held until race control's track status was green" if by_race_control
+                      else "no flagged car remains in sector")
             recs.append(
                 self._make_rec(
-                    self.t, msector, "CLEAR", 1.0, "no flagged car remains in sector",
+                    self.t, msector, "CLEAR", 1.0, reason,
                     _sector_message("CLEAR", msector), [],
                 )
             )
@@ -457,10 +538,13 @@ class RaceControl:
         if self.t - self.global_.empty_since_t < GLOBAL_CLEAR_AFTER_S:
             return []
 
+        reason = ("incident cleared, held until race control's track status was green"
+                  if self.global_.held_for_race_control else "incident cleared")
         rec = self._make_rec(
-            self.t, cause_sector, "CLEAR", 1.0, "incident cleared",
+            self.t, cause_sector, "CLEAR", 1.0, reason,
             _global_message("CLEAR"), [],
         )
+        self.global_.held_for_race_control = False
         self.global_.flag = "CLEAR"
         self.global_.since_t = self.t
         self.global_.cause_sectors = set()
