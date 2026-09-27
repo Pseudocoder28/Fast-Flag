@@ -598,5 +598,8 @@ html, body {
   #mapbox.active { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 }
 
-/* a seek or a connect rebuilds the page from the server's history: a clean cut, no slide-ins */
-#stage.catchup *, #stage.catchup *::before, #stage.catchup *::after { animation: none !important; transition: none !important; }
+/* a seek or a connect rebuilds the page from the server's history: a clean cut. Elements made while
+   it arrives never animate (.instant); the stage only holds transitions (the map resize), because
+   switching an animation off and on again would replay it */
+#stage.catchup *, #stage.catchup *::before, #stage.catchup *::after { transition: none !important; }
+.instant, .instant * { animation: none !important; }

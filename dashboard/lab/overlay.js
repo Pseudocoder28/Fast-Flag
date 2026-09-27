@@ -165,7 +165,8 @@ function raceTitle(id) {
 }
 
 function updateStandby() {
-  const paused = view.lastTickWall === null || performance.now() - view.lastTickWall > PAUSED_AFTER_MS;
+  // paused: the server says so (a paused seek still sends one tick), or no tick for a while
+  const paused = view.speed === 0 || view.lastTickWall === null || performance.now() - view.lastTickWall > PAUSED_AFTER_MS;
   ui.standby.classList.toggle("hidden", S.banners.size > 0);
   ui.standby.classList.toggle("paused", paused);
   ui.standby.querySelector(".sb-badge").textContent = !view.connected ? "OFFLINE" : paused ? "PAUSED" : "MONITORING";
@@ -312,7 +313,7 @@ function showBanner(rec, cause, scope) {
     S.banners.delete(scope);            // re-inserted below, so Map order stays oldest first
   }
   const div = document.createElement("div");
-  div.className = `banner flag-${rec.flag}`;
+  div.className = `banner flag-${rec.flag}${ui.stage.classList.contains("catchup") ? " instant" : ""}`;
   div.dataset.scope = String(scope);
   div.innerHTML = bannerHtml(rec, cause, scope);
   ui.banners.appendChild(div);
@@ -352,8 +353,11 @@ function showClearBanner(rec, scope) {
   // our track clear while race control's own SC, VSC or red is still out: racing does not resume yet
   const rcOut = Math.max(0, ...(S.official.get(TRACK) || []).map((o) => o.rank));
   const rcFlag = Object.keys(RANK).find((f) => RANK[f] === rcOut);
+  // ... or the field is still stopped (a red flag stoppage, GET /cars): the restart is still to come
+  const stopped = M.stoppages.some(([a, b]) => S.t !== null && S.t >= a && S.t <= b + 2);
   const line1 = !track ? `SECTOR ${escapeHtml(rec.msector)}`
-    : rcOut > 0 ? `RACE CONTROL'S ${FLAG_TEXT[rcFlag]} STILL OUT` : "GREEN FLAG, RACING RESUMES";
+    : rcOut > 0 ? `RACE CONTROL'S ${FLAG_TEXT[rcFlag]} STILL OUT`
+    : stopped ? "RACE STILL STOPPED · RESTART TO COME" : "GREEN FLAG, RACING RESUMES";
   const div = document.createElement("div");
   div.className = "banner flag-CLEAR";
   div.dataset.scope = String(scope);
@@ -546,7 +550,8 @@ const MODE_MOVE_MS = 700;          // redraw every frame this long after the map
 
 const M = { track: null, cars: new Map(), top: null, rcStatus: null, tickMs: 250, lastTickWall: null,
   active: null, busyUntil: 0, dirty: true,
-  out: new Map(), outReady: false, outKey: "", crashed: new Set(), gen: 0 };   // out of the race (GET /cars)
+  out: new Map(), outReady: false, outKey: "", crashed: new Set(), gen: 0,   // out of the race (GET /cars)
+  stoppages: [] };                 // [start, end] field stops (red flag, grid), from GET /cars
 const CARS_POLL_MS = 1000;
 const CATCHUP_QUIET_MS = 250;      // animations stay off this long after the last catch-up envelope
 
@@ -572,6 +577,8 @@ async function fetchCars() {
     const r = await (await fetch("/cars")).json();
     if (gen !== M.gen) return;    // asked before the last seek: the next tick asks again
     M.out = new Map((r.out || []).map((o) => [String(o.drv), o]));
+    M.stoppages = Array.isArray(r.stoppages) ? r.stoppages : [];
+    if (M.top && M.out.has(String(M.top.drv))) M.top = null;   // the next tick finds the fastest car still racing
   } catch (e) {
     if (gen !== M.gen) return;    // an older server without /cars: nothing is taken off the map
   }
@@ -637,7 +644,7 @@ function mapTick(tick, t) {
     const from = m ? carAt(m, now) : [x, y];
     M.cars.set(drv, { fx: from[0], fy: from[1], x, y, wall: now, t, inPit: Boolean(car.in_pit) });
     const speed = Number(car.speed) || 0;
-    if (!car.in_pit && (!M.top || speed > M.top.speed)) M.top = { drv, speed };
+    if (!car.in_pit && !M.out.has(drv) && (!M.top || speed > M.top.speed)) M.top = { drv, speed };
   }
   for (const [drv, m] of M.cars) if (t - m.t > CAR_STALE_S) M.cars.delete(drv);
   M.dirty = true;
@@ -681,7 +688,7 @@ function updateMapPanel(paused) {
   const inPit = racing.length - onTrack;
   ui.mapFoot.innerHTML = !M.cars.size ? (view.connected ? "Press play to start the replay" : "Waiting for the replay")
     : `ON TRACK <b>${onTrack}</b> · IN PIT <b>${inPit}</b>` + (M.out.size ? ` · OUT <b>${M.out.size}</b>` : "") +
-      (M.top ? ` · TOP SPEED <b>#${escapeHtml(M.top.drv)} ${M.top.speed.toFixed(0)} km/h</b>` : "") +
+      (M.top && M.top.speed > 0 ? ` · TOP SPEED <b>#${escapeHtml(M.top.drv)} ${M.top.speed.toFixed(0)} km/h</b>` : "") +
       (paused ? " · PAUSED" : "");
   M.dirty = true;
 }
@@ -856,7 +863,7 @@ function onTick(tick) {
   ui.replayT.textContent = `REPLAY t ${t.toFixed(1)} s · LAP ${tick.lap}`;
   view.lastTickWall = performance.now();
   view.lap = tick.lap;
-  view.watching = tick.cars.filter((c) => !c.in_pit).length;
+  view.watching = tick.cars.filter((c) => !c.in_pit && !M.out.has(String(c.drv))).length;
   mapTick(tick, t);
   updateStandby();
   let maxDist = 0;
@@ -969,7 +976,7 @@ function pushOfficial(off, flag, scope, t) {
       : d <= -MIN_LEAD_S ? `<span class="rc-lead behind">RACE CONTROL FIRST</span>` : "";
   }
   const li = document.createElement("li");
-  li.className = `rc-row flag-${flag}`;
+  li.className = `rc-row flag-${flag}${ui.stage.classList.contains("catchup") ? " instant" : ""}`;
   li.innerHTML = `<span class="rc-badge">${RC_TEXT[flag]}</span>` +
     `<span class="rc-msg">${escapeHtml(off.message || "")}</span>` +
     `<span class="rc-t">t ${t.toFixed(1)} s</span>${lead}`;
@@ -1103,6 +1110,8 @@ function togglePlay() {
 }
 
 function wireControls() {
+  // a clicked button loses focus, so the space bar is play or pause, never that button again
+  for (const b of document.querySelectorAll(".controls .ctl")) b.addEventListener("click", () => b.blur());
   el("play").addEventListener("click", togglePlay);
   for (const b of document.querySelectorAll("[data-seek]")) {
     b.addEventListener("click", () => seekBy(Number(b.dataset.seek)));
