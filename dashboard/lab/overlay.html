@@ -47,6 +47,19 @@
     <div id="rc-empty" class="rc-empty">No race control message yet</div>
   </section>
 
+  <section id="mapbox" aria-label="Track map">
+    <div class="map-head">
+      <span class="map-title">TRACK MAP <span class="map-tag">REPLAY</span></span>
+      <span id="map-race" class="map-race"></span>
+    </div>
+    <div class="map-chips">
+      <span id="chip-ff" class="chip lvl-CLEAR">FAST FLAG <b>NO FLAG</b></span>
+      <span id="chip-rc" class="chip lvl-CLEAR">RACE CONTROL <b>WAITING</b></span>
+    </div>
+    <canvas id="map"></canvas>
+    <div id="map-foot" class="map-foot">Waiting for the replay</div>
+  </section>
+
   <section id="banners" aria-live="polite"></section>
 
   <section id="standby" aria-live="polite">
