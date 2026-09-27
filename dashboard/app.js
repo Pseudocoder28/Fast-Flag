@@ -41,10 +41,6 @@ const STOPPED_AFTER_S = 3;     // ... for this long is marked STOPPED
 const OUT_AFTER_S = 60;        // ... and after this long OUT (retired: its data freezes)
 const RETIRED_AFTER_S = 120;   // still this long and no longer part of a flagged incident: out of the race ...
 const RETIRE_FADE_S = 3;       // ... it fades off the map over this long (it comes back if it moves again)
-
-// crash-site clock: advice only, never a flag (race control removed its 120 s red rule, 26 Sept)
-const CRASH_LOOKBACK_S = 30;   // an IMPACT or MULTI this long before the stop makes it a crash (engine: IMPACT_BEFORE_STOP_S)
-const RED_ADVICE_S = 120;      // at its crash site this long: advise race control to consider a red flag
 const FIELD_STILL_MIN = 5;     // this many still cars at once is a grid or a restart, not a stop
 const FADE_AFTER_S = 5;        // no data for this long: fade the car out ...
 const FADE_S = 2;              // ... over this long
@@ -79,6 +75,7 @@ const HALO_ALPHA = 0.55;
 const MAP_BG = "#101318";      // matches the map panel, used for the gap in the double stripe
 
 const TRACK_FLAGS = new Set(["VSC", "SC", "RED"]);   // track-wide recs (PROJECT_BRIEF.md 7.4)
+const TRACK_RANK = { VSC: 1, SC: 2, RED: 3 };
 const CAR_FILL = { low: "#343c49", stricken: "#d62839", stopped: "#4a4d52", pit: "#6b7480" };
 const RISK_HALO = { elevated: "#e0a800", high: "#ff4fa3" };   // risk is a secondary cue: a halo, never the fill
 const RING_STOPPED = "#9aa0a6";
@@ -201,12 +198,6 @@ function escapeHtml(s) {
   }[c]));
 }
 
-function fmtClock(secs) {
-  // a duration as m:ss
-  const s = Math.max(0, Math.floor(secs));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
-
 function fmtTime(t) {
   // SessionTime in seconds as h:mm:ss.s
   const s = Math.max(0, Number(t));
@@ -228,7 +219,6 @@ const feedEl = document.getElementById("feed");
 const statusEl = document.getElementById("conn-status");
 const trackFlagEl = document.getElementById("track-flag");
 const officialFlagEl = document.getElementById("official-flag");
-const crashClockEl = document.getElementById("crash-clock");
 const lapEl = document.getElementById("lap");
 const clockEl = document.getElementById("clock");
 const speedEl = document.getElementById("speed");
@@ -256,8 +246,6 @@ const cars = new Map();         // drv -> car (see newCar)
 const risk = new Map();         // drv -> risk_30s
 const watchUntil = new Map();   // drv -> replay time until which an ANOMALY watch ring shows
 const involved = new Map();     // drv -> sector of its latest physical detection (stricken while that sector is flagged)
-const crashT = new Map();       // drv -> replay time of its latest IMPACT or MULTI detection
-const stopT = new Map();        // drv -> replay time of its latest STOPPED detection
 const sectorFlags = new Map();  // msector -> sector flag (CLEAR, YELLOW, DOUBLE_YELLOW)
 let trackFlag = null;           // our track-wide flag: CLEAR, VSC, SC or RED. null: not known yet,
                                 // recs only arrive on changes, so a page opened mid-incident has
@@ -373,7 +361,11 @@ function num(v, digits = 2) {
 
 function onRec(rec) {
   const conf = `confidence ${num(rec.confidence)}`;
-  if (rec.flag !== "CLEAR") {
+  // a lower track-wide flag while a higher one is out is a downgrade (our time-based red ended
+  // and another incident keeps the SC), not a new call: it never earns a lead
+  const downgrade = TRACK_FLAGS.has(rec.flag) && TRACK_FLAGS.has(trackFlag)
+    && TRACK_RANK[rec.flag] < TRACK_RANK[trackFlag];
+  if (rec.flag !== "CLEAR" && !downgrade) {
     ourEvents.push({ t: rec.t, flag: rec.flag, msector: rec.msector, trackWide: TRACK_FLAGS.has(rec.flag) });
     renderLeadSummary();
   }
@@ -397,11 +389,7 @@ function onDetection(det) {
             escapeHtml(det.evidence), det.t);
     return;
   }
-  for (const d of det.drivers) {
-    involved.set(d, det.msector);
-    if (det.type === "IMPACT" || det.type === "MULTI") crashT.set(d, det.t);
-    if (det.type === "STOPPED") stopT.set(d, det.t);
-  }
+  for (const d of det.drivers) involved.set(d, det.msector);
   feedRow("det", det.type, `${who}, sector ${det.msector}`,
           `${escapeHtml(det.evidence)}, severity ${num(det.severity)}`, det.t);
 }
@@ -484,8 +472,6 @@ function resetForJump() {
   risk.clear();
   watchUntil.clear();
   involved.clear();
-  crashT.clear();
-  stopT.clear();
   cars.clear();                 // every car is placed fresh: a seek snaps, never glides
   burstT = null;
   dispT = null;
@@ -953,11 +939,6 @@ function carStates() {
     const zone = sectorFlags.get(s.car.msector);
     s.zone = s.status !== "PIT" && isFlagged(zone) ? zone : null;
     s.level = riskLevel(risk.get(s.drv));
-    // a crash site: stricken, stopped, with an IMPACT or MULTI from CRASH_LOOKBACK_S before its stop
-    const st = stopT.get(s.drv);
-    const ct = crashT.get(s.drv);
-    s.crashSince = s.stricken && (s.status === "STOPPED" || s.status === "OUT") && st !== undefined
-      && ct !== undefined && ct >= st - CRASH_LOOKBACK_S ? st : null;
     // out of the race: still this long, on track or in its garage, no longer part of a flagged
     // incident, while the rest of the field keeps moving. It fades off the map.
     if (!fieldStopped && s.fresh && s.stillFor >= RETIRED_AFTER_S && !s.stricken) {
@@ -969,32 +950,6 @@ function carStates() {
   const layer = (s) => (s.status === "PIT" ? 0 : s.stricken ? 5 : s.status ? 4 : s.zone ? 3 : 1);
   out.sort((p, q) => layer(p) - layer(q));
   return out.filter((s) => s.alpha > 0.02);
-}
-
-let crashClockHtml = null;
-
-function renderCrashClock(states) {
-  // advice only: how long the longest-standing crashed car has been at its crash site, and after
-  // RED_ADVICE_S a prompt to consider a red flag. Race control decides; this is never a flag.
-  const sites = states.filter((s) => s.crashSince !== null).sort((a, b) => a.crashSince - b.crashSince);
-  let html = "";
-  let advise = false;
-  if (sites.length) {
-    const s = sites[0];
-    const secs = Math.max(0, replayT - s.crashSince);
-    advise = secs >= RED_ADVICE_S;
-    const more = sites.length > 1 ? `, +${sites.length - 1} more` : "";
-    html = `<div class="cc-head"><span>Crash site</span><span class="cc-clock mono">${fmtClock(secs)}</span></div>` +
-      `<div class="cc-main">Car ${escapeHtml(s.drv)} stopped at its crash site, sector ${escapeHtml(s.car.msector)}${more}</div>` +
-      (advise ? `<div class="cc-advice">Consider a red flag</div>` +
-        `<div class="cc-note">Advice from time at the site only: our data cannot see barrier damage, debris or ` +
-        `medical needs. Race control decides.</div>` : "");
-  }
-  if (html === crashClockHtml) return;
-  crashClockHtml = html;
-  crashClockEl.innerHTML = html;
-  crashClockEl.hidden = !html;
-  crashClockEl.classList.toggle("advise", advise);
 }
 
 function isFlagged(flag) {
@@ -1145,10 +1100,9 @@ function draw(now) {
   for (const s of states) {
     if (!s.tagAt) continue;
     ctx.globalAlpha = s.alpha;
-    drawTag(s.crashSince === null ? s.status : `CRASH ${fmtClock(replayT - s.crashSince)}`, s.tagAt[0], s.tagAt[1]);
+    drawTag(s.status, s.tagAt[0], s.tagAt[1]);
     ctx.globalAlpha = 1;
   }
-  renderCrashClock(states);
   if (DEBUG) drawDebug(now);
 }
 

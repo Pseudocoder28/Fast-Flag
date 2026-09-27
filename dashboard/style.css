@@ -282,25 +282,6 @@ html, body {
   text-transform: uppercase;
 }
 
-/* crash-site clock: advice, never a flag chip */
-.crash-clock {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--border-strong);
-  border-left: 3px solid var(--text-faint);
-  border-radius: 6px;
-  background: var(--panel-2);
-}
-
-.crash-clock[hidden] { display: none; }
-.crash-clock.advise { border-left-color: var(--red); }
-.cc-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
-.cc-clock { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
-.cc-main { margin-top: 4px; font-size: 13px; color: var(--text); }
-.cc-advice { margin-top: 8px; font-size: 13px; font-weight: 800; color: #ff5a4f; }
-.cc-note { margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--text-faint); }
-
 .status-chip {
   display: inline-flex;
   align-items: center;
