@@ -248,7 +248,20 @@ def escalation() -> list[str]:
             f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" separates "
             f"race control's VSCs from its SCs and reds correctly {ir['right_with_impact_rule']} of "
             f"{ir['escalations_with_onset_car']} times, \"always SC\" {ir['right_if_always_sc']}.",
+            *red_line(e.get("red_check")),
+            "- Race control changed after the holdout run (26 Sept): a crashed car still at its crash site keeps "
+            "our flag out until race control's track status is green, and calls for a red flag after 2 minutes. "
+            "The holdout section below is from the engine frozen before that.",
             ""]
+
+
+def red_line(r: dict | None) -> list[str]:
+    if not r:
+        return []
+    lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
+    return [f"- Red flags: race control called {r['both'] + r['race_control_only']}; we called {r['both']} of "
+            f"them{lead}, and {r['ours_only']} that race control handled without a red flag. Do not claim red flag "
+            "accuracy: the data cannot see barrier damage, debris or medical needs."]
 
 
 def lab_delay_cost() -> list[str]:

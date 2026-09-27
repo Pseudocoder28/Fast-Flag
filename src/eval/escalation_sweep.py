@@ -40,6 +40,8 @@ def row(name: str, value: float, summ: dict) -> dict:
             "median_lead_s": summ["median_lead_s"], "lead_p25_s": iqr[0], "lead_p75_s": iqr[1],
             "same_first_flag": summ["same_first_flag"],
             **{f"our_{f.lower()}": v for f, v in summ["our_by_flag"].items() if f in ESCALATIONS},
+            "red_both": summ["red_check"]["both"], "red_race_control_only": summ["red_check"]["race_control_only"],
+            "red_ours_only": summ["red_check"]["ours_only"], "red_median_lead_s": summ["red_check"]["median_lead_s"],
             "extra": summ["extra"], "extra_per_hour": summ["extra_per_hour"],
             "extra_yellows_only": c["official yellows only"], "extra_no_official_flag": c["no official flag"]}
 

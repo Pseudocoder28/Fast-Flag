@@ -68,7 +68,9 @@ STOPPED_KMH = 5.0          # stopped-car rows for the lateral offset check ...
 OFF_LINE_M = 8.0           # ... and how far from the racing line a car off the track surface would be
 MATCHED = ("earlier", "later")
 OFFICIAL_COLUMNS = ["race", "t_incident", "t_official", "official_flag", "official_top", "sectors", "status", "lead_s",
-                    "our_t", "our_flag", "our_top", "miss_kind", "onset_car", "onset_car_alerts", "detail"]
+                    "our_t", "our_flag", "our_top", "miss_kind", "onset_car", "onset_car_alerts", "detail",
+                    "official_red_t", "our_red_t"]
+RED_WINDOW_S = 1200.0      # an incident with no official TRACK CLEAR is followed this long for the red check
 OURS_COLUMNS = ["race", "t", "flag", "msector", "reason", "category"]
 EXTRA = ("official yellows only", "escalated incident, outside the match window", "no official flag")
 
@@ -182,12 +184,18 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
         mine = [r for r in esc if inc.t - MATCH_BEFORE_S <= r["t"] <= t_hi and in_sectors(r["msector"], inc, n)]
         matched_ids |= {r["id"] for r in mine}
         car = onset_car(inc, ons, n)
+        t_end = next((e["t"] for e in official if e["flag"] == "CLEAR" and e["msector"] is None
+                      and e["t"] > first["t"]), first["t"] + RED_WINDOW_S)
+        off_red = [m["t"] for m in inc.messages if m["flag"] == "RED"]
+        our_red = [r["t"] for r in esc if r["flag"] == "RED" and inc.t - MATCH_BEFORE_S <= r["t"] <= t_end
+                   and in_sectors(r["msector"], inc, n)]
         row = {"race": rid, "t_incident": inc.t, "t_official": first["t"], "official_flag": first["flag"],
                "official_top": max((m["flag"] for m in msgs), key=RANK.get),
                "sectors": " ".join(map(str, sorted(inc.sectors))) or "track-wide", "status": "",
                "lead_s": np.nan, "our_t": np.nan, "our_flag": None, "our_top": None, "miss_kind": None,
                "onset_car": None if car is None else car["drv"],
-               "onset_car_alerts": "" if car is None else car_alerts(dets, car), "detail": ""}
+               "onset_car_alerts": "" if car is None else car_alerts(dets, car), "detail": "",
+               "official_red_t": min(off_red) if off_red else np.nan, "our_red_t": min(our_red) if our_red else np.nan}
         if mine:
             lead = first["t"] - mine[0]["t"]
             row.update(status="earlier" if lead > 0 else "later", lead_s=round(lead, 2), our_t=mine[0]["t"],
@@ -271,10 +279,20 @@ def summarise(results: list[dict]) -> dict:
         "extra_per_hour": round(len(extra) / hours, 2) if hours else None,
         "extra_by_flag": counts(extra["flag"], ESCALATIONS),
         "our_by_flag": counts(ours["flag"], ESCALATIONS),
+        "red_check": red_check(off),
         "engine_resets": int(sum(res["resets"] for res in results)),
         "stopped_lateral_offset": stopped_offset(results),
         "impact_signal": impact_signal(off),
     }
+
+
+def red_check(off: pd.DataFrame) -> dict:
+    """Red flags per official escalated incident, until race control's TRACK CLEAR:
+    both (lead = official red time - ours), race control only, ours only."""
+    o, u = off["official_red_t"].notna(), off["our_red_t"].notna()
+    lead = (off.loc[o & u, "official_red_t"] - off.loc[o & u, "our_red_t"]).to_numpy(float)
+    return {"both": int((o & u).sum()), "race_control_only": int((o & ~u).sum()), "ours_only": int((~o & u).sum()),
+            "median_lead_s": round(float(np.median(lead)), 1) if len(lead) else None}
 
 
 def stopped_offset(results: list[dict]) -> dict:
@@ -408,6 +426,14 @@ def plot(off: pd.DataFrame, summ: dict, path: Path, title: str | None = None, sc
     plt.close(fig)
 
 
+def red_text(r: dict) -> str:
+    lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
+    return (f"- Red flags, per official escalation until race control's TRACK CLEAR: race control called "
+            f"{r['both'] + r['race_control_only']}, we called {r['both']} of them{lead}, and {r['ours_only']} that race "
+            "control handled without a red flag (mostly our red for a crashed car still at its crash site after "
+            "2 minutes).")
+
+
 def pairs_text(pairs: dict[str, int]) -> str:
     out = []
     for key, k in pairs.items():
@@ -438,6 +464,7 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
         f"found and {summ['missed_kind']['no car collapse']} had none.",
         f"- Same first flag as race control: {summ['same_first_flag']} of {summ['matched']} "
         f"({pairs_text(summ['flag_pairs'])}).",
+        red_text(summ["red_check"]),
         "", "| official flag | escalations | earlier | later | missed | median lead (s) |", "|---|---|---|---|---|---|"]
     for f in ESCALATIONS:
         b = summ["by_official_flag"][f]
