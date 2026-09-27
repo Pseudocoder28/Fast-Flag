@@ -14,13 +14,18 @@
 //
 // - Every rec at YELLOW or above slides in a lower-third banner.
 // - Exposure Clock: when our rec reaches VSC, SC or RED before the official message
-//   of that level, it counts replay seconds and the cars passing the stricken car
-//   at racing speed. The official message freezes it.
+//   of that level, and race control has no track-wide flag out yet, it counts replay
+//   seconds and the cars passing the stricken car at racing speed. The official message
+//   freezes it; race control's TRACK CLEAR or our downgrade ends it.
 // - After the official message: FAST FLAG AHEAD BY X.X s, or RACE CONTROL FIRST BY X.X s.
+// - When we lift a flag, its banner turns into a green CLEAR banner for a few seconds.
+// - Race control panel: the official messages as they arrive, clears included. The message
+//   that first confirms one of our banners shows that banner's lead; repeats show none.
 
 const WS_URL = `ws://${location.host}/stream`;
 const RESET_JUMP_S = 2.0;          // same rule as the race control engine and the dashboard
-const CONFIRM_WINDOW_S = 120.0;    // an official message and our raise this far apart are about different things
+const CONFIRM_WINDOW_S = 120.0;    // an official message this long before our raise, or after it once our flag is
+                                   // down, is about something else (the voice's rule, src/lab/voice.py)
 const MIN_LEAD_S = 0.05;          // below the displayed resolution: not a lead
 const STATUS_POLL_MS = 3000;       // how often GET /status is checked for a race switch
 const RACING_SHARE = 0.8;          // racing speed: at least this share of the car's own speed here last lap
@@ -32,16 +37,21 @@ const REST_WITHIN_S = 30;          // stop following the stricken car after this
 const FIELD_MIN_KMH = 60;          // field reference: samples slower than this are not racing
 const FIELD_MAX = 40;              // samples kept per bin for the field reference
 const TICKER_MAX = 6;
-const BANNER_MAX = 3;
+const BANNER_MAX = 3;              // CLEAR banners make way first, a live flag banner never goes for one
 const HIDE_AFTER_CLEAR_S = 12;     // frozen clock stays this long (replay time) after the track clears
+const CLEAR_BANNER_MS = 5000;      // a green CLEAR banner stays this long (wall time, like the slide-out)
+const RC_MAX = 4;                  // race control messages shown
 
 const RANK = { CLEAR: 0, YELLOW: 1, DOUBLE_YELLOW: 2, VSC: 3, SC: 4, RED: 5 };
 const GLOBAL_FLAGS = new Set(["VSC", "SC", "RED"]);
 const FLAG_TEXT = { YELLOW: "YELLOW FLAG", DOUBLE_YELLOW: "DOUBLE YELLOW", VSC: "VIRTUAL SAFETY CAR",
   SC: "SAFETY CAR", RED: "RED FLAG" };
+const RC_TEXT = { YELLOW: "YELLOW", DOUBLE_YELLOW: "DOUBLE YELLOW", VSC: "VSC", SC: "SAFETY CAR", RED: "RED FLAG",
+  CLEAR: "CLEAR" };
 const TYPE_TEXT = { IMPACT: "IMPACT", STOPPED: "STOPPED", SPIN: "SPIN", DROPOUT: "NO DATA",
   MULTI: "MULTI-CAR", ANOMALY: "ANOMALY" };
 const TRACK = "track";
+const DOWNGRADE_RE = /a downgrade, not a new call/;   // src/racecontrol/engine.py, when our red by time ends
 
 // --- helpers ---------------------------------------------------------------------
 
@@ -91,7 +101,7 @@ function flagIcon(flag) {
     return `<svg viewBox="0 0 44 40" aria-hidden="true">${pole}<rect x="9" y="6" width="30" height="20" rx="2" fill="${ink}"/>` +
       `<text x="24" y="21" text-anchor="middle" font-family="system-ui, sans-serif" font-size="${flag === "VSC" ? 10 : 12}" font-weight="900" fill="${flag === "RED" ? "#e10600" : "#fff"}">${flag}</text></svg>`;
   }
-  const fill = flag === "RED" ? "#e10600" : "#ffd400";
+  const fill = flag === "RED" ? "#e10600" : flag === "CLEAR" ? "#4cc36a" : "#ffd400";
   return `<svg viewBox="0 0 44 40" aria-hidden="true">${pole}${wave(9, 8, fill)}</svg>`;
 }
 
@@ -108,6 +118,7 @@ const S = {
   level: new Map(),           // scope (sector number or TRACK) -> current rank
   episode: new Map(),         // scope -> [{t, rank}] raises of the current episode
   official: new Map(),        // scope -> [{t, rank}] official flags still in force
+  offLog: [],                 // every official raise since the last reset: {t, rank, scope, clearedAt}
   cause: new Map(),           // sector -> {cars, type} last known cause
   banners: new Map(),         // scope -> {el, rec, cause, scope}, oldest first
   race: null,                 // race id and start time from GET /status, to reset on a race switch
@@ -118,7 +129,7 @@ const el = (id) => document.getElementById(id);
 const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
   clockFlag: el("clock-flag"), clockValue: el("clock-value"), clockCars: el("clock-cars"),
   clockResult: el("clock-result"), ticker: el("ticker"), standby: el("standby"), sbRace: el("sb-race"),
-  sbState: el("sb-state") };
+  sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty") };
 
 // --- standby: shown while no flag is out, so the overlay never looks dead ----------------
 
@@ -155,9 +166,12 @@ function resetAll() {
   S.level.clear();
   S.episode.clear();
   S.official.clear();
+  S.offLog = [];
   S.cause.clear();
   for (const b of S.banners.values()) b.el.remove();
   S.banners.clear();
+  ui.rcList.innerHTML = "";
+  ui.rcEmpty.classList.remove("hidden");
   S.clock = null;
   hideClock();
   updateStandby();
@@ -174,7 +188,9 @@ function resetAll() {
 // sector (the same one, 2 downstream or 1 upstream), a track banner against track-wide ones,
 // each at least the banner's level, measured from the first time this episode reached that
 // level. A re-sent rec (the engine re-sends a flag when the ANOMALY detector corroborates it)
-// never moves that time.
+// never moves that time, and neither does race control clearing and re-issuing its flag while
+// ours stays out. A downgrade (our red by time ended, our SC or VSC stays out) lowers the
+// level and drops the higher raises, so a later red is a new call.
 
 function raiseScope(scope, t, rank) {
   const cur = S.level.get(scope) || 0;
@@ -190,17 +206,31 @@ function ourFirstAt(scope, rank) {
   return raise ? raise.t : null;
 }
 
-function officialsFor(scope, rank) {
-  // official messages still in force for this scope, at least this level
-  const keys = scope === TRACK ? [TRACK]
-    : [...S.official.keys()].filter((s) => s !== TRACK && sectorMatches(scope, s, S.nSectors));
-  return keys.flatMap((s) => S.official.get(s) || []).filter((o) => o.rank >= rank);
+function lowerTrack(rank, t) {
+  // a downgrade: not a new call. The higher raises leave the episode and their clock ends
+  S.level.set(TRACK, rank);
+  S.episode.set(TRACK, (S.episode.get(TRACK) || []).filter((r) => r.rank <= rank));
+  if (S.clock && !S.clock.frozen && S.clock.rank > rank) endClockWithoutOfficial(t);
+}
+
+function inWindow(scope, ours, t) {
+  // can an official message at t be about our raise of this scope at `ours`? Before it, within
+  // the confirm window; after it, any time while our flag is still out, else within the window
+  return t <= ours ? ours - t <= CONFIRM_WINDOW_S : (S.level.get(scope) || 0) > 0 || t - ours <= CONFIRM_WINDOW_S;
+}
+
+function officialsFor(scope, rank, ours) {
+  // race control's messages for this scope, at least this level, about our raise at `ours`:
+  // still in force at that time, or sent since
+  return S.offLog.filter((o) => o.rank >= rank && inWindow(scope, ours, o.t)
+    && (o.clearedAt === null || o.clearedAt > ours)
+    && (scope === TRACK ? o.scope === TRACK : o.scope !== TRACK && sectorMatches(scope, o.scope, S.nSectors)));
 }
 
 function leadFor(scope, rank) {
   const ours = ourFirstAt(scope, rank);
-  if (ours === null) return { cls: "wait", text: "WAITING FOR RACE CONTROL" };
-  const offs = officialsFor(scope, rank).filter((o) => Math.abs(o.t - ours) <= CONFIRM_WINDOW_S);
+  if (ours === null) return { cls: "wait", text: "" };     // a downgrade whose call came before this page opened
+  const offs = officialsFor(scope, rank, ours);
   if (!offs.length) return { cls: "wait", text: "WAITING FOR RACE CONTROL" };
   const d = Math.min(...offs.map((o) => o.t)) - ours;
   if (d <= -MIN_LEAD_S) return { cls: "behind", text: `RACE CONTROL FIRST BY ${(-d).toFixed(1)} s` };
@@ -253,8 +283,14 @@ function showBanner(rec, cause, scope) {
   ui.banners.appendChild(div);
   updateStandby();
   S.banners.set(scope, { el: div, rec, cause, scope });
+  trimBanners();
+}
+
+function trimBanners() {
+  // over BANNER_MAX: CLEAR banners go first, oldest first, then the oldest flag banner
   while (S.banners.size > BANNER_MAX) {
-    const [k, b] = S.banners.entries().next().value;   // the oldest
+    const all = [...S.banners.entries()];
+    const [k, b] = all.find(([, x]) => x.clear) || all[0];
     b.el.remove();
     S.banners.delete(k);
   }
@@ -262,11 +298,39 @@ function showBanner(rec, cause, scope) {
 
 function refreshLeads() {
   for (const b of S.banners.values()) {
+    if (b.clear) continue;                // a CLEAR banner has no lead
     const leadEl = b.el.querySelector(".lead");
     const lead = leadFor(b.scope, RANK[b.rec.flag]);
     leadEl.className = `lead ${lead.cls}`;
     leadEl.textContent = lead.text;
   }
+}
+
+function showClearBanner(rec, scope) {
+  // our flag for this scope was lifted: a green banner for a few seconds, then it slides out
+  const old = S.banners.get(scope);
+  if (old) {
+    old.el.remove();
+    S.banners.delete(scope);
+  }
+  const track = scope === TRACK;
+  // our track clear while race control's own SC, VSC or red is still out: racing does not resume yet
+  const rcOut = Math.max(0, ...(S.official.get(TRACK) || []).map((o) => o.rank));
+  const rcFlag = Object.keys(RANK).find((f) => RANK[f] === rcOut);
+  const line1 = !track ? `SECTOR ${escapeHtml(rec.msector)}`
+    : rcOut > 0 ? `RACE CONTROL'S ${FLAG_TEXT[rcFlag]} STILL OUT` : "GREEN FLAG, RACING RESUMES";
+  const div = document.createElement("div");
+  div.className = "banner flag-CLEAR";
+  div.dataset.scope = String(scope);
+  div.innerHTML = `<div class="badge">${flagIcon("CLEAR")}<span>${track ? "TRACK CLEAR" : "CLEAR"}</span></div>` +
+    `<div class="body"><div class="line1">${line1}</div>` +
+    `<div class="line2">${escapeHtml(rec.reason || rec.message || "")}</div></div><div class="mark">FAST FLAG</div>`;
+  ui.banners.appendChild(div);
+  const entry = { el: div, rec, cause: { cars: [], type: null }, scope, clear: true };
+  S.banners.set(scope, entry);
+  updateStandby();
+  trimBanners();
+  setTimeout(() => { if (S.banners.get(scope) === entry) dropBanner(scope); }, CLEAR_BANNER_MS);
 }
 
 function dropBanner(scope) {
@@ -480,16 +544,24 @@ function onRec(rec) {
   const rank = RANK[flag];
   const cause = causeOf(rec, msector);
   const scope = GLOBAL_FLAGS.has(flag) ? TRACK : msector;
-  const levelUp = rank > (S.level.get(scope) || 0);
+  const cur = S.level.get(scope) || 0;
+  if (scope === TRACK && (rank < cur || DOWNGRADE_RE.test(String(rec.reason || "")))) {
+    lowerTrack(rank, t);
+    showBanner(rec, cause, scope);
+    return;
+  }
   raiseScope(scope, t, rank);
   showBanner(rec, cause, scope);
-  if (scope === TRACK && levelUp && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
+  if (scope === TRACK && rank > cur && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
 }
 
 function maybeStartClock(rec, cause, rank, t) {
-  // run the clock only when race control has not called this level yet; an official that was
-  // received before our rec but is stamped later still means we were first, so freeze at once
-  const offs = officialsFor(TRACK, rank).map((o) => o.t);
+  // run the clock only while race control has no track-wide flag out (the field is not
+  // neutralised yet; our red by time only comes under race control's own SC) and has not
+  // called this level; an official that was received before our rec but is stamped later
+  // still means we were first, so freeze at once
+  if ((S.official.get(TRACK) || []).some((o) => o.t <= t)) return;
+  const offs = officialsFor(TRACK, rank, t).map((o) => o.t);
   if (offs.some((ot) => ot <= t)) return;
   startClock(rec, cause);
   if (offs.length) freezeClock(Math.min(...offs));
@@ -502,11 +574,45 @@ function onClear(rec, msector, t) {
   if ((S.level.get(scope) || 0) === 0) return;
   S.level.set(scope, 0);
   if (sectorClear) S.cause.delete(msector);
-  dropBanner(scope);
+  showClearBanner(rec, scope);
   if (!sectorClear && S.clock) {
     if (!S.clock.frozen) endClockWithoutOfficial(t);
     S.clock.clearedAt = t;
   }
+}
+
+function panelLead(scope, rank, t) {
+  // the lead of the banner this message confirms (leadFor's rules), only when it is race
+  // control's first message about it: a repeat, or a message after race control had already
+  // called it at this level, gets none. Called before the message joins the log.
+  const ourScopes = scope === TRACK ? [TRACK]
+    : [...S.episode.keys()].filter((m) => m !== TRACK && sectorMatches(m, scope, S.nSectors));
+  let best = null;
+  for (const m of ourScopes) {
+    const ours = ourFirstAt(m, rank);
+    if (ours === null || !inWindow(m, ours, t) || officialsFor(m, rank, ours).length) continue;
+    if (best === null || t - ours > best) best = t - ours;
+  }
+  return best;
+}
+
+function pushOfficial(off, flag, scope, t) {
+  // the race control panel: newest first; the message that first confirms one of our banners
+  // shows how much earlier Fast Flag called it
+  let lead = "";
+  const d = flag === "CLEAR" ? null : panelLead(scope, RANK[flag], t);
+  if (d !== null) {
+    lead = d >= MIN_LEAD_S ? `<span class="rc-lead ahead">FAST FLAG ${d.toFixed(1)} s EARLIER</span>`
+      : d <= -MIN_LEAD_S ? `<span class="rc-lead behind">RACE CONTROL FIRST</span>` : "";
+  }
+  const li = document.createElement("li");
+  li.className = `rc-row flag-${flag}`;
+  li.innerHTML = `<span class="rc-badge">${RC_TEXT[flag]}</span>` +
+    `<span class="rc-msg">${escapeHtml(off.message || "")}</span>` +
+    `<span class="rc-t">t ${t.toFixed(1)} s</span>${lead}`;
+  ui.rcList.insertBefore(li, ui.rcList.firstChild);
+  while (ui.rcList.children.length > RC_MAX) ui.rcList.removeChild(ui.rcList.lastChild);
+  ui.rcEmpty.classList.add("hidden");
 }
 
 function onOfficial(off) {
@@ -515,15 +621,20 @@ function onOfficial(off) {
   const t = Number(off.t);
   if (!Number.isFinite(t)) return;
   const scope = off.msector === null || off.msector === undefined ? TRACK : Number(off.msector);
+  pushOfficial(off, flag, scope, t);
   if (flag === "CLEAR") {
     if (scope === TRACK) S.official.clear();       // TRACK CLEAR ends every official flag
     else S.official.delete(scope);
+    for (const o of S.offLog) if (o.clearedAt === null && (scope === TRACK || o.scope === scope)) o.clearedAt = t;
+    // race control's green ends a clock it never froze: passes after it are racing, not exposure
+    if (scope === TRACK && S.clock && !S.clock.frozen) endClockWithoutOfficial(t);
     refreshLeads();
     return;
   }
   const rank = RANK[flag];
   if (!S.official.has(scope)) S.official.set(scope, []);
   S.official.get(scope).push({ t, rank });
+  S.offLog.push({ t, rank, scope, clearedAt: null });
   refreshLeads();
   if (scope === TRACK && S.clock && !S.clock.frozen && rank >= S.clock.rank) freezeClock(t);
 }

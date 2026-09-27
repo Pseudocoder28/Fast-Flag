@@ -223,7 +223,7 @@ def case_studies() -> list[str]:
 
 
 def escalation() -> list[str]:
-    from src.eval.escalation import impact_signal
+    from src.eval.escalation import RED_UNCALLED, impact_signal
     e = json.loads((CHARTS / "escalation.json").read_text(encoding="utf-8"))
     ours = pd.read_csv(CHARTS / "escalation_ours.csv", encoding="utf-8")
     ir = impact_signal(pd.read_csv(CHARTS / "escalation_official.csv", encoding="utf-8"))
@@ -242,13 +242,36 @@ def escalation() -> list[str]:
             f"{e['missed_kind']['no car collapse']} without one (re-flags of an earlier stoppage, debris, weather, lap 1).",
             f"- Escalations race control never made: {e['extra']} in {e['race_hours']:.1f} race hours = "
             f"{e['extra_per_hour']:.2f} per race hour ({c['official yellows only']} where race control kept yellows "
-            f"only, {c['no official flag']} with no official flag).",
+            f"only, {c['escalated incident, outside the match window']} near an official escalation but outside its "
+            f"match window, {c['no official flag']} with no official flag, {c.get(RED_UNCALLED, 0)} red flags race "
+            "control never called while its own SC or VSC was out).",
             f"- Flag choice: same first flag as race control in {e['same_first_flag']} of {e['matched']}; our "
             f"{len(ours)} recommendations by flag: {by_ours}. FastF1 puts stopped cars on the racing line, so the "
             f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" separates "
             f"race control's VSCs from its SCs and reds correctly {ir['right_with_impact_rule']} of "
             f"{ir['escalations_with_onset_car']} times, \"always SC\" {ir['right_if_always_sc']}.",
+            *red_line(e.get("red_check"), e.get("our_reds")),
+            f"- Our TRACK CLEARs while race control's track status showed its own SC, VSC or red: "
+            f"{e.get('track_clears_under_neutral', 'n/a')}.",
+            "- Race control changed after the holdout run (26 and 27 Sept): our SC or VSC stays out while race control's own "
+            "SC, VSC or red is out, a crashed car still at its crash site keeps its sector flagged until race control's "
+            "track status is green, and a crashed car still at its crash site after 2 minutes gets a red flag that "
+            "never blocks another incident's escalation (PROJECT_BRIEF 6.5). These changes were checked on replays of "
+            "the 2026 Azerbaijan holdout, so they have no out-of-sample test; the holdout section below is from the "
+            "engine frozen before them.",
             ""]
+
+
+def red_line(r: dict | None, o: dict | None) -> list[str]:
+    if not r or not o:
+        return []
+    lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
+    return [f"- Red flags: race control showed a red in {r['both'] + r['race_control_only']} of its escalated "
+            f"incidents and we recommended red in {r['both']} of them{lead}. In all we sent {o['total']} red flags "
+            f"({o['time_based']} by time at a crash site, {o['multi_car']} for multi-car crashes); {o['with_race_control_red']} "
+            f"had a race control red around them and {o['without_race_control_red']} did not ({o['time_based_without']} "
+            "of those by time at a crash site). Do not claim red flag accuracy: the data cannot see barrier damage, "
+            "debris or medical needs."]
 
 
 def lab_delay_cost() -> list[str]:
@@ -320,7 +343,9 @@ def holdout() -> list[str]:
                 out.append(f"- {c['driver']} crash, W3 (our escalation to the official one): "
                            f"{w3['cars_passing'] if w3['cars_passing'] is not None else 'n/a'} cars")
         out.append("")
-    return out
+    return out + ["The holdout numbers above come from the frozen engine. Race control changed after the freeze "
+                  "(26 and 27 Sept) and those changes were checked on replays of 2026 Azerbaijan, so the current engine has "
+                  "no out-of-sample test.", ""]
 
 
 def holdout_line() -> str:
@@ -329,7 +354,8 @@ def holdout_line() -> str:
         return ("- Training data: 20 races from 2023 to 2026. Holdout races (2026 Azerbaijan, 2026 Madrid): no numbers "
                 "until A7, after the code freeze.")
     return (f"- Training data: 20 races from 2023 to 2026. Holdout: {', '.join(ran)}, run once after the code freeze "
-            "(last section); nothing was fitted or tuned on it.")
+            "(last section); nothing was fitted or tuned on it. Race control changes made after the freeze (26 and 27 Sept) "
+            "were checked on replays of 2026 Azerbaijan, so they have no out-of-sample test.")
 
 
 def build() -> str:

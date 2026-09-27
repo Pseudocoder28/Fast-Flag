@@ -9,7 +9,10 @@
 <body>
 <div id="stage">
   <header id="top">
-    <div id="wordmark" class="wordmark"><span class="fast">FAST</span><span class="flag">FLAG</span></div>
+    <div class="top-left">
+      <a id="back" class="back" href="/" title="Back to the pit wall">&lsaquo; BACK TO RACE</a>
+      <div id="wordmark" class="wordmark"><span class="fast">FAST</span><span class="flag">FLAG</span></div>
+    </div>
     <div id="status"><span id="conn">connecting</span><span id="replay-t"></span></div>
   </header>
 
@@ -23,6 +26,12 @@
     <div id="clock-result" class="clock-result"></div>
     <ol id="ticker" class="ticker"></ol>
     <div class="clock-note">Cars passing the stricken car at racing speed since our call, from tick data</div>
+  </section>
+
+  <section id="rcpanel" aria-live="polite">
+    <div class="rc-head">RACE CONTROL <span class="rc-sub">official messages</span></div>
+    <ol id="rc-list" class="rc-list"></ol>
+    <div id="rc-empty" class="rc-empty">No race control message yet</div>
   </section>
 
   <section id="banners" aria-live="polite"></section>

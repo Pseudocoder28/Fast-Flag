@@ -26,6 +26,14 @@ def test_dashboard_files_are_never_served_stale() -> None:
             assert r.status_code == 200 and r.headers["cache-control"] == "no-cache"
 
 
+def test_seek_while_paused_sends_the_new_position() -> None:
+    with TestClient(create_app(autoplay=False)) as c:
+        with c.websocket_connect("/stream") as ws:
+            c.post("/replay", json={"speed": 0, "seek_t": 4500.0})
+            env = ws.receive_json()
+            assert env["kind"] == "tick" and 4500.0 <= env["data"]["t"] < 4501.0
+
+
 def test_stream_envelopes_and_rec_rebroadcast() -> None:
     with TestClient(create_app()) as c:
         c.post("/replay", json={"speed": 50, "seek_t": 4385.0})
