@@ -947,3 +947,45 @@ def test_race_laps_from_track() -> None:
     assert race_laps_from_track(track) == 59                 # 305 km / 5227.7 m, rounded up (real: 58)
     assert race_laps_from_track({**track, "race": "2023_Monaco"}) == 50
     assert race_laps_from_track({"race": "x", "msectors": []}) is None
+
+
+def rolling_stop(exit_kmh: float):
+    """Car 63 is flagged as stopped in sector 20 while still rolling at 60 km/h (the detector
+    fires on the collapse), crosses into sector 1 at exit_kmh at t 104, and stops there at t 108.
+    2023_Australian, Russell: stopped at 6431.75 in sector 20, came to rest in sector 1."""
+    def cars(t: float) -> list[dict]:
+        if t < 104.0:
+            car = make_car("63", 20, speed=60.0, x=20.0 * t)
+        elif t < 108.0:
+            car = make_car("63", 1, speed=exit_kmh, x=2080.0 + (exit_kmh / 3.6) * (t - 104.0))
+        else:
+            car = make_car("63", 1, speed=0.0 if exit_kmh <= 80.0 else exit_kmh,
+                           x=2080.0 + (exit_kmh / 3.6) * (4.0 if exit_kmh <= 80.0 else t - 104.0))
+        return [car, moving_car("44", 10, t)]
+    return cars
+
+
+def test_stopped_car_rolling_into_the_next_sector_keeps_its_flag() -> None:
+    """The stop moves with the car: its double yellow goes to sector 1 and its VSC comes
+    VSC_STOPPED_HOLD_S after it stops there, instead of the flag clearing behind it."""
+    rc = RaceControl()
+    cars = rolling_stop(exit_kmh=40.0)
+    rc.on_tick(make_tick(100.0, cars(100.0)))
+    rc.on_detection(make_det("det-s63", 100.0, "63", 20, "STOPPED", 0.7))
+    recs = tick_until(rc, 100.0, 108.0 + VSC_STOPPED_HOLD_S + 1.0, cars)
+    all_recs_valid(recs)
+    moved = [r for r in recs if r["msector"] == 1 and r["flag"] == "DOUBLE_YELLOW"]
+    assert moved and "rolled on from sector 20" in moved[0]["reason"]
+    vsc = [r for r in recs if r["flag"] == "VSC"]
+    assert len(vsc) == 1 and vsc[0]["msector"] == 1
+    assert 108.0 + VSC_STOPPED_HOLD_S - 0.5 <= vsc[0]["t"] <= 108.0 + VSC_STOPPED_HOLD_S + 0.5
+
+
+def test_stopped_car_that_drives_off_at_speed_is_not_followed() -> None:
+    rc = RaceControl()
+    cars = rolling_stop(exit_kmh=200.0)
+    rc.on_tick(make_tick(100.0, cars(100.0)))
+    rc.on_detection(make_det("det-s63", 100.0, "63", 20, "STOPPED", 0.7))
+    recs = tick_until(rc, 100.0, 130.0, cars)
+    assert not [r for r in recs if r["msector"] == 1]
+    assert not [r for r in recs if r["flag"] in ("VSC", "SC", "RED")]
