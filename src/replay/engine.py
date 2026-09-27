@@ -97,6 +97,8 @@ class RaceData:
         self._live = np.isfinite(c["x"].astype(float)) & np.isfinite(c["y"].astype(float)) \
             & np.isfinite(c["speed"].astype(float)) & np.isfinite(c["dist"].astype(float)) \
             & np.isfinite(c["gear"].astype(float)) & np.isfinite(c["rpm"].astype(float))
+        # the entry list: every car in the race, with live data or not (GET /status)
+        self.cars = sorted({str(d) for d in c["drv"]}, key=lambda d: (not d.isdigit(), int(d) if d.isdigit() else 0, d))
 
     def rows(self, k: int) -> slice:
         return slice(int(self.bounds[k]), int(self.bounds[k + 1]))

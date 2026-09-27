@@ -60,3 +60,15 @@ def test_no_recs_and_causal_order() -> None:
     sent = r.due()
     assert sent and all(env["data"]["t"] <= 4310.0 for env in sent)
     assert r.events[r.cursor][0] > 4310.0
+
+
+def test_a_page_that_opens_late_gets_what_it_missed() -> None:
+    with TestClient(create_app(no_recs=True, autoplay=False)) as c:
+        with c.websocket_connect("/stream") as rc:
+            c.post("/replay", json={"speed": 0, "seek_t": 4500.0})
+            assert rc.receive_json()["kind"] == "tick"
+            rc.send_json({"kind": "rec", "data": {"id": "rec-a", "t": 4500.0}})
+            assert rc.receive_json()["data"]["id"] == "rec-a"
+            with c.websocket_connect("/stream?catchup=1") as page:
+                assert page.receive_json()["data"]["id"] == "rec-a"
+                assert page.receive_json()["kind"] == "tick"
