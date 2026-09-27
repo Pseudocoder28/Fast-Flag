@@ -215,7 +215,9 @@ def test_cars_out_of_the_race_stay_out_through_a_stoppage() -> None:
     t = np.round(np.arange(T0, T0 + 200, 0.25), 2)
     frames = []
     for drv, x in (("1", t * 50), ("44", np.where(t < T0 + 10, t * 50, (T0 + 10) * 50)), ("16", t * 50)):
-        frames.append(pd.DataFrame({"t": t, "drv": drv, "x": x, "y": 0.0, "in_pit": False, "msector": 3}))
+        speed = np.where((drv != "44") | (t < T0 + 10), 180.0, 0.0)
+        frames.append(pd.DataFrame({"t": t, "drv": drv, "speed": speed, "x": x, "y": 0.0, "in_pit": False,
+                                    "msector": 3}))
     rows = pd.concat(frames)
     rows = rows[~((rows["drv"] == "16") & (rows["t"] > T0 + 20))]             # car 16 goes silent
     stops = t[(t >= T0 + 100) & (t < T0 + 150)]                                # a red flag: the field stopped
@@ -225,6 +227,21 @@ def test_cars_out_of_the_race_stay_out_through_a_stoppage() -> None:
     assert at(75)["44"]["why"] == "stopped" and at(75)["44"]["since"] == T0 + 10
     assert at(85)["16"]["why"] == "no data"
     assert "44" in at(120)                                                     # still out during the red flag
+
+
+def test_a_wreck_goes_out_through_a_red_flag_and_stays_out_on_the_recovery_truck() -> None:
+    from src.replay.cars import Cars
+    t = np.round(np.arange(T0, T0 + 300, 0.25), 2)
+    x = np.where(t < T0 + 20, (t - T0) * 50, 1000.0)
+    x = np.where(t >= T0 + 200, 1500.0 + (t - T0 - 200), x)                    # carried off at 0 km/h
+    rows = pd.DataFrame({"t": t, "drv": "55", "speed": np.where(t < T0 + 20, 200.0, 0.0), "x": x, "y": 0.0,
+                         "in_pit": False, "msector": 7})
+    red = t[(t >= T0 + 30) & (t < T0 + 250)]                                   # red flag: the field in the pit lane
+    cars = Cars(rows, red, T0, track_stop_times=np.array([]), entries=["55", "81"])
+    at = lambda s: {o["drv"]: o for o in cars.at(T0 + s)["out"]}              # noqa: E731
+    assert "55" not in at(70) and at(85)["55"]["why"] == "stopped"             # out 60 s after the crash
+    assert "55" in at(220)                                                     # moved by the truck: still out
+    assert at(90)["81"]["why"] == "no data"                                    # never sent data: out too
 
 
 def test_a_seek_never_sends_official_messages_from_before_the_replay_start(tmp_path, monkeypatch) -> None:
