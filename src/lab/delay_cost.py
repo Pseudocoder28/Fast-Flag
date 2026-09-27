@@ -53,6 +53,7 @@ from src.eval.latency_by_type import ALERT_AFTER_S, ALERT_BEFORE_S, ONSET_AFTER_
 from src.eval.onset import RULE, add_own_ratio, onsets  # noqa: E402
 from src.ingest.holdout import assert_not_holdout  # noqa: E402
 from src.ingest.sectors import sector_matches  # noqa: E402
+from src.racecontrol.engine import race_laps_from_track  # noqa: E402
 from src.replay.engine import Engine, RaceData, available_races, race_dir  # noqa: E402
 
 OUT_DIR = Path("docs/lab")
@@ -87,7 +88,7 @@ def run_engine(race: RaceData) -> tuple[list[dict], list[dict]]:
     eng = Engine(race, [DetectorSuite(load_config(), anomaly_threshold=model.threshold, n_sectors=n)])
     envs = eng.advance(eng.t_end)
     dets = sorted((e["data"] for e in envs if e["kind"] == "detection"), key=lambda d: d["t"])
-    recs, _ = recommendations(envs)
+    recs, _ = recommendations(envs, race_laps_from_track(race.track))
     return dets, recs or []
 
 
