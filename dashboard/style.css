@@ -360,6 +360,15 @@ html, body {
   outline-offset: 2px;
 }
 
+.legend-dot.stricken {
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px #d62839;
+  animation: legend-pulse 1s ease-in-out infinite;
+}
+
+@keyframes legend-pulse {
+  50% { box-shadow: 0 0 0 2px var(--panel), 0 0 0 6px rgba(214, 40, 57, 0.35); }
+}
+
 .legend-dot.pit {
   width: 8px;
   height: 8px;
