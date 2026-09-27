@@ -115,6 +115,14 @@ def test_server_endpoints_and_stream() -> None:
                 raise AssertionError("rec was not rebroadcast")
 
 
+def test_server_seek_while_paused_sends_the_new_position() -> None:
+    with TestClient(create_app(synthetic_race(), autoplay=False)) as c:
+        with c.websocket_connect("/stream") as ws:
+            c.post("/replay", json={"speed": 0, "seek_t": T0 + 12})
+            env = ws.receive_json()
+            assert env["kind"] == "tick" and T0 + 12 <= env["data"]["t"] < T0 + 13
+
+
 def test_server_refuses_holdout_by_default() -> None:
     with TestClient(create_app(synthetic_race(), autoplay=False)) as c:
         assert c.post("/replay", json={"race": "2026_Azerbaijan"}).status_code == 403

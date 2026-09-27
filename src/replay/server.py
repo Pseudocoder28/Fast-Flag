@@ -105,6 +105,14 @@ class LiveReplay:
                 await self.hub.broadcast(env)
             self.latency.maybe_report()
 
+    async def preview(self) -> None:
+        """While paused, send the tick at the current position, so a seek shows at once
+        (the replay does not advance, so nothing else would be sent). No processor runs
+        on it: detections resume from here when playback does."""
+        if len(self.race.times):
+            k = min(self.engine.k, len(self.race.times) - 1)
+            await self.hub.broadcast({"kind": "tick", "data": self.race.tick(k)})
+
     def status(self) -> dict:
         e = self.engine
         return {"race": self.race.race, "t": round(e.clock, 2), "speed": self.speed,
@@ -148,6 +156,8 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData
             replay.speed = float(body["speed"])
         if body.get("seek_t") is not None:
             replay.engine.seek(float(body["seek_t"]))
+        if replay.speed <= 0 and (body.get("seek_t") is not None or body.get("race")):
+            await replay.preview()
         return replay.status()
 
     @app.get("/status")

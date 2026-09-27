@@ -103,6 +103,14 @@ class Replay:
                 await asyncio.sleep(LOOP_PAUSE_S)
                 self.seek(self.t0)
 
+    async def preview(self) -> None:
+        """While paused, send the next tick from the current position, so a seek shows at
+        once. The cursor does not move: playback sends it again when it resumes."""
+        for _, _, env in self.events[self.cursor:]:
+            if env["kind"] == "tick":
+                await self.broadcast(env)
+                return
+
     def status(self) -> dict:
         return {"race": self.track["race"], "t": round(self.sim_t, 2), "speed": self.speed,
                 "t_start": self.t0, "t_end": self.t1, "clients": len(self.clients)}
@@ -141,6 +149,8 @@ def create_app(no_recs: bool = False, loop: bool = True, autoplay: bool = True) 
             replay.speed = float(body["speed"])
         if body.get("seek_t") is not None:
             replay.seek(float(body["seek_t"]))
+            if replay.speed <= 0:
+                await replay.preview()
         return replay.status()
 
     @app.get("/status")
