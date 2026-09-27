@@ -3,7 +3,7 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2023_Australian,anomaly_advisory,8856.5,ANOMALY,2,21,anomaly score 0.76 (threshold 0.75),True
 2023_Australian,detectors,3761.75,IMPACT,5,16,"lost 95 km/h in 1 s (95 to 0 km/h), with brakes on",False
 2023_Australian,detectors,4387.75,IMPACT,9,23,"lost 145 km/h in 1 s (180 to 33 km/h), with brakes on",False
-2023_Australian,detectors,6431.75,STOPPED,20,63,"speed 75 km/h vs ref 303 km/h, on the racing line",False
+2023_Australian,detectors,6434.75,STOPPED,1,63,"speed 59 km/h vs ref 309 km/h, on the racing line",False
 2023_Australian,detectors,9401.75,STOPPED,6,20,"speed 35 km/h vs ref 163 km/h, on the racing line",False
 2023_Australian,detectors,10757.0,STOPPED,2,2,"speed 0 km/h vs ref 195 km/h, on the racing line",False
 2023_Australian,detectors,10757.0,STOPPED,2,21,"speed 0 km/h vs ref 180 km/h, on the racing line",False
@@ -131,14 +131,7 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2023_Mexico_City,anomaly_advisory,10755.75,ANOMALY,16,18,anomaly score 0.76 (threshold 0.76),False
 2023_Mexico_City,detectors,3758.75,IMPACT,3,11,"lost 80 km/h in 1 s (95 to 24 km/h), with brakes on",False
 2023_Mexico_City,detectors,6480.25,IMPACT,10,20,"lost 158 km/h in 1 s (179 to 0 km/h), with brakes on",False
-2023_Mexico_City,detectors,8018.75,STOPPED,15,1,"speed 31 km/h vs ref 152 km/h, on the racing line",True
-2023_Mexico_City,detectors,8022.0,STOPPED,14,16,"speed 31 km/h vs ref 141 km/h, on the racing line",True
-2023_Mexico_City,detectors,8022.0,MULTI,14,"1,16","cars 1, 16 in sectors 14-15 within 5 s",True
-2023_Mexico_City,detectors,8026.0,STOPPED,14,55,"speed 31 km/h vs ref 141 km/h, on the racing line",True
-2023_Mexico_City,detectors,8027.0,STOPPED,14,3,"speed 27 km/h vs ref 141 km/h, on the racing line",True
-2023_Mexico_City,detectors,8037.75,STOPPED,15,81,"speed 21 km/h vs ref 133 km/h, on the racing line",True
-2023_Mexico_City,detectors,8043.25,STOPPED,15,63,"speed 12 km/h vs ref 122 km/h, on the racing line",True
-2023_Mexico_City,detectors,9232.75,IMPACT,3,22,"lost 82 km/h in 1 s (195 to 50 km/h), without braking",False
+2023_Mexico_City,detectors,9233.75,IMPACT,3,22,"lost 104 km/h in 1 s (113 to 56 km/h), without braking",False
 2023_Mexico_City,detectors,10733.0,STOPPED,14,18,"speed 0 km/h vs ref 112 km/h, on the racing line",False
 2023_Mexico_City,baseline,3758.75,STOPPED,3,11,speed 24 km/h < 50 km/h,False
 2023_Mexico_City,baseline,6480.75,STOPPED,10,20,speed 9 km/h < 50 km/h,False
@@ -1302,7 +1295,7 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2024_Canadian,detectors,5065.5,STOPPED,6,55,"speed 0 km/h vs ref 124 km/h, on the racing line",False
 2024_Canadian,detectors,5067.75,STOPPED,6,23,"speed 0 km/h vs ref 166 km/h, on the racing line",False
 2024_Canadian,detectors,5067.75,MULTI,6,"23,55","cars 23, 55 in sectors 6-6 within 5 s",False
-2024_Canadian,detectors,5543.75,IMPACT,13,27,"lost 85 km/h in 1 s (152 to 72 km/h), without braking",True
+2024_Canadian,detectors,5543.75,IMPACT,13,27,"lost 85 km/h in 1 s (152 to 72 km/h), with brakes on",True
 2024_Canadian,detectors,6277.5,IMPACT,9,22,"lost 99 km/h in 1 s (106 to 31 km/h), with brakes on",False
 2024_Canadian,baseline,269.5,STOPPED,2,10,speed 42 km/h < 50 km/h,False
 2024_Canadian,baseline,326.75,STOPPED,11,20,speed 48 km/h < 50 km/h,True
@@ -1591,14 +1584,13 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2024_Qatar,detectors,3309.25,STOPPED,3,31,"speed 7 km/h vs ref 176 km/h, on the racing line",False
 2024_Qatar,detectors,3309.25,STOPPED,3,43,"speed 0 km/h vs ref 185 km/h, on the racing line",False
 2024_Qatar,detectors,3309.25,MULTI,3,"27,31","cars 27, 31 in sectors 3-3 within 5 s",False
-2024_Qatar,detectors,3325.0,IMPACT,6,18,"lost 100 km/h in 1 s (134 to 65 km/h), without braking",True
-2024_Qatar,detectors,3325.0,IMPACT,6,23,"lost 118 km/h in 1 s (154 to 52 km/h), with brakes on",True
+2024_Qatar,detectors,3325.0,IMPACT,6,18,"lost 100 km/h in 1 s (134 to 65 km/h), with brakes on",True
+2024_Qatar,detectors,3325.0,IMPACT,6,23,"lost 118 km/h in 1 s (154 to 52 km/h), without braking",True
 2024_Qatar,detectors,3325.0,MULTI,6,"18,23","cars 18, 23 in sectors 6-6 within 5 s",True
 2024_Qatar,detectors,3609.25,STOPPED,7,10,"speed 42 km/h vs ref 243 km/h, on the racing line",True
-2024_Qatar,detectors,3851.0,IMPACT,3,30,"lost 104 km/h in 1 s (117 to 0 km/h), with brakes on",False
-2024_Qatar,detectors,7087.25,IMPACT,15,11,"lost 84 km/h in 1 s (130 to 20 km/h), without braking",True
+2024_Qatar,detectors,3851.0,IMPACT,3,30,"lost 104 km/h in 1 s (117 to 0 km/h), without braking",False
+2024_Qatar,detectors,7087.25,IMPACT,15,11,"lost 84 km/h in 1 s (130 to 20 km/h), with brakes on",True
 2024_Qatar,detectors,7178.25,IMPACT,11,27,"lost 166 km/h in 1 s (222 to 67 km/h), with brakes on",False
-2024_Qatar,detectors,8689.0,STOPPED,2,23,"speed 80 km/h vs ref 291 km/h, on the racing line",True
 2024_Qatar,baseline,3307.5,STOPPED,3,27,speed 0 km/h < 50 km/h,False
 2024_Qatar,baseline,3307.5,STOPPED,3,31,speed 15 km/h < 50 km/h,False
 2024_Qatar,baseline,3307.5,STOPPED,3,43,speed 7 km/h < 50 km/h,False
@@ -1732,7 +1724,7 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Australian,detectors,8964.0,STOPPED,19,81,"speed 0 km/h vs ref 97 km/h, on the racing line",False
 2025_Australian,detectors,9040.75,IMPACT,18,87,"lost 123 km/h in 1 s (140 to 0 km/h), with brakes on",False
 2025_Australian,detectors,9076.75,STOPPED,19,30,"speed 6 km/h vs ref 122 km/h, on the racing line",True
-2025_Australian,detectors,9192.25,IMPACT,18,5,"lost 135 km/h in 1 s (192 to 75 km/h), without braking",False
+2025_Australian,detectors,9192.25,IMPACT,18,5,"lost 135 km/h in 1 s (192 to 75 km/h), with brakes on",False
 2025_Australian,detectors,9202.0,IMPACT,2,30,"lost 99 km/h in 1 s (112 to 0 km/h), with brakes on",False
 2025_Australian,baseline,4278.25,STOPPED,0,6,speed 0 km/h < 50 km/h,True
 2025_Australian,baseline,4309.0,STOPPED,8,7,speed 6 km/h < 50 km/h,False
@@ -1935,7 +1927,7 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Belgian,detectors,8415.25,MULTI,15,"43,44","cars 43, 44 in sectors 15-16 within 5 s",True
 2025_Belgian,detectors,8416.25,STOPPED,16,18,"speed 35 km/h vs ref 290 km/h, on the racing line",True
 2025_Belgian,detectors,8417.25,IMPACT,16,12,"lost 90 km/h in 1 s (117 to 26 km/h), with brakes on",True
-2025_Belgian,detectors,8420.25,IMPACT,16,14,"lost 137 km/h in 1 s (173 to 36 km/h), without braking",True
+2025_Belgian,detectors,8420.25,IMPACT,16,14,"lost 137 km/h in 1 s (173 to 36 km/h), with brakes on",True
 2025_Belgian,detectors,8421.25,MULTI,16,"12,14,18","cars 12, 14, 18 in sectors 16-16 within 5 s",True
 2025_Belgian,detectors,8618.0,STOPPED,19,12,"speed 56 km/h vs ref 311 km/h, on the racing line",True
 2025_Belgian,detectors,8640.5,STOPPED,3,5,"speed 41 km/h vs ref 290 km/h, on the racing line",True
@@ -1976,14 +1968,14 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_British,anomaly_advisory,8285.25,ANOMALY,2,22,anomaly score 0.76 (threshold 0.75),True
 2025_British,detectors,3402.0,IMPACT,5,30,"lost 145 km/h in 1 s (211 to 76 km/h), with brakes on",False
 2025_British,detectors,3790.25,IMPACT,2,5,"lost 144 km/h in 1 s (193 to 5 km/h), with brakes on",False
-2025_British,detectors,3890.5,STOPPED,10,5,"speed 63 km/h vs ref 299 km/h, on the racing line",False
+2025_British,detectors,3891.75,STOPPED,10,5,"speed 58 km/h vs ref 300 km/h, on the racing line",False
 2025_British,detectors,5475.5,STOPPED,13,4,"speed 43 km/h vs ref 308 km/h, on the racing line",True
 2025_British,detectors,5596.75,IMPACT,10,6,"lost 180 km/h in 1 s (218 to 0 km/h), harder than braking",False
 2025_British,detectors,6176.5,IMPACT,7,87,"lost 82 km/h in 1 s (118 to 77 km/h), without braking",False
 2025_British,detectors,7995.0,IMPACT,11,63,"lost 211 km/h in 1 s (237 to 0 km/h), harder than braking",False
 2025_British,detectors,8307.0,IMPACT,11,87,"lost 194 km/h in 1 s (273 to 37 km/h), harder than braking",False
 2025_British,detectors,8380.0,IMPACT,7,87,"lost 109 km/h in 1 s (137 to 8 km/h), with brakes on",False
-2025_British,detectors,8380.25,IMPACT,7,31,"lost 90 km/h in 1 s (140 to 68 km/h), without braking",False
+2025_British,detectors,8380.25,IMPACT,7,31,"lost 90 km/h in 1 s (140 to 68 km/h), with brakes on",False
 2025_British,detectors,8380.25,MULTI,7,"31,87","cars 31, 87 in sectors 7-7 within 5 s",False
 2025_British,detectors,8432.25,STOPPED,14,16,"speed 45 km/h vs ref 250 km/h, on the racing line",False
 2025_British,baseline,3411.75,STOPPED,5,30,speed 45 km/h < 50 km/h,False
@@ -2115,8 +2107,7 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Dutch,baseline,8997.25,STOPPED,15,5,speed 44 km/h < 50 km/h,True
 2025_Dutch,baseline,8998.25,STOPPED,15,55,speed 44 km/h < 50 km/h,True
 2025_Miami,detectors,3454.75,STOPPED,2,30,"speed 10 km/h vs ref 120 km/h, on the racing line",False
-2025_Miami,detectors,3533.5,STOPPED,11,7,"speed 91 km/h vs ref 331 km/h, on the racing line",True
-2025_Miami,detectors,3650.5,IMPACT,1,81,"lost 83 km/h in 1 s (203 to 119 km/h), without braking",True
+2025_Miami,detectors,3569.25,STOPPED,14,7,"speed 13 km/h vs ref 115 km/h, on the racing line",False
 2025_Miami,detectors,4304.0,STOPPED,13,14,"speed 11 km/h vs ref 133 km/h, on the racing line",True
 2025_Miami,detectors,6052.5,STOPPED,6,87,"speed 49 km/h vs ref 250 km/h, on the racing line",False
 2025_Miami,detectors,6476.5,STOPPED,16,5,"speed 50 km/h vs ref 292 km/h, on the racing line",False
@@ -2172,10 +2163,8 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2025_Miami,baseline,6618.5,STOPPED,18,1,speed 42 km/h < 50 km/h,True
 2026_Australian,anomaly_advisory,7822.75,ANOMALY,2,55,anomaly score 0.77 (threshold 0.75),True
 2026_Australian,anomaly_advisory,8006.25,ANOMALY,1,18,anomaly score 0.75 (threshold 0.75),True
-2026_Australian,detectors,4663.25,STOPPED,13,6,"speed 73 km/h vs ref 288 km/h, on the racing line",False
-2026_Australian,detectors,4847.0,IMPACT,3,31,"lost 105 km/h in 1 s (207 to 102 km/h), without braking",True
+2026_Australian,detectors,4666.5,STOPPED,13,6,"speed 52 km/h vs ref 277 km/h, on the racing line",False
 2026_Australian,detectors,5290.75,STOPPED,18,77,"speed 49 km/h vs ref 214 km/h, on the racing line",True
-2026_Australian,detectors,6615.25,IMPACT,17,63,"lost 98 km/h in 1 s (212 to 112 km/h), without braking",False
 2026_Australian,baseline,3757.5,STOPPED,0,81,speed 0 km/h < 50 km/h,True
 2026_Australian,baseline,4668.0,STOPPED,13,6,speed 28 km/h < 50 km/h,False
 2026_Australian,baseline,4898.25,STOPPED,19,44,speed 40 km/h < 50 km/h,True
@@ -2195,9 +2184,8 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Belgian,anomaly_advisory,5857.0,ANOMALY,2,87,anomaly score 0.76 (threshold 0.75),True
 2026_Belgian,anomaly_advisory,6943.0,ANOMALY,2,1,anomaly score 0.76 (threshold 0.75),True
 2026_Belgian,anomaly_advisory,7192.0,ANOMALY,2,14,anomaly score 0.76 (threshold 0.75),True
-2026_Belgian,detectors,3395.75,IMPACT,7,63,"lost 88 km/h in 1 s (128 to 13 km/h), without braking",False
+2026_Belgian,detectors,3395.75,IMPACT,7,63,"lost 88 km/h in 1 s (128 to 13 km/h), with brakes on",False
 2026_Belgian,detectors,3449.5,STOPPED,15,31,"speed 30 km/h vs ref 181 km/h, on the racing line",False
-2026_Belgian,detectors,8444.5,STOPPED,1,12,"speed 71 km/h vs ref 270 km/h, on the racing line",True
 2026_Belgian,baseline,3396.25,STOPPED,7,63,speed 0 km/h < 50 km/h,False
 2026_Belgian,baseline,3448.5,STOPPED,14,31,speed 25 km/h < 50 km/h,False
 2026_Belgian,baseline,3505.5,STOPPED,1,1,speed 41 km/h < 50 km/h,True
@@ -2213,7 +2201,6 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_British,detectors,3381.5,IMPACT,7,87,"lost 93 km/h in 1 s (138 to 16 km/h), with brakes on",False
 2026_British,detectors,3384.5,STOPPED,7,23,"speed 21 km/h vs ref 170 km/h, on the racing line",False
 2026_British,detectors,3384.5,MULTI,7,"23,87","cars 23, 87 in sectors 7-7 within 5 s",False
-2026_British,detectors,3430.75,IMPACT,15,63,"lost 126 km/h in 1 s (231 to 100 km/h), without braking",True
 2026_British,detectors,3489.75,IMPACT,8,27,"lost 125 km/h in 1 s (135 to 45 km/h), with brakes on",False
 2026_British,detectors,6916.75,STOPPED,10,27,"speed 43 km/h vs ref 281 km/h, on the racing line",False
 2026_British,detectors,7814.75,IMPACT,14,3,"lost 148 km/h in 1 s (217 to 0 km/h), with brakes on",False
@@ -2262,20 +2249,9 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Canadian,baseline,8517.5,STOPPED,1,27,speed 4 km/h < 50 km/h,False
 2026_Canadian,baseline,9033.25,STOPPED,11,18,speed 38 km/h < 50 km/h,True
 2026_Dutch,detectors,3492.25,IMPACT,19,3,"lost 158 km/h in 1 s (171 to 0 km/h), with brakes on",False
-2026_Dutch,detectors,3493.5,IMPACT,18,5,"lost 99 km/h in 1 s (197 to 62 km/h), without braking",False
-2026_Dutch,detectors,3493.5,MULTI,18,"3,5","cars 3, 5 in sectors 18-19 within 5 s",False
-2026_Dutch,detectors,5269.25,STOPPED,16,1,"speed 34 km/h vs ref 175 km/h, on the racing line",True
-2026_Dutch,detectors,5276.25,STOPPED,16,12,"speed 38 km/h vs ref 206 km/h, on the racing line",True
-2026_Dutch,detectors,5276.25,STOPPED,16,63,"speed 33 km/h vs ref 184 km/h, on the racing line",True
-2026_Dutch,detectors,5276.25,MULTI,16,"12,63","cars 12, 63 in sectors 16-16 within 5 s",True
-2026_Dutch,detectors,5276.75,STOPPED,16,16,"speed 31 km/h vs ref 175 km/h, on the racing line",True
-2026_Dutch,detectors,5277.0,STOPPED,16,81,"speed 23 km/h vs ref 150 km/h, on the racing line",True
-2026_Dutch,detectors,5277.5,STOPPED,16,44,"speed 28 km/h vs ref 140 km/h, on the racing line",True
-2026_Dutch,detectors,5282.75,STOPPED,16,30,"speed 18 km/h vs ref 165 km/h, on the racing line",True
-2026_Dutch,detectors,5283.75,STOPPED,16,41,"speed 18 km/h vs ref 150 km/h, on the racing line",True
-2026_Dutch,detectors,5288.0,STOPPED,16,10,"speed 21 km/h vs ref 165 km/h, on the racing line",True
+2026_Dutch,detectors,3493.75,IMPACT,18,5,"lost 119 km/h in 1 s (181 to 25 km/h), with brakes on",False
+2026_Dutch,detectors,3493.75,MULTI,18,"3,5","cars 3, 5 in sectors 18-19 within 5 s",False
 2026_Dutch,detectors,5481.0,STOPPED,16,12,"speed 39 km/h vs ref 240 km/h, on the racing line",True
-2026_Dutch,detectors,8181.0,IMPACT,10,14,"lost 93 km/h in 1 s (198 to 111 km/h), without braking",True
 2026_Dutch,detectors,9435.75,STOPPED,5,31,"speed 30 km/h vs ref 151 km/h, on the racing line",False
 2026_Dutch,baseline,3492.75,STOPPED,19,3,speed 2 km/h < 50 km/h,False
 2026_Dutch,baseline,5262.0,STOPPED,15,12,speed 44 km/h < 50 km/h,True
@@ -2324,11 +2300,8 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Italian,detectors,3456.5,IMPACT,7,23,"lost 218 km/h in 1 s (300 to 99 km/h), harder than braking",True
 2026_Italian,detectors,3540.0,IMPACT,7,43,"lost 195 km/h in 1 s (292 to 103 km/h), harder than braking",True
 2026_Italian,detectors,3548.75,IMPACT,7,23,"lost 206 km/h in 1 s (293 to 103 km/h), harder than braking",True
-2026_Italian,detectors,3589.25,IMPACT,16,16,"lost 138 km/h in 1 s (234 to 6 km/h), without braking",False
+2026_Italian,detectors,3589.25,IMPACT,16,16,"lost 138 km/h in 1 s (234 to 6 km/h), with brakes on",False
 2026_Italian,detectors,3605.75,IMPACT,3,81,"lost 236 km/h in 1 s (323 to 77 km/h), harder than braking",True
-2026_Italian,detectors,5686.25,STOPPED,1,63,"speed 5 km/h vs ref 332 km/h, on the racing line",True
-2026_Italian,detectors,5686.75,STOPPED,1,10,"speed 9 km/h vs ref 332 km/h, on the racing line",True
-2026_Italian,detectors,5686.75,MULTI,1,"10,63","cars 10, 63 in sectors 1-1 within 5 s",True
 2026_Italian,detectors,5884.5,STOPPED,1,63,"speed 9 km/h vs ref 332 km/h, on the racing line",True
 2026_Italian,detectors,5887.0,STOPPED,1,10,"speed 11 km/h vs ref 332 km/h, on the racing line",True
 2026_Italian,detectors,5887.0,MULTI,1,"10,63","cars 10, 63 in sectors 1-1 within 5 s",True
@@ -2418,9 +2391,8 @@ race,system,t,type,msector,drivers,evidence,false_alarm
 2026_Miami,detectors,3924.0,MULTI,18,"10,30","cars 10, 30 in sectors 18-18 within 5 s",False
 2026_Miami,detectors,4215.5,STOPPED,16,27,"speed 52 km/h vs ref 331 km/h, on the racing line",False
 2026_Miami,detectors,5149.0,STOPPED,18,18,"speed 13 km/h vs ref 80 km/h, on the racing line",False
-2026_Miami,detectors,6928.75,IMPACT,17,77,"lost 84 km/h in 1 s (168 to 72 km/h), without braking",True
-2026_Miami,detectors,8991.0,IMPACT,4,16,"lost 87 km/h in 1 s (140 to 7 km/h), without braking",False
-2026_Miami,detectors,9049.5,STOPPED,1,12,"speed 71 km/h vs ref 288 km/h, on the racing line",True
+2026_Miami,detectors,6928.75,IMPACT,17,77,"lost 84 km/h in 1 s (168 to 72 km/h), with brakes on",True
+2026_Miami,detectors,8991.0,IMPACT,4,16,"lost 87 km/h in 1 s (140 to 7 km/h), with brakes on",False
 2026_Miami,baseline,3516.25,STOPPED,15,6,speed 35 km/h < 50 km/h,True
 2026_Miami,baseline,3516.25,STOPPED,15,77,speed 40 km/h < 50 km/h,True
 2026_Miami,baseline,3537.25,STOPPED,18,55,speed 46 km/h < 50 km/h,True

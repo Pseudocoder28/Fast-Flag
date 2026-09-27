@@ -7,7 +7,6 @@ race,t,flag,msector,reason,category,race_control_red
 2023_Australian,10757.0,SC,2,multi-car incident,matched,
 2023_Australian,10757.25,RED,2,"SC out for a live incident with about 2 laps left: a red flag lets the race restart and finish racing, not behind the SC",matched,True
 2023_Mexico_City,6484.25,SC,10,car 20 stopped for 3.0 s after an impact,matched,
-2023_Mexico_City,8022.0,SC,14,multi-car incident,during an official neutralisation,
 2023_Mexico_City,10743.0,VSC,14,"car 18 stopped for 10.0 s, no impact detected",official yellows only,
 2023_Monaco,8027.75,SC,7,car 55 stopped for 3.0 s after an impact,official yellows only,
 2023_Monaco,8357.5,VSC,17,"car 20 stopped for 10.0 s, no impact detected",official yellows only,
@@ -52,11 +51,9 @@ race,t,flag,msector,reason,category,race_control_red
 2026_British,7819.0,SC,14,car 3 stopped for 3.0 s after an impact,matched,
 2026_British,7917.5,RED,14,"SC out for a live incident with about 4 laps left: a red flag lets the race restart and finish racing, not behind the SC",red while race control kept its SC or VSC,False
 2026_Canadian,6874.5,VSC,11,"car 1 stopped for 10.0 s, no impact detected",official yellows only,
-2026_Dutch,3493.5,SC,18,multi-car incident,official yellows only,
-2026_Dutch,5276.25,SC,16,multi-car incident,no official flag,
+2026_Dutch,3493.75,SC,18,multi-car incident,official yellows only,
 2026_Dutch,9445.75,VSC,5,"car 31 stopped for 10.0 s, no impact detected",matched,
 2026_Italian,3648.0,SC,7,car 16 stopped for 3.0 s after an impact,during an official neutralisation,
-2026_Italian,5686.75,SC,1,multi-car incident,no official flag,
 2026_Italian,5887.0,SC,1,multi-car incident,no official flag,
 2026_Italian,7862.25,VSC,3,"car 18 stopped for 10.0 s, no impact detected",matched,
 2026_Miami,3911.75,VSC,16,"car 6 stopped for 10.0 s, no impact detected",matched,

@@ -34,7 +34,7 @@ race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_
 2025_Miami,6522.16,6522.16,VSC,VSC,track-wide,earlier,34.66,6487.5,VSC,VSC,,5,STOPPED,"car 5 stopped for 10.0 s, no impact detected",,
 2026_Australian,4681.38,4681.38,VSC,VSC,track-wide,earlier,3.38,4678.0,VSC,VSC,,6,STOPPED,"car 6 stopped for 10.0 s, no impact detected",,
 2026_Australian,5311.38,5328.38,VSC,VSC,20,earlier,9.13,5319.25,VSC,VSC,,77,STOPPED,"car 77 stopped for 10.0 s, no impact detected",,
-2026_Australian,6673.38,6673.38,VSC,VSC,track-wide,missed,,,,,car collapse seen,63,IMPACT,car 63 collapsed 59 s before the first official message; we showed yellow but did not escalate,,
+2026_Australian,6673.38,6673.38,VSC,VSC,track-wide,missed,,,,,car collapse seen,63,,car 63 collapsed 59 s before the first official message; we made no recommendation,,
 2026_Belgian,3398.9,3448.9,SC,SC,4 5 6 7,earlier,48.65,3400.25,SC,SC,,,,car 63 stopped for 3.0 s after an impact,,
 2026_Belgian,5476.9,5476.9,VSC,VSC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
 2026_Belgian,5721.9,5721.9,VSC,VSC,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),,
