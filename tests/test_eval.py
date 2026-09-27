@@ -56,7 +56,7 @@ def test_numbers_md_builds_from_the_committed_charts() -> None:
     from src.eval.numbers import build
     text = build()
     assert "replay of historical FastF1 data" in text
-    for section in ("## Detection, headline", "## Latency from crash onset", "## Risk model", "## Case studies",
+    for section in ("## Where the AI is", "## Detection, headline", "## Latency from crash onset", "## Risk model", "## Case studies",
                     "## Escalation scorecard", "## Holdout"):
         assert section in text
 
