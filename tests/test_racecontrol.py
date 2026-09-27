@@ -748,13 +748,72 @@ def test_crash_site_holds_sc_and_calls_a_soft_red_until_race_control_is_green() 
 def test_crash_site_released_when_the_car_is_moved_away() -> None:
     rc, recs = crash_scene()
     craned = lambda t: stopped_33(100.0 if t < 60.0 else 100.0 + CRASH_SITE_MOVE_M + 10.0)(t)
-    recs += tick_until(rc, 10.0, 300.0, craned, track_status="4")
+    sc_until_300 = lambda t: "4" if t < 300.0 else "1"
+    recs += tick_until(rc, 10.0, 320.0, craned, track_status=sc_until_300)
     assert not any(r["flag"] == "RED" for r in recs)        # moved at t=60, before the red timer
+    # no longer a crash site: the parked rule clears its sector 180 s after the move ...
+    sector = [r for r in recs if r["message"] == "CLEAR IN TRACK SECTOR 5"]
+    assert sector and 60.0 + PARKED_CAR_S <= sector[0]["t"] <= 60.0 + PARKED_CAR_S + 10.0
+    assert "race control" not in sector[0]["reason"]
+    # ... but our SC waits for race control's own green before TRACK CLEAR
     clear = [r for r in recs if r["message"] == "TRACK CLEAR"]
-    # no longer a crash site, so the parked rule applies from the move (60 + 180 s),
-    # even though race control is still under its Safety Car
-    assert clear and 60.0 + PARKED_CAR_S <= clear[0]["t"] <= 60.0 + PARKED_CAR_S + 15.0
-    assert "race control" not in clear[0]["reason"]
+    assert len(clear) == 1 and clear[0]["t"] > 300.0 and "race control" in clear[0]["reason"]
+
+
+def test_no_impact_stop_keeps_our_vsc_while_race_control_neutralises() -> None:
+    """2023 Australia, Magnussen: a stop with no impact gets our VSC and no crash site; the
+    parked rule used to give TRACK CLEAR 5 s before race control's red flag."""
+    rc = RaceControl()
+    rc.on_tick(make_tick(9.0, [make_car("20", 4, x=100.0), moving_car("44", 2, 9.0)]))
+    rc.on_detection(make_det("det-s20", 10.0, "20", 4, "STOPPED", 0.85))
+    cars = lambda t: [make_car("20", 4, speed=0.0, x=100.0), moving_car("44", 2, t)]
+    recs = tick_until(rc, 10.0, 400.0, cars, track_status=lambda t: "4" if t >= 30.0 else "1")
+    assert [r["flag"] for r in recs if r["flag"] in ("VSC", "SC", "RED")] == ["VSC"]
+    assert any(r["message"] == "CLEAR IN TRACK SECTOR 4" for r in recs)   # its sector clears as before
+    assert not any(r["message"] == "TRACK CLEAR" for r in recs)           # our VSC stays under race control's SC
+    after = tick_until(rc, 400.0, 420.0, cars, track_status="1")
+    clear = [r for r in after if r["message"] == "TRACK CLEAR"]
+    assert len(clear) == 1 and "race control" in clear[0]["reason"]
+
+
+def two_crash_scene() -> tuple[RaceControl, list[dict]]:
+    """Car 33 crashes in sector 5 at t=10 and car 55 in sector 8 at t=30; both stay put."""
+    rc, recs = crash_scene()
+    recs += tick_until(rc, 10.0, 29.0, stopped_33(), track_status=lambda t: "4" if t >= 20.0 else "1")
+    rc.on_tick(make_tick(29.25, stopped_33()(29.25) + [make_car("55", 8, x=500.0)], track_status="4"))
+    recs += crash(rc, 30.0, "55", 8)
+    return rc, recs
+
+
+def cars_33_55(x33: float = 100.0):
+    return lambda t: stopped_33(x33)(t) + [make_car("55", 8, speed=0.0, x=500.0)]
+
+
+def test_soft_red_passes_to_another_crash_site_without_a_flip() -> None:
+    rc, recs = two_crash_scene()
+    recs += tick_until(rc, 30.0, 299.0, cars_33_55(), track_status="4")
+    assert rc.soft_red == "33" and sum(r["flag"] == "RED" for r in recs) == 1
+    craned = lambda t: cars_33_55(100.0 if t < 300.0 else 160.0)(t)   # car 33 lifted 60 m at t=300
+    at = tick_until(rc, 299.0, 301.0, craned, track_status="4")
+    assert rc.soft_red == "55"                                          # the red passes on ...
+    assert not [r for r in at if r["flag"] in ("VSC", "SC", "RED")]     # ... with no SC-then-RED flip
+
+
+def test_moved_crash_car_in_the_same_sector_sends_the_downgrade() -> None:
+    rc, recs = crash_scene()
+    moved = lambda t: stopped_33(100.0 if t < 200.0 else 140.0)(t)     # set down 40 m away, still in sector 5
+    recs += tick_until(rc, 10.0, 205.0, moved, track_status="4")
+    down = [r for r in recs if r["t"] >= 200.0 and r["flag"] == "SC"]
+    assert len(down) == 1 and "a downgrade, not a new call" in down[0]["reason"] and down[0]["msector"] == 5
+    assert rc.soft_red is None and rc.global_.flag == "SC"
+
+
+def test_green_release_of_every_crash_site_sends_no_false_downgrade() -> None:
+    rc, recs = two_crash_scene()
+    recs += tick_until(rc, 30.0, 400.0, cars_33_55(), track_status="4")
+    after = tick_until(rc, 400.0, 460.0, cars_33_55(), track_status="1")
+    assert not [r for r in after if r["flag"] == "SC"]                  # both sites released by the green: no downgrade
+    assert [r["message"] for r in after if r["message"] == "TRACK CLEAR"] == ["TRACK CLEAR"]
 
 
 def test_no_soft_red_and_released_as_before_when_race_control_never_reacts() -> None:
