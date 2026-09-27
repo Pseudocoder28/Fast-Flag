@@ -75,21 +75,28 @@ class LiveReplay:
         self.warned = False
         self.load(race)
 
-    def load(self, race: RaceData) -> None:
-        self.race = race
+    def prepare(self, race: RaceData) -> tuple:
+        """Everything a race needs before it can play (slow: the timeline may be built)."""
         if self.use_timeline:
             from src.replay.timeline import load_or_build
-            self.timeline = load_or_build(race, self.make_processors, *self.flags,
-                                          log=lambda m: print(m, file=sys.stderr, flush=True))
-            self.engine = Engine(race, [])
+            timeline = load_or_build(race, self.make_processors, *self.flags,
+                                     log=lambda m: print(m, file=sys.stderr, flush=True))
+            engine = Engine(race, [])
         else:
-            self.timeline = None
-            self.engine = Engine(race, self.make_processors(race))
-        self.cars = Cars.from_race(race)
+            timeline, engine = None, Engine(race, self.make_processors(race))
+        return race, timeline, engine, Cars.from_race(race)
+
+    def install(self, prepared: tuple) -> None:
+        """Swap in a prepared race, all at once on the event loop: the playback loop never sees
+        one race's ticks with another's timeline."""
+        self.race, self.timeline, self.engine, self.cars = prepared
         self.epoch = getattr(self, "epoch", 0) + 1   # a seek or race switch: the playback loop drops its step
-        self.tick_t = float(race.times[0]) if len(race.times) else 0.0
+        self.tick_t = float(self.race.times[0]) if len(self.race.times) else 0.0
         self.pending: list[dict] | None = None      # history to push after the next tick (a seek)
         self.hub.reset()
+
+    def load(self, race: RaceData) -> None:
+        self.install(self.prepare(race))
 
     def seek(self, t: float) -> None:
         jump = abs(t - self.engine.clock) > RESET_JUMP_S
@@ -106,7 +113,8 @@ class LiveReplay:
         per car."""
         k, j = self.engine.k, self.engine.j
         off, times = self.race.official, self.race.times
-        envs, risk, o = [], {}, 0
+        o = bisect.bisect_left(self.engine.official_t, self.engine.t_start)   # the engine never plays earlier ones
+        envs, risk = [], {}
         for i in range(k):
             while o < j and off[o]["t"] <= times[i]:
                 envs.append({"kind": "official", "data": off[o]})
@@ -152,12 +160,13 @@ class LiveReplay:
             print("precomputed race: ignoring recs from a separate race control client "
                   "(not needed; use --live to take them)", file=sys.stderr, flush=True)
 
-    def switch(self, rid: str) -> None:
+    def switch(self, rid: str) -> tuple:
+        """Load and prepare another race (run in a worker thread), then install() it."""
         if is_holdout_id(rid) and not self.allow_holdout:
             raise HTTPException(403, f"{rid} is a holdout race: start the server with --holdout")
         if rid not in available_races(include_holdout=self.allow_holdout):
             raise HTTPException(404, f"race {rid} is not built (python -m src.ingest.build {rid})")
-        self.load(RaceData.load(rid))
+        return self.prepare(RaceData.load(rid))
 
     async def run(self) -> None:
         while True:
@@ -234,7 +243,7 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData
     @app.post("/replay")
     async def control(body: dict) -> dict:
         if body.get("race") and body["race"] != replay.race.race:
-            await asyncio.to_thread(replay.switch, str(body["race"]))   # loading + scoring takes seconds
+            replay.install(await asyncio.to_thread(replay.switch, str(body["race"])))   # loading takes seconds
         if "speed" in body:
             replay.speed = float(body["speed"])
         if body.get("seek_t") is not None:

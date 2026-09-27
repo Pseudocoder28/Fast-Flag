@@ -570,7 +570,7 @@ async function fetchCars() {
   const gen = M.gen;
   try {
     const r = await (await fetch("/cars")).json();
-    if (gen !== M.gen || (S.t !== null && Math.abs(r.t - S.t) > RESET_JUMP_S)) return;
+    if (gen !== M.gen) return;    // asked before the last seek: the next tick asks again
     M.out = new Map((r.out || []).map((o) => [String(o.drv), o]));
   } catch (e) {
     if (gen !== M.gen) return;    // an older server without /cars: nothing is taken off the map

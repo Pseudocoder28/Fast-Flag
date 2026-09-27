@@ -302,6 +302,10 @@ html, body {
 .status-chip[data-flag="RED"] { background: var(--red); color: #ffffff; }
 .status-chip[data-flag="UNKNOWN"] { background: #2a313b; color: var(--text-dim); }
 
+.out-card {
+  min-height: 78px;             /* one row of cars reserved: the legend below never jumps */
+}
+
 .out-card h2 {
   margin-bottom: 0;
 }

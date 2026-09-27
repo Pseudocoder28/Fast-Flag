@@ -225,3 +225,18 @@ def test_cars_out_of_the_race_stay_out_through_a_stoppage() -> None:
     assert at(75)["44"]["why"] == "stopped" and at(75)["44"]["since"] == T0 + 10
     assert at(85)["16"]["why"] == "no data"
     assert "44" in at(120)                                                     # still out during the red flag
+
+
+def test_a_seek_never_sends_official_messages_from_before_the_replay_start(tmp_path, monkeypatch) -> None:
+    import src.replay.timeline as timeline
+    monkeypatch.setattr(timeline, "CACHE", tmp_path)
+    race = synthetic_race()
+    early = {"t": T0 - 50, "category": "Flag", "message": "YELLOW IN TRACK SECTOR 1", "flag": "YELLOW",
+             "scope": "Sector", "msector": 1, "drivers": []}
+    race = RaceData.from_frame("TEST", race.frame, race.track, [early] + race.official)
+    app = create_app(race, make_processors=lambda r: [OneStop()], autoplay=False, timeline=True)
+    with TestClient(app) as c, c.websocket_connect("/stream?catchup=1") as page:
+        c.post("/replay", json={"speed": 0, "seek_t": T0 + 20})
+        assert page.receive_json()["kind"] == "tick"
+        burst = [page.receive_json() for _ in range(3)]
+        assert all(e["data"]["t"] >= T0 for e in burst)          # as a continuous run from the start: never before it

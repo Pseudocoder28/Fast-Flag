@@ -21,6 +21,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 from collections.abc import Callable
 from pathlib import Path
 from time import perf_counter
@@ -32,7 +33,7 @@ from src.replay.engine import Engine, Processor, RaceData
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / "data" / "timeline"
 KEY_PATHS = ("src/detect", "src/predict", "src/racecontrol/engine.py", "src/replay/engine.py",
-             "src/replay/pipeline.py", "src/replay/timeline.py", "data/models")
+             "src/replay/pipeline.py", "src/replay/timeline.py", "src/ingest/sectors.py", "data/models")
 KEY_SUFFIXES = {".py", ".json", ".joblib", ".txt"}
 
 
@@ -41,6 +42,7 @@ def shown(path: Path) -> str:
 
 
 def cache_key(rid: str, detect: bool, predict: bool) -> str:
+    """The code and models by content, the race's own files (a rebuild) by size and mtime."""
     h = hashlib.sha256(f"{rid}|detect={detect}|predict={predict}".encode())
     for rel in KEY_PATHS:
         base = ROOT / rel
@@ -48,7 +50,16 @@ def cache_key(rid: str, detect: bool, predict: bool) -> str:
         for p in files:
             h.update(str(p.relative_to(ROOT)).encode())
             h.update(p.read_bytes())
+    from src.replay.engine import race_dir
+    for p in sorted(race_dir(rid).glob(f"{rid}[._]*")):
+        st = p.stat()
+        h.update(f"{p.name}|{st.st_size}|{st.st_mtime_ns}".encode())
     return h.hexdigest()
+
+
+def cache_path(rid: str, detect: bool, predict: bool) -> Path:
+    tag = "" if detect and predict else f"_detect{int(detect)}_predict{int(predict)}"
+    return CACHE / f"{rid}{tag}.json.gz"
 
 
 def build(race: RaceData, processors: list[Processor]) -> list[list[dict]]:
@@ -76,7 +87,7 @@ def build(race: RaceData, processors: list[Processor]) -> list[list[dict]]:
 def load_or_build(race: RaceData, make_processors: Callable[[RaceData], list[Processor]],
                   detect: bool = True, predict: bool = True, log: Callable[[str], None] = print) -> list[list[dict]]:
     key = cache_key(race.race, detect, predict)
-    path = CACHE / f"{race.race}.json.gz"
+    path = cache_path(race.race, detect, predict)
     if path.exists():
         try:
             with gzip.open(path, "rt", encoding="utf-8") as f:
@@ -90,8 +101,10 @@ def load_or_build(race: RaceData, make_processors: Callable[[RaceData], list[Pro
     t0 = perf_counter()
     ticks = build(race, make_processors(race))
     CACHE.mkdir(parents=True, exist_ok=True)
-    with gzip.open(path, "wt", encoding="utf-8") as f:
+    tmp = path.with_name(path.name + f".{os.getpid()}.tmp")
+    with gzip.open(tmp, "wt", encoding="utf-8") as f:
         json.dump({"key": key, "race": race.race, "ticks": ticks}, f, separators=(",", ":"))
+    os.replace(tmp, path)                  # atomic: a half-written cache is never read
     n_recs = sum(e["kind"] == "rec" for tk in ticks for e in tk)
     log(f"timeline: {race.race} built in {perf_counter() - t0:.0f} s, {n_recs} recs, cached in {shown(path)}")
     return ticks
