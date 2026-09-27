@@ -337,6 +337,17 @@ html, body {
   color: var(--text);
 }
 
+.out-car.crashed {
+  border-color: rgba(214, 40, 57, 0.55);
+  color: #f0a3ab;
+}
+
+.legend-hazard {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+}
+
 .legend {
   display: grid;
   grid-template-columns: 1fr 1fr;
