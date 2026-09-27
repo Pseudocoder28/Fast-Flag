@@ -3,40 +3,40 @@
   "race_hours": 31.23,
   "official_escalations": 51,
   "status": {
-    "earlier": 27,
-    "later": 2,
-    "already out": 2,
-    "missed": 20
+    "earlier": 30,
+    "later": 1,
+    "already out": 4,
+    "missed": 16
   },
-  "matched": 29,
-  "median_lead_s": 20.0,
+  "matched": 31,
+  "median_lead_s": 20.1,
   "lead_iqr_s": [
-    9.1,
-    33.9
+    8.4,
+    34.3
   ],
-  "same_first_flag": 23,
+  "same_first_flag": 24,
   "flag_pairs": {
     "RED->SC": 1,
-    "SC->SC": 15,
-    "SC->VSC": 3,
+    "SC->SC": 14,
+    "SC->VSC": 4,
     "VSC->SC": 2,
-    "VSC->VSC": 8
+    "VSC->VSC": 10
   },
   "by_official_flag": {
     "VSC": {
       "official": 23,
-      "earlier": 8,
-      "later": 2,
-      "already out": 0,
-      "missed": 13,
-      "median_lead_s": 14.6
+      "earlier": 11,
+      "later": 1,
+      "already out": 1,
+      "missed": 10,
+      "median_lead_s": 22.1
     },
     "SC": {
       "official": 25,
       "earlier": 18,
       "later": 0,
-      "already out": 1,
-      "missed": 6,
+      "already out": 2,
+      "missed": 5,
       "median_lead_s": 21.3
     },
     "RED": {
@@ -49,27 +49,27 @@
     }
   },
   "missed_kind": {
-    "car collapse seen": 7,
-    "no car collapse": 13
+    "car collapse seen": 4,
+    "no car collapse": 12
   },
-  "our_escalations": 59,
+  "our_escalations": 62,
   "our_by_category": {
-    "matched": 31,
+    "matched": 33,
     "during an official neutralisation": 4,
-    "official yellows only": 19,
+    "official yellows only": 20,
     "escalated incident, outside the match window": 0,
     "no official flag": 4,
     "red while race control kept its SC or VSC": 1
   },
-  "extra": 24,
-  "extra_per_hour": 0.77,
+  "extra": 25,
+  "extra_per_hour": 0.8,
   "extra_by_flag": {
     "VSC": 6,
-    "SC": 17,
+    "SC": 18,
     "RED": 1
   },
   "our_by_flag": {
-    "VSC": 17,
+    "VSC": 20,
     "SC": 39,
     "RED": 3
   },
