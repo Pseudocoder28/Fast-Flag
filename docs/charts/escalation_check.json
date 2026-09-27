@@ -51,25 +51,25 @@
     "car collapse seen": 3,
     "no car collapse": 7
   },
-  "our_escalations": 49,
+  "our_escalations": 47,
   "our_by_category": {
     "matched": 23,
-    "during an official neutralisation": 2,
-    "official yellows only": 15,
+    "during an official neutralisation": 1,
+    "official yellows only": 16,
     "escalated incident, outside the match window": 0,
-    "no official flag": 9,
+    "no official flag": 7,
     "red while race control kept its SC or VSC": 0
   },
-  "extra": 24,
-  "extra_per_hour": 0.8,
+  "extra": 23,
+  "extra_per_hour": 0.76,
   "extra_by_flag": {
     "VSC": 9,
-    "SC": 13,
+    "SC": 12,
     "RED": 2
   },
   "our_by_flag": {
     "VSC": 21,
-    "SC": 25,
+    "SC": 23,
     "RED": 3
   },
   "red_check": {
@@ -131,6 +131,19 @@
       "at": "2026-09-27T03:09:49",
       "commit": "013bd259cbcb820125132ea73bcfea19317ffda1",
       "reason": null,
+      "models": {
+        "anomaly.joblib": "b0e05575e85f27eeefc55f1fd6f9e75684e9995216d918ba0603e434852868b8",
+        "detector_config.json": "bc71d84e6507504757608a455f232b0279852361b936771ff20924ee575ed6ae",
+        "risk_10.txt": "2792abb98a40f6313e3bc1846d5f0adce3b7c7fbfc357bf5c1011b6ee76aa6e7",
+        "risk_20.txt": "9a5f6694a03b0d4a00c83dbcb321484f8e3d4261c622bb7029fd0e916253f4ab",
+        "risk_30.txt": "b6c72dab1cf3a53eeb79c1c8e9dcb112a0371fa09049a9bf91bd1187bca86e4e",
+        "risk_meta.json": "f38ba7377efa26e7a27219b71bc257b1c4daf21e1cc4d08fea9d1d05c997cb43"
+      }
+    },
+    {
+      "at": "2026-09-27T04:30:16",
+      "commit": "141f1735b2e9407beb2eb56fc7a3573c88022120",
+      "reason": "27 Sept detector and race control fixes found on the 2021 Azerbaijan replay and checked on the training races (never on these races)",
       "models": {
         "anomaly.joblib": "b0e05575e85f27eeefc55f1fd6f9e75684e9995216d918ba0603e434852868b8",
         "detector_config.json": "bc71d84e6507504757608a455f232b0279852361b936771ff20924ee575ed6ae",
