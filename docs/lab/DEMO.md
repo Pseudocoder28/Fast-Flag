@@ -58,11 +58,10 @@ Start: `curl -s -X POST localhost:8000/replay -H 'content-type: application/json
 
 | Replay t (s) | Wall time | On screen | Voice | Presenter says |
 |---|---|---|---|---|
-| 5268 | 0 s | Empty broadcast frame | | "Baku 2021, lap 31. Watch car 18, Lance Stroll, flat out on the main straight." |
-| 5275.25 | 7 s | YELLOW banner: CAR #18, IMPACT, SECTOR 20 | "Yellow flag. Car 18, impact, sector 20." | (let the voice speak) |
+| 5268 | 0 s | Big track map, every car moving, both chips green | | "Baku 2021, lap 31. Watch car 18, Lance Stroll, flat out on the main straight." || 5275.25 | 7 s | YELLOW banner: CAR #18, IMPACT, SECTOR 20 | "Yellow flag. Car 18, impact, sector 20." | (let the voice speak) |
 | 5276.25 | 8 s | Banner becomes DOUBLE YELLOW: STOPPED | "Double yellow. Car 18, stopped, sector 20." | |
 | 5277.99 | 10 s | Double yellow banner: FAST FLAG AHEAD BY 1.7 s | | |
-| 5279.25 | 11 s | SAFETY CAR banner. Exposure Clock starts in the top right | "Safety Car. Car 18, stopped, sector 20." | "Five seconds after the crash, we recommend the Safety Car. The clock counts how long the track stays live, and every car that passes the wreck at racing speed." |
+| 5279.25 | 11 s | SAFETY CAR banner. Exposure Clock starts in the top right. The map shrinks to the top centre: the track turns orange, car 18 pulses red, chips read FAST FLAG SAFETY CAR and RACE CONTROL YELLOW | "Safety Car. Car 18, stopped, sector 20." | "Five seconds after the crash, we recommend the Safety Car. The clock counts how long the track stays live, and every car that passes the wreck at racing speed." |
 | about 5281 | 13 s | Ticker lines appear: #16, #5, #22, ... | "Race control confirms Double yellow, 2.7 seconds after Fast Flag." | |
 
 At about 13 s wall time, speed it up so the room does not wait 30 s:

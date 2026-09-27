@@ -430,6 +430,85 @@ html, body {
 
 #conn.paused { color: var(--ink-2); }
 
+/* --- track map: big in the middle while no flag is out, a corner card once one is ------ */
+
+#mapbox {
+  position: absolute;
+  left: calc(4vw + 380px + 3vw);
+  top: 10vh;
+  width: calc(89vw - 380px);
+  height: calc(70vh - 72px);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 10px;
+  background: rgba(12, 12, 12, 0.55);
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  transition: left 0.6s ease, top 0.6s ease, width 0.6s ease, height 0.6s ease, background 0.6s ease;
+}
+
+/* a flag is out: the map shrinks to the top centre, between the race control panel and the
+   exposure clock, above the banners (three banners start about 48vh down at 1600 x 900) */
+#mapbox.active {
+  width: calc(86vw - 760px);
+  height: 38vh;
+  background: var(--panel);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.map-title { font-size: 13px; font-weight: 900; letter-spacing: 0.14em; white-space: nowrap; }
+.map-tag {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--edge);
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3);
+  vertical-align: 1px;
+}
+.map-race { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--ink-2); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+
+.map-chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid var(--edge);
+  border-left: 4px solid var(--clear);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.chip b { color: var(--ink); font-weight: 900; }
+.chip.lvl-YELLOW { border-left-color: var(--yellow); }
+.chip.lvl-DOUBLE_YELLOW { border-left-color: var(--double-yellow); }
+.chip.lvl-VSC { border-left-color: var(--vsc); }
+.chip.lvl-SC { border-left-color: var(--sc); }
+.chip.lvl-RED { border-left-color: var(--red); }
+.chip.lvl-NONE { border-left-color: var(--ink-3); }
+
+#map { flex: 1 1 0; min-height: 0; width: 100%; margin-top: 6px; display: block; }   /* basis 0: the canvas's own size never feeds back */
+
+.map-foot {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-foot b { color: var(--ink); font-weight: 700; }
+
 /* --- footer ----------------------------------------------------------------- */
 
 #foot {
@@ -483,4 +562,25 @@ html, body {
   .line1 { font-size: 16px; white-space: normal; }
   .line2 { font-size: 11px; white-space: normal; }
   .lead { font-size: 11px; }
+  /* one row for the top bar: smaller wordmark and buttons, the replay time stays in the map and standby */
+  #top { top: 2vh; left: 3vw; right: 3vw; gap: 10px; }
+  .wordmark { font-size: 16px; }
+  .back { padding: 6px 8px 5px; font-size: 11px; }
+  .top-left { gap: 10px; }
+  .controls { flex-wrap: nowrap; gap: 3px; }
+  .ctl { padding: 5px 6px 4px; font-size: 10.5px; letter-spacing: 0.04em; }
+  .ctl.play { min-width: 52px; }
+  .ctl-sep { margin: 0 2px; }
+  #replay-t { display: none; }
+  #mapbox {
+    left: calc(4vw + min(320px, 44vw) + 2vw);
+    top: 9vh;
+    width: calc(90vw - min(320px, 44vw));
+    height: calc(79vh - 56px);       /* ends 2vh above the standby bar */
+  }
+}
+
+/* no room for the map between the race control panel and the clock: it steps aside while a flag is out */
+@media (max-width: 1279px), (max-height: 759px) {
+  #mapbox.active { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 }

@@ -30,6 +30,11 @@
 // - When we lift a flag, its banner turns into a green CLEAR banner for a few seconds.
 // - Race control panel: the official messages as they arrive, clears included. The message
 //   that first confirms one of our banners shows that banner's lead; repeats show none.
+// - Track map: GET /track's reference line with every car from the ticks, eased between ticks
+//   (display only, never ahead of the last tick received). Big in the middle while no flag is
+//   out, a smaller top-centre card once one is. Our flagged sectors are coloured, a track-wide flag tints
+//   the whole line, and the cars behind a banner are red. Chips: our flag and race control's
+//   track status (from the tick).
 
 const WS_URL = `ws://${location.host}/stream?catchup=1`;
 const RESET_JUMP_S = 2.0;          // same rule as the race control engine and the dashboard
@@ -140,7 +145,8 @@ const el = (id) => document.getElementById(id);
 const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
   clockFlag: el("clock-flag"), clockValue: el("clock-value"), clockCars: el("clock-cars"),
   clockResult: el("clock-result"), ticker: el("ticker"), standby: el("standby"), sbRace: el("sb-race"),
-  sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty") };
+  sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty"), mapbox: el("mapbox"), map: el("map"),
+  mapRace: el("map-race"), mapFoot: el("map-foot"), chipFF: el("chip-ff"), chipRC: el("chip-rc") };
 
 // --- standby: shown while no flag is out, so the overlay never looks dead ----------------
 
@@ -167,6 +173,7 @@ function updateStandby() {
   ui.conn.textContent = !view.connected ? "RECONNECTING" : paused ? "REPLAY PAUSED" : "REPLAY RUNNING";
   ui.conn.classList.toggle("on", view.connected && !paused);
   ui.conn.classList.toggle("paused", view.connected && paused);
+  updateMapPanel(paused);
 }
 
 function resetAll() {
@@ -186,6 +193,9 @@ function resetAll() {
   ui.rcEmpty.classList.remove("hidden");
   S.clock = null;
   hideClock();
+  M.cars.clear();
+  M.top = null;
+  M.rcStatus = null;
   updateStandby();
 }
 
@@ -293,9 +303,9 @@ function showBanner(rec, cause, scope) {
   div.dataset.scope = String(scope);
   div.innerHTML = bannerHtml(rec, cause, scope);
   ui.banners.appendChild(div);
-  updateStandby();
   S.banners.set(scope, { el: div, rec, cause, scope });
   trimBanners();
+  updateStandby();
 }
 
 function trimBanners() {
@@ -340,8 +350,8 @@ function showClearBanner(rec, scope) {
   ui.banners.appendChild(div);
   const entry = { el: div, rec, cause: { cars: [], type: null }, scope, clear: true };
   S.banners.set(scope, entry);
-  updateStandby();
   trimBanners();
+  updateStandby();
   setTimeout(() => { if (S.banners.get(scope) === entry) dropBanner(scope); }, CLEAR_BANNER_MS);
 }
 
@@ -508,6 +518,242 @@ function remember(drv, dist, speed, green) {
   }
 }
 
+// --- track map --------------------------------------------------------------------------
+//
+// Display only: it draws what the ticks already said. Between two ticks a car eases from the
+// position it was drawn at to its latest position, never towards a future one.
+
+const TRACK_STATUS = { 1: ["GREEN", "CLEAR"], 2: ["YELLOW", "YELLOW"], 4: ["SAFETY CAR", "SC"], 5: ["RED FLAG", "RED"],
+  6: ["VSC", "VSC"], 7: ["VSC ENDING", "VSC"] };
+const FLAG_COLOUR = { YELLOW: "#ffd400", DOUBLE_YELLOW: "#ffb000", VSC: "#00a3e0", SC: "#ff6b00", RED: "#e10600" };
+const RANK_FLAG = Object.fromEntries(Object.entries(RANK).map(([f, r]) => [r, f]));
+const CAR_STALE_S = 5;             // a car missing from the ticks this long leaves the map
+const EASE_MAX_MS = 400;           // longest ease between two ticks (1x replay sends one every 250 ms)
+const MODE_MOVE_MS = 700;          // redraw every frame this long after the map changes size
+
+const M = { track: null, cars: new Map(), top: null, rcStatus: null, tickMs: 250, lastTickWall: null,
+  active: null, busyUntil: 0, dirty: true };
+
+function buildTrack(track) {
+  // reference line, cumulative distance and each segment's marshal sector (as the pit wall map)
+  const pts = (track.ref_line || []).map((p) => [Number(p[0]), Number(p[1])]).filter((p) => p.every(Number.isFinite));
+  if (pts.length < 3) return null;
+  const n = pts.length;
+  const cum = [0];
+  for (let i = 1; i < n; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = cum[n - 1] + Math.hypot(pts[0][0] - pts[n - 1][0], pts[0][1] - pts[n - 1][1]);
+  const msectors = track.msectors || [];
+  const sectorAt = (d) => {
+    for (const s of msectors) {
+      const a = Number(s.start_dist);
+      const b = Number(s.end_dist);
+      if (a <= b ? d >= a && d < b : d >= a || d < b) return Number(s.id);
+    }
+    return null;
+  };
+  const seg = pts.map((_, i) => sectorAt(((cum[i] + (i === n - 1 ? total : cum[i + 1])) / 2) % total));
+  const xs = pts.map((p) => p[0]);
+  const ys = pts.map((p) => p[1]);
+  const box = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+  const corners = (track.corners || []).map((c) => ({ n: c.number, x: Number(c.x), y: Number(c.y) }))
+    .filter((c) => Number.isFinite(c.x) && Number.isFinite(c.y));
+  return { pts, seg, box, corners, cx: xs.reduce((a, b) => a + b, 0) / n, cy: ys.reduce((a, b) => a + b, 0) / n };
+}
+
+function mapTick(tick, t) {
+  const now = performance.now();
+  if (M.lastTickWall !== null) {
+    const gap = now - M.lastTickWall;
+    if (gap > 0 && gap < 2000) M.tickMs = 0.8 * M.tickMs + 0.2 * gap;
+  }
+  M.lastTickWall = now;
+  M.rcStatus = String(tick.track_status ?? "");
+  for (const car of tick.cars) {
+    const x = Number(car.x);
+    const y = Number(car.y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    const drv = String(car.drv);
+    const m = M.cars.get(drv);
+    const from = m ? carAt(m, now) : [x, y];
+    M.cars.set(drv, { fx: from[0], fy: from[1], x, y, wall: now, t, inPit: Boolean(car.in_pit) });
+    const speed = Number(car.speed) || 0;
+    if (!car.in_pit && (!M.top || speed > M.top.speed)) M.top = { drv, speed };
+  }
+  for (const [drv, m] of M.cars) if (t - m.t > CAR_STALE_S) M.cars.delete(drv);
+  M.dirty = true;
+}
+
+function carAt(m, now) {
+  const a = Math.min(1, Math.max(0, (now - m.wall) / Math.min(M.tickMs, EASE_MAX_MS)));
+  const e = a * (2 - a);                                        // ease out
+  return [m.fx + (m.x - m.fx) * e, m.fy + (m.y - m.fy) * e];
+}
+
+function ourFlag() {
+  // the highest flag we have out: track-wide first, else the highest sector flag and its sector
+  const g = S.level.get(TRACK) || 0;
+  if (g > 0) return { flag: RANK_FLAG[g], text: FLAG_TEXT[RANK_FLAG[g]] };
+  let best = null;
+  for (const [scope, rank] of S.level) {
+    if (scope !== TRACK && rank > 0 && (!best || rank > best.rank)) best = { rank, scope };
+  }
+  return best ? { flag: RANK_FLAG[best.rank], text: `${FLAG_TEXT[RANK_FLAG[best.rank]]} · S${best.scope}` }
+    : { flag: "CLEAR", text: "NO FLAG" };
+}
+
+function updateMapPanel(paused) {
+  const active = S.banners.size > 0 || !ui.clock.classList.contains("hidden");
+  if (active !== M.active) {
+    M.active = active;
+    ui.mapbox.classList.toggle("active", active);
+    M.busyUntil = performance.now() + MODE_MOVE_MS;
+  }
+  ui.mapRace.textContent = [view.raceName ? `${view.raceName} GP` : null, view.lap !== null ? `LAP ${view.lap}` : null]
+    .filter(Boolean).join(" · ");
+  const ours = ourFlag();
+  ui.chipFF.className = `chip lvl-${ours.flag}`;
+  ui.chipFF.innerHTML = `FAST FLAG <b>${escapeHtml(ours.text)}</b>`;
+  const rc = TRACK_STATUS[M.rcStatus];
+  ui.chipRC.className = `chip lvl-${rc ? rc[1] : "NONE"}`;
+  ui.chipRC.innerHTML = `RACE CONTROL <b>${rc ? rc[0] : "WAITING"}</b>`;
+  const onTrack = [...M.cars.values()].filter((m) => !m.inPit).length;
+  const inPit = M.cars.size - onTrack;
+  ui.mapFoot.innerHTML = !M.cars.size ? (view.connected ? "Press play to start the replay" : "Waiting for the replay")
+    : `ON TRACK <b>${onTrack}</b> · IN PIT <b>${inPit}</b>` +
+      (M.top ? ` · TOP SPEED <b>#${escapeHtml(M.top.drv)} ${M.top.speed.toFixed(0)} km/h</b>` : "") +
+      (paused ? " · PAUSED" : "");
+  M.dirty = true;
+}
+
+function strickenCars() {
+  // the cars behind a live flag banner
+  const out = new Set();
+  for (const b of S.banners.values()) if (!b.clear) for (const c of b.cause.cars) out.add(String(c));
+  return out;
+}
+
+function drawMap(now) {
+  const cv = ui.map;
+  const w = cv.clientWidth;
+  const h = cv.clientHeight;
+  if (!w || !h) return;
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+  }
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  const tr = M.track;
+  if (!tr) return;
+  const big = Math.min(w, h) > 320;
+  const r = Math.max(8, Math.min(12, Math.min(w, h) / 38));      // 8 px: a two-digit number still reads
+  const pad = r * 2 + 4;
+  const bw = tr.box.maxX - tr.box.minX || 1;
+  const bh = tr.box.maxY - tr.box.minY || 1;
+  const k = Math.min((w - 2 * pad) / bw, (h - 2 * pad) / bh);
+  const ox = (w - bw * k) / 2;
+  const oy = (h - bh * k) / 2;
+  const P = (x, y) => [ox + (x - tr.box.minX) * k, h - (oy + (y - tr.box.minY) * k)];   // track is y-up
+  const lw = big ? 5 : 3.5;
+  const line = (idx) => {
+    ctx.beginPath();
+    let open = false;
+    for (let i = 0; i < tr.pts.length; i++) {
+      if (!idx(i)) { open = false; continue; }
+      const a = P(...tr.pts[i]);
+      const b = P(...tr.pts[(i + 1) % tr.pts.length]);
+      if (!open) ctx.moveTo(a[0], a[1]);
+      ctx.lineTo(b[0], b[1]);
+      open = true;
+    }
+  };
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  // the track: a soft casing, then the line; a track-wide flag of ours tints all of it
+  const g = S.level.get(TRACK) || 0;
+  line(() => true);
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.07)";
+  ctx.lineWidth = lw * 3.2;
+  ctx.stroke();
+  ctx.strokeStyle = g > 0 ? FLAG_COLOUR[RANK_FLAG[g]] : "#62625d";
+  ctx.lineWidth = lw;
+  ctx.globalAlpha = g > 0 ? 0.85 : 1;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  // our sector flags on top
+  for (const [scope, rank] of S.level) {
+    if (scope === TRACK || rank <= 0) continue;
+    line((i) => tr.seg[i] === scope);
+    ctx.strokeStyle = FLAG_COLOUR[RANK_FLAG[rank]];
+    ctx.lineWidth = lw * 1.9;
+    ctx.stroke();
+  }
+  // start and finish line
+  const [s0, s1] = [P(...tr.pts[0]), P(...tr.pts[1])];
+  const len = Math.hypot(s1[0] - s0[0], s1[1] - s0[1]) || 1;
+  const [nx, ny] = [-(s1[1] - s0[1]) / len, (s1[0] - s0[0]) / len];
+  ctx.beginPath();
+  ctx.moveTo(s0[0] - nx * lw * 2.2, s0[1] - ny * lw * 2.2);
+  ctx.lineTo(s0[0] + nx * lw * 2.2, s0[1] + ny * lw * 2.2);
+  ctx.strokeStyle = "#f4f4f2";
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = "butt";
+  ctx.stroke();
+  // corner numbers, big map only
+  if (big) {
+    ctx.fillStyle = "rgba(244, 244, 242, 0.28)";
+    ctx.font = `600 ${Math.round(r * 0.95)}px ui-monospace, Menlo, monospace`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (const c of tr.corners) {
+      const [px, py] = P(c.x, c.y);
+      const [cx, cy] = P(tr.cx, tr.cy);
+      const d = Math.hypot(px - cx, py - cy) || 1;
+      ctx.fillText(String(c.n), px + (px - cx) / d * r * 2.2, py + (py - cy) / d * r * 2.2);
+    }
+  }
+  // cars: the field, then the cars behind a flag on top, pulsing
+  const hit = strickenCars();
+  const order = [...M.cars.entries()].sort(([a], [b]) => (hit.has(a) ? 1 : 0) - (hit.has(b) ? 1 : 0));
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `800 ${Math.round(r * 1.1)}px system-ui, -apple-system, sans-serif`;
+  for (const [drv, m] of order) {
+    const [px, py] = P(...carAt(m, now));
+    const struck = hit.has(drv);
+    if (struck) {
+      const pulse = 0.5 + 0.5 * Math.sin(now / 180);
+      ctx.beginPath();
+      ctx.arc(px, py, r * (1.5 + 0.7 * pulse), 0, 2 * Math.PI);
+      ctx.fillStyle = `rgba(225, 6, 0, ${0.18 + 0.2 * (1 - pulse)})`;
+      ctx.fill();
+    }
+    ctx.globalAlpha = m.inPit ? 0.35 : 1;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, 2 * Math.PI);
+    ctx.fillStyle = struck ? "#e10600" : "#f4f4f2";
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.8)";
+    ctx.stroke();
+    ctx.fillStyle = struck ? "#fff" : "#050505";
+    ctx.fillText(drv, px, py + 0.5);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function mapFrame(now) {
+  // redraw while cars are easing, the map is resizing, a car pulses, or something changed
+  const easing = M.lastTickWall !== null && now - M.lastTickWall < Math.min(M.tickMs, EASE_MAX_MS) + 50;
+  if (M.dirty || easing || now < M.busyUntil || strickenCars().size) {
+    M.dirty = false;
+    drawMap(now);
+  }
+  requestAnimationFrame(mapFrame);
+}
+
 // --- envelope handlers ------------------------------------------------------------------
 
 function onTick(tick) {
@@ -518,6 +764,7 @@ function onTick(tick) {
   view.lastTickWall = performance.now();
   view.lap = tick.lap;
   view.watching = tick.cars.filter((c) => !c.in_pit).length;
+  mapTick(tick, t);
   updateStandby();
   let maxDist = 0;
   for (const car of tick.cars) maxDist = Math.max(maxDist, Number(car.dist) || 0);
@@ -700,6 +947,8 @@ async function loadTrack() {
     for (const s of track.msectors || []) length = Math.max(length, Number(s.start_dist) || 0, Number(s.end_dist) || 0);
     S.lapLength = length > 0 ? length : null;
     S.nSectors = (track.msectors || []).length || 1000;
+    M.track = buildTrack(track);
+    M.dirty = true;
   } catch (e) {
     console.warn("overlay: GET /track failed, lap length from ticks", e);
   }
@@ -783,6 +1032,8 @@ async function init() {
   await watchRace();
   setInterval(watchRace, STATUS_POLL_MS);
   setInterval(updateStandby, 500);          // notices a paused replay (no ticks) within a second
+  window.addEventListener("resize", () => { M.dirty = true; });
+  requestAnimationFrame(mapFrame);
   connect();
 }
 
