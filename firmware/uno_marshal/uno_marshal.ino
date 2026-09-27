@@ -72,8 +72,10 @@ void updateOutputs() {
   unsigned long now = millis();
   bool blinkOn = ((now / 250) % 2) == 0;
 
+  // no green anywhere while the track is neutralised (VSC, SC or RED)
+  bool neutralised = globalFlag != 0;
   for (uint8_t i = 0; i < 3; i++) {
-    digitalWrite(ZONE_GREEN[i], zones[i] == 0 ? HIGH : LOW);
+    digitalWrite(ZONE_GREEN[i], (zones[i] == 0 && !neutralised) ? HIGH : LOW);
     bool yellow = zones[i] == 1 || (zones[i] == 2 && blinkOn);
     digitalWrite(ZONE_YELLOW[i], yellow ? HIGH : LOW);
   }
