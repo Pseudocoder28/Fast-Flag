@@ -1,74 +1,60 @@
 race,t,flag,msector,reason,category,race_control_red
 2023_Australian,3772.5,SC,5,car 16 stopped for 3.0 s after an impact,matched,
-2023_Australian,3882.75,RED,5,car 16 still stopped at its crash site 120 s after it stopped,during an official neutralisation,True
 2023_Australian,4391.75,SC,9,car 23 stopped for 3.0 s after an impact,matched,
-2023_Australian,4508.75,RED,9,car 23 still stopped at its crash site 120 s after it stopped,during an official neutralisation,True
 2023_Australian,9412.5,VSC,6,"car 20 stopped for 10.0 s, no impact detected",matched,
-2023_Australian,10757.0,RED,2,multi-car incident,matched,True
+2023_Australian,9484.0,RED,6,"VSC out for a live incident with about 4 laps left: a red flag lets the race restart and finish racing, not behind the VSC",matched,True
+2023_Australian,10757.0,SC,2,multi-car incident,matched,
+2023_Australian,10757.25,RED,2,"SC out for a live incident with about 2 laps left: a red flag lets the race restart and finish racing, not behind the SC",matched,True
 2023_Mexico_City,6484.25,SC,10,car 20 stopped for 3.0 s after an impact,matched,
-2023_Mexico_City,6601.25,RED,10,car 20 still stopped at its crash site 120 s after it stopped,during an official neutralisation,True
 2023_Mexico_City,8022.0,SC,14,multi-car incident,during an official neutralisation,
 2023_Mexico_City,10743.0,VSC,14,"car 18 stopped for 10.0 s, no impact detected",official yellows only,
 2023_Monaco,8027.75,SC,7,car 55 stopped for 3.0 s after an impact,official yellows only,
-2023_Monaco,8038.5,RED,7,multi-car incident,official yellows only,False
 2023_Monaco,8357.5,VSC,17,"car 20 stopped for 10.0 s, no impact detected",official yellows only,
 2023_Monaco,8544.0,VSC,2,"car 20 stopped for 10.0 s, no impact detected",official yellows only,
 2023_Monaco,9433.75,VSC,7,"car 22 stopped for 10.0 s, no impact detected",official yellows only,
 2023_Monaco,9696.25,VSC,2,"car 2 stopped for 10.0 s, no impact detected",no official flag,
 2024_Canadian,801.25,SC,6,car 2 stopped for 3.0 s after an impact,official yellows only,
 2024_Canadian,2436.0,SC,4,car 2 stopped for 3.0 s after an impact,matched,
-2024_Canadian,2553.0,RED,4,car 2 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
 2024_Canadian,4988.75,SC,6,car 11 stopped for 3.0 s after an impact,official yellows only,
-2024_Canadian,5067.75,RED,6,multi-car incident,matched,False
+2024_Canadian,5067.75,SC,6,multi-car incident,matched,
 2024_Canadian,6281.25,SC,9,car 22 stopped for 3.0 s after an impact,official yellows only,
 2024_Mexico_City,3384.0,SC,3,car 22 stopped for 3.0 s after an impact,matched,
-2024_Mexico_City,3501.0,RED,3,car 22 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
-2024_Qatar,3309.25,RED,3,multi-car incident,matched,False
+2024_Qatar,3309.25,SC,3,multi-car incident,matched,
 2024_Qatar,3854.75,SC,3,car 30 stopped for 3.0 s after an impact,official yellows only,
 2024_Qatar,7092.75,SC,15,car 11 stopped for 3.0 s after an impact,during an official neutralisation,
 2024_Qatar,7184.5,SC,11,car 27 stopped for 3.0 s after an impact,matched,
-2024_Qatar,7301.5,RED,11,car 27 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
 2024_São_Paulo,6582.25,SC,2,car 27 stopped for 3.0 s after an impact,matched,
 2024_São_Paulo,9042.75,SC,7,car 50 stopped for 3.0 s after an impact,official yellows only,
 2024_São_Paulo,9308.0,SC,8,car 55 stopped for 3.0 s after an impact,matched,
 2025_Australian,4316.25,SC,8,car 7 stopped for 3.0 s after an impact,matched,
-2025_Australian,4429.5,RED,8,car 7 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
 2025_Australian,7646.25,SC,9,car 14 stopped for 3.0 s after an impact,matched,
-2025_Australian,7763.25,RED,9,car 14 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
 2025_Australian,8974.5,SC,19,car 81 stopped for 3.0 s after an impact,official yellows only,
 2025_Australian,9044.5,SC,18,car 87 stopped for 3.0 s after an impact,official yellows only,
 2025_Australian,9206.0,SC,2,car 30 stopped for 3.0 s after an impact,matched,
-2025_Australian,9323.0,RED,2,car 30 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
 2025_Azerbaijan,3504.5,SC,7,car 81 stopped for 3.0 s after an impact,matched,
-2025_Azerbaijan,3621.5,RED,7,car 81 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
 2025_Azerbaijan,5465.25,SC,7,car 43 stopped for 3.0 s after an impact,official yellows only,
 2025_Belgian,8415.25,SC,15,multi-car incident,during an official neutralisation,
-2025_Belgian,8421.25,RED,16,multi-car incident,red while race control kept its SC or VSC,False
 2025_British,3794.25,SC,2,car 5 stopped for 3.0 s after an impact,official yellows only,
 2025_British,3907.75,VSC,10,"car 5 stopped for 10.0 s, no impact detected",matched,
 2025_British,5605.0,SC,10,car 6 stopped for 3.0 s after an impact,matched,
-2025_British,5717.75,RED,10,car 6 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
-2025_British,8380.25,RED,7,multi-car incident,official yellows only,False
+2025_British,8380.25,SC,7,multi-car incident,official yellows only,
 2025_Dutch,8614.0,VSC,12,"car 4 stopped for 10.0 s, no impact detected",matched,
 2025_Miami,3579.25,VSC,14,"car 7 stopped for 10.0 s, no impact detected",matched,
 2025_Miami,6487.5,VSC,16,"car 5 stopped for 10.0 s, no impact detected",matched,
 2026_Australian,4678.0,VSC,13,"car 6 stopped for 10.0 s, no impact detected",matched,
 2026_Australian,5319.25,VSC,20,"car 77 stopped for 10.0 s, no impact detected",matched,
 2026_Belgian,3400.25,SC,7,car 63 stopped for 3.0 s after an impact,matched,
-2026_Belgian,3517.25,RED,7,car 63 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
-2026_British,3384.5,RED,7,multi-car incident,official yellows only,False
+2026_British,3384.5,SC,7,multi-car incident,official yellows only,
 2026_British,6927.5,VSC,10,"car 27 stopped for 10.0 s, no impact detected",matched,
 2026_British,7819.0,SC,14,car 3 stopped for 3.0 s after an impact,matched,
-2026_British,7936.0,RED,14,car 3 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False
+2026_British,7917.5,RED,14,"SC out for a live incident with about 4 laps left: a red flag lets the race restart and finish racing, not behind the SC",red while race control kept its SC or VSC,False
 2026_Canadian,6874.5,VSC,11,"car 1 stopped for 10.0 s, no impact detected",official yellows only,
-2026_Dutch,3493.5,RED,18,multi-car incident,official yellows only,False
+2026_Dutch,3493.5,SC,18,multi-car incident,official yellows only,
 2026_Dutch,5276.25,SC,16,multi-car incident,no official flag,
 2026_Dutch,9445.75,VSC,5,"car 31 stopped for 10.0 s, no impact detected",matched,
 2026_Italian,3648.0,SC,7,car 16 stopped for 3.0 s after an impact,during an official neutralisation,
-2026_Italian,3765.0,RED,7,car 16 still stopped at its crash site 120 s after it stopped,during an official neutralisation,True
 2026_Italian,5686.75,SC,1,multi-car incident,no official flag,
 2026_Italian,5887.0,SC,1,multi-car incident,no official flag,
 2026_Italian,7862.25,VSC,3,"car 18 stopped for 10.0 s, no impact detected",matched,
 2026_Miami,3911.75,VSC,16,"car 6 stopped for 10.0 s, no impact detected",matched,
 2026_Miami,3924.0,SC,18,multi-car incident,official yellows only,
-2026_Miami,4041.75,RED,18,car 10 still stopped at its crash site 120 s after it stopped,red while race control kept its SC or VSC,False

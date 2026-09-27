@@ -63,7 +63,7 @@ from src.eval.onset import add_own_ratio, onsets
 from src.eval.run import belongs
 from src.ingest.features import NEUTRAL_STATUS
 from src.ingest.holdout import assert_not_holdout
-from src.racecontrol.engine import RaceControl
+from src.racecontrol.engine import RaceControl, race_laps_from_track
 from src.replay.engine import Engine, Processor, RaceData, available_races
 
 CHARTS = Path("docs/charts")
@@ -87,7 +87,7 @@ EXTRA = ("official yellows only", "escalated incident, outside the match window"
 
 def replay(race: RaceData, suite: Processor) -> tuple[list[dict], list[dict], list[float]]:
     """Returns (detections, recommendations, times the engine reset its flag state)."""
-    rc, eng = RaceControl(), Engine(race, [suite])
+    rc, eng = RaceControl(race_laps=race_laps_from_track(race.track)), Engine(race, [suite])
     dets, recs, resets = [], [], []
     for step in eng.steps(eng.t_end):
         for env in step.envelopes:
@@ -140,6 +140,16 @@ def track_wide_at(changes: list[tuple[float, str, int | None]], t: float) -> tup
             break
         since, flag, cause = tc, f, ms
     return flag, since, cause
+
+
+def red_out_since(changes: list[tuple[float, str, int | None]], t: float) -> float | None:
+    """When our track-wide flag last went to RED, if it is still RED at t; None otherwise."""
+    since = None
+    for tc, f, _ in changes:
+        if tc > t:
+            break
+        since = (since if since is not None else tc) if f == "RED" else None
+    return since
 
 
 def status_at(status: pd.Series, t: float) -> str:
@@ -223,6 +233,8 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
         off_red = [m["t"] for m in inc.messages if m["flag"] == "RED"]
         our_red = [r["t"] for r in esc if r["flag"] == "RED" and inc.t - MATCH_BEFORE_S <= r["t"] <= t_end
                    and in_sectors(r["msector"], inc, n)]
+        if off_red and not our_red and (since := red_out_since(changes, min(off_red))) is not None:
+            our_red = [since]    # our red was already out, as "already out" for escalations
         row = {"race": rid, "t_incident": inc.t, "t_official": first["t"], "official_flag": first["flag"],
                "official_top": max((m["flag"] for m in msgs), key=RANK.get),
                "sectors": " ".join(map(str, sorted(inc.sectors))) or "track-wide", "status": "",
@@ -332,23 +344,29 @@ def summarise(results: list[dict]) -> dict:
 
 
 def our_reds(ours: pd.DataFrame) -> dict:
-    """Every red flag we sent: by time at a crash site or for a multi-car crash, and whether
-    race control showed a red around it (its red status, or a RED message from 60 s before to
-    RED_WINDOW_S after)."""
+    """Every red flag we sent: late in the race (the rule in use), by time at a crash site or
+    for a multi-car crash (the old rules, RED_BY_TIME and RED_FROM_MULTI in the engine), and
+    whether race control showed a red around it (its red status, or a RED message from 60 s
+    before to RED_WINDOW_S after)."""
     red = ours[ours["flag"] == "RED"]
     timed = red["reason"].str.contains("crash site", na=False)
+    late = red["reason"].str.contains("laps left", na=False)
     called = red["race_control_red"].astype(bool)
-    return {"total": len(red), "time_based": int(timed.sum()), "multi_car": int((~timed).sum()),
+    return {"total": len(red), "late_race": int(late.sum()), "time_based": int(timed.sum()),
+            "multi_car": int((~timed & ~late).sum()),
             "with_race_control_red": int(called.sum()), "without_race_control_red": int((~called).sum()),
             "time_based_without": int((timed & ~called).sum())}
 
 
 def red_check(off: pd.DataFrame) -> dict:
-    """Red flags per official escalated incident, until race control's TRACK CLEAR:
-    both (lead = official red time - ours), race control only, ours only."""
+    """Race control's red flags per official escalated incident, until its TRACK CLEAR: both
+    (our red in the incident's window, or already out when race control's red came; lead =
+    official red time - ours) or race control only. Reds race control never called are
+    counted per red we sent (our_reds), because race control's red for one crash can be a
+    separate official incident from its SC (2023 Australia, Magnussen)."""
     o, u = off["official_red_t"].notna(), off["our_red_t"].notna()
     lead = (off.loc[o & u, "official_red_t"] - off.loc[o & u, "our_red_t"]).to_numpy(float)
-    return {"both": int((o & u).sum()), "race_control_only": int((o & ~u).sum()), "ours_only": int((~o & u).sum()),
+    return {"both": int((o & u).sum()), "race_control_only": int((o & ~u).sum()),
             "median_lead_s": round(float(np.median(lead)), 1) if len(lead) else None}
 
 
@@ -387,9 +405,9 @@ SEGMENTS = [("earlier", "Earlier than race control", BLUE, SURFACE),
             ("later", "Later than race control", ORANGE, INK),
             ("car collapse seen", "Missed: a car collapse we could see", GRAY_DARK, SURFACE),
             ("no car collapse", "Missed: no car collapse (re-flag, debris, weather, lap 1)", GRAY_LIGHT, INK)]
-IN_SAMPLE = ("In-sample: the detector settings were tuned and the race control rules were set on these races. The A7 "
-             "holdout run tested the engine frozen before the race control changes of 26 and 27 Sept;\nthose changes were checked "
-             "on replays of the holdout, so they have no out-of-sample test.")
+IN_SAMPLE = ("In-sample: the detector settings were tuned and the race control rules were set on these races.\nThe A7 "
+             "holdout run tested the engine frozen before the race control changes of 26 and 27 Sept;\nthose changes were "
+             "checked on replays of the holdout, so they have no out-of-sample test.")
 COUNTERFACTUAL = ("Counterfactual: assumes race control acted on our recommendation at once. Race control also has "
                   "marshal reports and CCTV, and picks VSC or SC by recovery work we cannot see. Claim earlier than "
                   "the race control feed, never earlier than the marshals.")
@@ -486,13 +504,17 @@ def plot(off: pd.DataFrame, summ: dict, path: Path, title: str | None = None, sc
 
 
 def red_text(r: dict, o: dict) -> str:
+    """The red flag line of the report and NUMBERS.md: per official incident, then every red we sent."""
     lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
+    kinds = ", ".join(f"{n} {what}" for n, what in ((o.get("late_race", 0), "late in the race"),
+                                                    (o["time_based"], "by time at a crash site"),
+                                                    (o["multi_car"], "for multi-car crashes")) if n)
+    timed = f" ({o['time_based_without']} of them by time at a crash site)" if o["time_based_without"] else ""
     return (f"- Red flags: race control showed a red in {r['both'] + r['race_control_only']} of its escalated "
-            f"incidents and we recommended red in {r['both']} of them{lead}. In all we sent {o['total']} red flags "
-            f"({o['time_based']} by time at a crash site, {o['multi_car']} for multi-car crashes); race control showed "
-            f"a red around {o['with_race_control_red']} of them, and {o['without_race_control_red']} were reds race "
-            f"control never called ({o['time_based_without']} of them by time at a crash site). The data cannot see "
-            "barrier damage, debris or medical needs: do not claim red flag accuracy.")
+            f"incidents and we recommended red in {r['both']} of them{lead}. In all we sent {o['total']} red "
+            f"flag{'' if o['total'] == 1 else 's'}{f' ({kinds})' if kinds else ''}; race control showed a red around "
+            f"{o['with_race_control_red']} of them and never called {o['without_race_control_red']}{timed}. The data "
+            "cannot see barrier damage, debris or medical needs: do not claim red flag accuracy.")
 
 
 def pairs_text(pairs: dict[str, int]) -> str:
@@ -544,8 +566,8 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
               f"- Extra, race control never escalated: {summ['extra']}, {summ['extra_per_hour']:.2f} per race hour "
               f"({c['official yellows only']} where race control kept yellows only, "
               f"{c['escalated incident, outside the match window']} near an escalated incident but outside its "
-              f"match window, {c['no official flag']} with no official flag, {c[RED_UNCALLED]} red flags race control "
-              "never called while its own SC or VSC was out). By flag: "
+              f"match window, {c['no official flag']} with no official flag, {c[RED_UNCALLED]} red "
+              f"flag{'' if c[RED_UNCALLED] == 1 else 's'} race control never called while its own SC or VSC was out). By flag: "
               + ", ".join(f"{FLAG_NAME[k]} {v}" for k, v in summ["extra_by_flag"].items()) + ".",
               f"- Race control engine resets (tick jumps over 2 s): {summ['engine_resets']}.", "",
               "## Flag choice: VSC or SC", "",
