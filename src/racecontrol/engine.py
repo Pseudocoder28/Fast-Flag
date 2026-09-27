@@ -273,6 +273,10 @@ class RaceControl:
         if dtype in ("IMPACT", "MULTI"):
             for d in det["drivers"]:
                 self.impact_t[d] = max(det_t, self.impact_t.get(d, det_t))
+        if dtype == "IMPACT" and self.official_status in OFFICIAL_NEUTRAL:
+            # under race control's own SC or VSC a lone impact signature (a car braking behind the
+            # SC) raises no sector flag; it still counts if the car then stops (2021 Baku car 22)
+            return []
 
         sec = self.sectors.setdefault(msector, SectorState())
         drv = det["drivers"][0]

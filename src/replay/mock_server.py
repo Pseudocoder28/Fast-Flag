@@ -12,6 +12,10 @@ Endpoints:
   GET /track         track map for the loaded race
   GET /official      all official events for the loaded race
   GET /status        current replay time, speed, clients, the cars in the race
+  GET /cars          cars out of the race at the replay time (src.replay.cars)
+
+A seek sends the tick at the new time first, then everything before it (the fixtures are a
+precomputed race) to the pages that asked for catch-up, like the real server.
   GET /races         races available to load (the fixture race only)
   /                  the dashboard/ folder
 """
@@ -29,6 +33,7 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
+from src.replay.cars import Cars
 from src.replay.hub import RESET_JUMP_S, Hub
 from src.replay.static import NoCacheStaticFiles
 
@@ -69,16 +74,46 @@ class Replay:
         self.loop = loop
         self.track = json.loads((FIX / "track_sample.json").read_text(encoding="utf-8"))
         self.official = read_jsonl(FIX / "official_sample.jsonl")
-        self.cars = sorted({str(c["drv"]) for _, _, env in self.events if env["kind"] == "tick"
-                            for c in env["data"]["cars"]}, key=lambda d: (not d.isdigit(), int(d) if d.isdigit() else 0, d))
+        self.out = Cars.from_ticks([env["data"] for _, _, env in self.events if env["kind"] == "tick"])
+        self.cars = self.out.ids
+        self.tick_t = self.t0
+        self.pending: list[dict] | None = None      # history to push after the next tick (a seek)
+        self.epoch = 0                              # a seek: a play loop in progress stops
         self.hub = Hub()
 
     def seek(self, t: float) -> None:
         t = min(max(t, self.t0), self.t1)
-        if abs(t - self.sim_t) > RESET_JUMP_S:
-            self.hub.reset()              # the pages and race control wipe their state too
         self.sim_t = t
         self.cursor = bisect.bisect_left(self.times, self.sim_t)
+        self.epoch += 1
+        nxt = next((e[0] for e in self.events[self.cursor:] if e[2]["kind"] == "tick"), t)
+        if abs(nxt - self.tick_t) > RESET_JUMP_S:   # the pages' rule: tick time against tick time
+            self.hub.reset()              # the pages and race control wipe their state too
+            self.pending = self.history()
+
+    def history(self) -> list[dict]:
+        """Every official message, detection and rec before the cursor, then the latest risk per car."""
+        envs, risk = [], {}
+        for _, _, env in self.events[:self.cursor]:
+            if env["kind"] == "risk":
+                risk[str(env["data"].get("drv"))] = env
+            elif env["kind"] != "tick":
+                envs.append(env)
+        return envs + list(risk.values())
+
+    async def play(self, envs: list[dict]) -> None:
+        """Broadcast in order; after a seek the first tick goes out, then the history to the
+        catch-up pages, then the rest."""
+        epoch = self.epoch
+        for env in envs:
+            if self.epoch != epoch:
+                return                    # a seek came in while sending: the rest is the old position
+            if env["kind"] == "tick":
+                self.tick_t = float(env["data"]["t"])
+            await self.hub.broadcast(env)
+            if env["kind"] == "tick" and self.pending is not None:
+                await self.hub.push_catchup(self.hub.restart_history(self.pending))
+                self.pending = None
 
     def due(self) -> list[dict]:
         """Envelopes with t <= sim_t not yet sent. Never anything from the future."""
@@ -94,8 +129,7 @@ class Replay:
             if self.speed <= 0:
                 continue
             self.sim_t += STEP_S * self.speed
-            for env in self.due():
-                await self.hub.broadcast(env)
+            await self.play(self.due())
             if self.cursor >= len(self.events) and self.loop:
                 await asyncio.sleep(LOOP_PAUSE_S)
                 self.seek(self.t0)
@@ -105,7 +139,7 @@ class Replay:
         once. The cursor does not move: playback sends it again when it resumes."""
         for _, _, env in self.events[self.cursor:]:
             if env["kind"] == "tick":
-                await self.hub.broadcast(env)
+                await self.play([env])
                 return
 
     def status(self) -> dict:
@@ -169,6 +203,10 @@ def create_app(no_recs: bool = False, loop: bool = True, autoplay: bool = True) 
     @app.get("/official")
     async def official() -> list[dict]:
         return replay.official
+
+    @app.get("/cars")
+    async def cars() -> dict:
+        return replay.out.at(replay.tick_t)
 
     if (DASHBOARD / "index.html").exists():
         app.mount("/", NoCacheStaticFiles(directory=DASHBOARD, html=True), name="dashboard")

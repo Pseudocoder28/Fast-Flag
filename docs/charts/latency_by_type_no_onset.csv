@@ -102,8 +102,8 @@ race,t_official,flag,sectors,reason
 2026_Dutch,5326.22,YELLOW,[13],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Dutch,5584.22,YELLOW,[3],"no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Dutch,10682.22,DOUBLE_YELLOW,"[7, 8]","field not racing (SC, VSC, restart or procession)"
-2026_Italian,3597.82,YELLOW,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,3597.82,DOUBLE_YELLOW,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
+2026_Italian,3597.82,YELLOW,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,3613.82,SC,"[14, 15, 16]","no car collapsed below 50% (debris, weather, or a car that went off and kept going)"
 2026_Italian,5998.82,YELLOW,"[7, 8]",car already slow or stopped before the window (re-flag of an earlier stoppage)
 2026_Miami,4198.26,DOUBLE_YELLOW,[16],car already slow or stopped before the window (re-flag of an earlier stoppage)

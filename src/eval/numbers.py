@@ -99,7 +99,8 @@ def detection_loro() -> list[str]:
            "Source: tune_results.md. For each training race the thresholds were chosen on the other races and "
            "scored on that race; the naive speed threshold was tuned the same way. Recall = official incidents "
            "matched (an alert within 60 s before to 10 s after the first official message, in a matching marshal "
-           "sector, or a stopped car we were still flagging). Lead = official time minus our first alert.", ""]
+           "sector, or a stopped car we were still flagging). Lead = official time minus our first alert. This "
+           "tuning ran before the 27 Sept detector fixes (next section), so it describes the detectors as they were.", ""]
     for b, g in t.groupby("budget_fa_h"):
         d, s = g[g["system"] == "detectors"].iloc[0], g[g["system"] == "baseline"].iloc[0]
         out.append(f"- Budget {b:g} false alarms per race hour: our detectors {pct(d['recall'])} of {int(d['incidents'])} "
@@ -117,7 +118,13 @@ def detection_deployed() -> list[str]:
            "Source: detect_eval.csv, detect_alerts.csv, detect_incidents.csv. Thresholds were selected on these same "
            "races, so these are not strictly out of sample (use the headline above for that); the ANOMALY model is "
            "leave-one-race-out. ANOMALY detections are advisories (watch markers on the dashboard, confirmation for "
-           "race control), not alerts, so they are not in the recall or false alarms below.", ""]
+           "race control), not alerts, so they are not in the recall or false alarms below.", "",
+           "Detector fixes of 27 Sept, included here: a stopped car must be below 60 km/h, \"without braking\" means no "
+           "brake in the whole second of the speed drop, and nothing fires on the lap to the grid after a red flag or "
+           "after the chequered flag; our race control raises no sector flag for a lone impact under race control's "
+           "own Safety Car or VSC. They were found on the 2021 Azerbaijan replay and checked on these 20 races, so "
+           "2021 Azerbaijan is no longer out of sample for the detector rules (the machine learning models still never "
+           "saw it). Before them: 83 of 146 incidents, 94 false alarms (3.0/h).", ""]
     for system, label in (("detectors", "Our system (rule-based alerts)"), ("baseline", "Untuned 50 km/h speed threshold")):
         g = ev[ev["system"] == system]
         n, m, held = g["incidents"].sum(), g["matched"].sum(), g["held"].sum()
@@ -170,7 +177,8 @@ def risk() -> list[str]:
     out = ["## Risk model (LightGBM, leave-one-race-out)", "",
            "Source: risk_eval.csv, risk_early_warning.csv, risk_importance.csv. PR-AUC over every racing tick. "
            "Precursor = the same without each incident's last 3 s, so the car already crashing does not count as "
-           "predicting it: quote the precursor numbers.", ""]
+           "predicting it: quote the precursor numbers. The model and its labels (incidents matched to detections) "
+           "are from before the 27 Sept detector fixes; the model is frozen and was not retrained.", ""]
     for h, g in t.groupby("horizon_s"):
         r = g.set_index("model")
         out.append(f"- {h} s: precursor PR-AUC {r.loc['lightgbm', 'pr_auc_precursor']:.4f} (without the ANOMALY feature "
@@ -322,8 +330,10 @@ def lab_delay_cost() -> list[str]:
                    f"a gap of {off['t_after_onset'] - ours['t_after_onset']:.1f} s. Cars at racing speed by the official "
                    f"{off['flag']}: {by_off} counted from onset, {by_off - by_ours} counted from our {ours['flag']} call "
                    "(as the overlay's Exposure Clock does).")
-    out.append("- 2021 Azerbaijan is out of sample twice: our models never saw it, and 2021 cars ran under different "
-               "rules. Say \"earlier than the race control feed\", never \"earlier than the marshals\".")
+    out.append("- 2021 Azerbaijan: our machine learning models never saw it and 2021 cars ran under different rules, "
+               "but the detector rules were corrected on its replay on 27 Sept, so it is not out of sample for them. "
+               "This cost of delay predates those fixes. Say \"earlier than the race control feed\", never \"earlier "
+               "than the marshals\".")
     return out + [""]
 
 

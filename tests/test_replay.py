@@ -162,3 +162,98 @@ def test_a_page_that_opens_late_gets_what_it_missed_then_live() -> None:
             with c.websocket_connect("/stream?catchup=1") as page:
                 env = page.receive_json()
                 assert env["kind"] == "tick" and env["data"]["t"] >= T0 + 25
+
+
+class OneStop:
+    """Emits one STOPPED detection for car 44 at T0 + 5, as the real detectors would."""
+
+    def reset(self) -> None:
+        pass
+
+    def on_tick(self, t: float, frame: pd.DataFrame, tick: dict) -> list[dict]:
+        if t != T0 + 5:
+            return []
+        return [{"kind": "detection", "data": {"id": "det-stop", "t": t, "drivers": ["44"], "msector": 3,
+                                               "type": "STOPPED", "severity": 0.9, "evidence": "speed 0 km/h"}}]
+
+
+def precomputed_app(tmp_path, monkeypatch):
+    import src.replay.timeline as timeline
+    monkeypatch.setattr(timeline, "CACHE", tmp_path)
+    return create_app(synthetic_race(), make_processors=lambda race: [OneStop()], autoplay=False, timeline=True)
+
+
+def test_precomputed_race_sends_our_recs_itself(tmp_path, monkeypatch) -> None:
+    app = precomputed_app(tmp_path, monkeypatch)
+    replay = app.state.replay
+    recs = [e for tick in replay.timeline for e in tick if e["kind"] == "rec"]
+    assert recs and recs[0]["data"]["msector"] == 3 and recs[0]["data"]["t"] >= T0 + 5
+    assert (tmp_path / "TEST.json.gz").exists()                             # cached for the next start
+    with TestClient(app) as c, c.websocket_connect("/stream") as rc:
+        rc.send_json({"kind": "rec", "data": {"id": "rec-extra", "t": T0}})   # a second race control ...
+        c.post("/replay", json={"speed": 0, "seek_t": T0 + 1})
+        assert rc.receive_json()["kind"] == "tick"                             # ... is not rebroadcast
+
+
+def test_precomputed_seek_gives_pages_the_state_of_a_continuous_run(tmp_path, monkeypatch) -> None:
+    app = precomputed_app(tmp_path, monkeypatch)
+    with TestClient(app) as c, c.websocket_connect("/stream?catchup=1") as page:
+        c.post("/replay", json={"speed": 0, "seek_t": T0 + 20})
+        tick = page.receive_json()
+        assert tick["kind"] == "tick" and tick["data"]["t"] >= T0 + 20       # the page resets on this jump
+        burst = [page.receive_json() for _ in range(3)]
+        kinds = [e["kind"] for e in burst]
+        assert kinds == ["detection", "rec", "official"]                       # everything before, in play order
+        assert all(e["data"]["t"] < T0 + 20 for e in burst)
+    with TestClient(app) as c, c.websocket_connect("/stream?catchup=1") as late:
+        seen = [late.receive_json() for _ in range(4)]                         # a page opened now: same history
+        assert [e["kind"] for e in seen] == ["detection", "rec", "official", "tick"]
+
+
+def test_cars_out_of_the_race_stay_out_through_a_stoppage() -> None:
+    from src.replay.cars import Cars
+    t = np.round(np.arange(T0, T0 + 200, 0.25), 2)
+    frames = []
+    for drv, x in (("1", t * 50), ("44", np.where(t < T0 + 10, t * 50, (T0 + 10) * 50)), ("16", t * 50)):
+        speed = np.where((drv != "44") | (t < T0 + 10), 180.0, 0.0)
+        frames.append(pd.DataFrame({"t": t, "drv": drv, "speed": speed, "x": x, "y": 0.0, "in_pit": False,
+                                    "msector": 3}))
+    rows = pd.concat(frames)
+    rows = rows[~((rows["drv"] == "16") & (rows["t"] > T0 + 20))]             # car 16 goes silent
+    stops = t[(t >= T0 + 100) & (t < T0 + 150)]                                # a red flag: the field stopped
+    cars = Cars(rows, stops, T0)
+    at = lambda s: {o["drv"]: o for o in cars.at(T0 + s)["out"]}              # noqa: E731
+    assert at(50) == {}                                                        # 44 still for 40 s only
+    assert at(75)["44"]["why"] == "stopped" and at(75)["44"]["since"] == T0 + 10
+    assert at(85)["16"]["why"] == "no data"
+    assert "44" in at(120)                                                     # still out during the red flag
+
+
+def test_a_wreck_goes_out_through_a_red_flag_and_stays_out_on_the_recovery_truck() -> None:
+    from src.replay.cars import Cars
+    t = np.round(np.arange(T0, T0 + 300, 0.25), 2)
+    x = np.where(t < T0 + 20, (t - T0) * 50, 1000.0)
+    x = np.where(t >= T0 + 200, 1500.0 + (t - T0 - 200), x)                    # carried off at 0 km/h
+    rows = pd.DataFrame({"t": t, "drv": "55", "speed": np.where(t < T0 + 20, 200.0, 0.0), "x": x, "y": 0.0,
+                         "in_pit": False, "msector": 7})
+    red = t[(t >= T0 + 30) & (t < T0 + 250)]                                   # red flag: the field in the pit lane
+    cars = Cars(rows, red, T0, track_stop_times=np.array([]), entries=["55", "81"])
+    at = lambda s: {o["drv"]: o for o in cars.at(T0 + s)["out"]}              # noqa: E731
+    assert "55" not in at(70) and at(85)["55"]["why"] == "stopped"             # out 60 s after the crash
+    assert "55" in at(220)                                                     # moved by the truck: still out
+    assert at(90)["81"]["why"] == "no data"                                    # never sent data: out too
+
+
+def test_a_seek_never_sends_official_messages_from_before_the_replay_start(tmp_path, monkeypatch) -> None:
+    import src.replay.timeline as timeline
+    monkeypatch.setattr(timeline, "CACHE", tmp_path)
+    race = synthetic_race()
+    early = {"t": T0 - 50, "category": "Flag", "message": "YELLOW IN TRACK SECTOR 1", "flag": "YELLOW",
+             "scope": "Sector", "msector": 1, "drivers": []}
+    race = RaceData.from_frame("TEST", race.frame, race.track, [early] + race.official)
+    app = create_app(race, make_processors=lambda r: [OneStop()], autoplay=False, timeline=True)
+    with TestClient(app) as c, c.websocket_connect("/stream?catchup=1") as page:
+        c.post("/replay", json={"speed": 0, "seek_t": T0 + 20})
+        assert page.receive_json()["kind"] == "tick"
+        burst = [page.receive_json() for _ in range(3)]
+        assert all(e["data"]["t"] >= T0 for e in burst)          # as a continuous run from the start: never before it

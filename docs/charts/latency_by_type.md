@@ -14,7 +14,7 @@ The onset car of an official incident is the car whose collapse race control rea
 |:--------------|---------:|----------:|--------------:|-----------:|-----------:|----------------:|-------------:|-------------:|----------------:|
 | YELLOW        |       45 |        43 |          2.77 |       1.01 |       5.32 |            1.5  |         0.5  |         3.12 |            0.74 |
 | DOUBLE_YELLOW |       36 |        33 |          6.44 |       2.07 |      37.99 |            1.5  |         0.5  |         3    |            0.85 |
-| VSC           |       13 |        12 |         35.01 |      23.03 |      48.16 |            2.75 |         1.81 |         5.38 |            1    |
+| VSC           |       13 |        11 |         35.01 |      23.03 |      48.16 |            2.75 |         2.25 |         6.5  |            1    |
 | SC            |       14 |        13 |         22.52 |      18.93 |      29.16 |            1    |         0.5  |         2.25 |            1    |
 | RED           |        2 |         2 |        173.05 |     172.99 |     173.11 |            0.5  |         0.5  |         0.5  |            1    |
 
@@ -22,9 +22,9 @@ The onset car of an official incident is the car whose collapse race control rea
 
 | our_alert_type   |   events |   matched |   rc_median_s |   rc_p25_s |   rc_p75_s |   ours_median_s |   ours_p25_s |   ours_p75_s |   earlier_share |
 |:-----------------|---------:|----------:|--------------:|-----------:|-----------:|----------------:|-------------:|-------------:|----------------:|
-| IMPACT           |       51 |        51 |          5    |       2.41 |      20.76 |             0.5 |         0.5  |         0.75 |            1    |
+| IMPACT           |       50 |        50 |          4.82 |       2.36 |      19.86 |             0.5 |         0.5  |         0.75 |            1    |
 | STOPPED          |       52 |        52 |         12.62 |       2.14 |      34.23 |             3   |         2.25 |         4.75 |            0.69 |
-| none (missed)    |        7 |         0 |         19.81 |      -0.5  |      62.52 |           nan   |       nan    |       nan    |          nan    |
+| none (missed)    |        8 |         0 |         39.6  |      -0.38 |      62.02 |           nan   |       nan    |       nan    |          nan    |
 
 ## Events without an identifiable onset car (115 events)
 

@@ -5,8 +5,13 @@ between the pit wall and the overlay reloads the page) would show no flag until 
 change. The hub keeps every detection, rec and official envelope since the last reset (a
 seek over RESET_JUMP_S, a loop or a race switch), the latest risk per car and the latest
 tick. A client that connects with ?catchup=1 gets those first, in that order, then
-everything live. Clients without it (race control, the serial bridge) get live envelopes
-only, as before. Both servers use it.
+everything live. Clients without it (race control, the serial bridge, the voice) get live
+envelopes only, as before. Both servers use it.
+
+In a precomputed race (src.replay.timeline) a seek does not wipe the state: the server
+sends the tick at the new time first (every page resets on the jump), then pushes every
+detection, rec and official message up to that time to the catch-up clients only, so a
+page after a seek shows exactly what it would after playing continuously to that time.
 """
 
 from __future__ import annotations
@@ -24,6 +29,7 @@ class Hub:
     def __init__(self) -> None:
         self.clients: set[WebSocket] = set()
         self.joining: dict[WebSocket, deque[str]] = {}   # clients still receiving their catch-up
+        self.catchup_clients: set[WebSocket] = set()     # clients that asked for catch-up (the pages)
         self.history: list[str] = []
         self.risk: dict[str, str] = {}                   # drv -> latest risk envelope
         self.tick: str | None = None
@@ -64,6 +70,7 @@ class Hub:
         """Register a client. With catchup, it first gets what it missed; envelopes broadcast
         meanwhile queue behind, so it sees each one once and in order."""
         if catchup:
+            self.catchup_clients.add(ws)
             queue = self.joining[ws] = deque(self.catchup())
             try:
                 while queue:
@@ -75,3 +82,32 @@ class Hub:
     def leave(self, ws: WebSocket) -> None:
         self.clients.discard(ws)
         self.joining.pop(ws, None)
+        self.catchup_clients.discard(ws)
+
+    def restart_history(self, envs: list[dict]) -> list[str]:
+        """After a seek in a precomputed race: everything up to the new time becomes the
+        history (the tick at the new time, already broadcast, stays the latest tick)."""
+        self.history.clear()
+        self.risk.clear()
+        msgs = []
+        for env in envs:
+            msg = json.dumps(env, separators=(",", ":"))
+            self.remember(env, msg)
+            msgs.append(msg)
+        return msgs
+
+    async def push_catchup(self, msgs: list[str]) -> None:
+        """Send msgs to the catch-up clients only, in order (after the tick they reset on)."""
+        for queue in self.joining.values():
+            queue.extend(msgs)
+        dead = []
+        for ws in list(self.clients):
+            if ws not in self.catchup_clients:
+                continue
+            try:
+                for msg in msgs:
+                    await ws.send_text(msg)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.leave(ws)

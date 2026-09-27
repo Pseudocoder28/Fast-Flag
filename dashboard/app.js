@@ -8,7 +8,9 @@
 // ?catchup=1: the server first sends everything since the last seek (src/replay/hub.py), so the
 // page shows the flags already out when it opens, or reopens after a switch to the overlay
 const WS_URL = `ws://${location.host}/stream?catchup=1`;
-const RESET_JUMP_S = 2.0;      // same rule as engine.RESET_JUMP_S: a bigger jump is a seek or loop
+const RESET_JUMP_S = 2.0;
+const HOLD_MS = 400;            // after a jump the map keeps its last frame until GET /cars answers, at most this long
+let holdSince = -Infinity;      // same rule as engine.RESET_JUMP_S: a bigger jump is a seek or loop
 const MARGIN_PX = 48;
 const FEED_MAX = 50;
 
@@ -40,13 +42,10 @@ const SNAP_JUMP_M = 200;       // a bigger move between two ticks is drawn as a 
 // stopped and missing cars, all in replay time
 const STILL_MOVE_M = 3;        // a car that stays within this distance of one spot ...
 const STOPPED_AFTER_S = 3;     // ... for this long is marked STOPPED
-const OUT_AFTER_S = 60;        // ... and after this long OUT. Still this long while the field moves, or no data
-                               // this long, and no longer part of a flagged incident: out of the race ...
-const RETIRE_FADE_S = 3;       // ... it fades off the map over this long, is listed under "Out of the race"
-                               // and stays off until it moves again
-const SAVE_KEY = "fastflag.cars";   // car stillness kept in localStorage across a page switch or reload
-const NEVER_SEEN_S = 10;       // a car of the race (GET /status) in no tick for this long since the page started
-                               // watching (opened, reconnected or jumped) sends no data: out of the race
+const OUT_AFTER_S = 60;        // ... and after this long OUT
+const CARS_POLL_MS = 1000;     // GET /cars: the cars out of the race (src/replay/cars.py) leave the map and are
+                               // listed beside it; the server reads its own data, so this page and the overlay
+                               // agree, also right after a seek
 const FIELD_STILL_MIN = 5;     // this many still cars at once is a grid or a restart, not a stop
 const FADE_AFTER_S = 5;        // no data for this long: fade the car out ...
 const FADE_S = 2;              // ... over this long
@@ -70,6 +69,7 @@ const FLAG_COLORS = {
 const FLAG_LABEL = {
   CLEAR: "CLEAR", YELLOW: "YELLOW", DOUBLE_YELLOW: "DOUBLE YELLOW", VSC: "VSC", SC: "SC", RED: "RED",
 };
+const TRACK_RING = "#f5f7fa";   // every car under our track-wide flag; red stays for incidents
 const TRACK_STATE_LABEL = { CLEAR: "GREEN", VSC: "VSC", SC: "SAFETY CAR", RED: "RED FLAG" };
 
 // track line widths: CLEAR 2.5x the first version, flagged sectors wider, and a halo
@@ -260,11 +260,13 @@ let trackFlag = null;           // our track-wide flag: CLEAR, VSC, SC or RED. n
                                 // recs only arrive on changes, so a page opened mid-incident has
                                 // to wait for the next track-wide rec or a seek (reset)
 let officialFlag = null;        // official track-wide flag at the replay time (null before the first tick)
-let lastFieldStopT = -Infinity; // replay time the whole field was last stopped (a red flag queue, the grid)
-let savedCars = null;           // this race's car stillness from the last page, applied at the first tick
+let outCars = new Map();        // drv -> {why, since, msector, x, y}: out of the race per GET /cars, never drawn
+let outReady = false;           // GET /cars answered since the page connected or jumped: cars may be drawn
+let carsGen = 0;                // bumped on every reset: an answer to an older question is dropped
 let outKey = "";                // the out-of-the-race list as last rendered
-let entryCars = [];             // every car in the race, from GET /status
-let watchFromT = null;          // replay time of the first tick since the page opened, reconnected or jumped
+let stoppages = [];             // [start, end] field stops (red flag, grid) per GET /cars: race control's flags in
+                                // them are for marshals, no car is on track, so they are not in the lead count
+const crashed = new Set();      // cars named in an IMPACT or MULTI detection since the last jump
 let replayT = null;             // SessionTime of the latest tick
 let replayLap = null;
 let lastTickWall = -Infinity;   // performance.now() of the latest tick
@@ -298,10 +300,6 @@ function newCar(c, t) {
     seenT: t,                    // replay time of the latest tick with this car
     anchorX: c.x, anchorY: c.y,  // where the car was when it last moved STILL_MOVE_M
     movedT: t,
-    retired: false,              // out of the race: off the map and listed, until it moves again
-    outWhy: null,                // "stopped", "in the garage" or "no data"
-    outSince: null,              // replay time it stopped moving or sending data
-    outSector: null,
   };
 }
 
@@ -335,12 +333,10 @@ function updateCar(c, t) {
   car.inPit = c.in_pit;
   car.msector = c.msector;
   car.seenT = t;
-  if (car.retired && car.outWhy === "no data") car.outWhy = car.inPit ? "in the garage" : "stopped";
   if (dist([c.x, c.y], [car.anchorX, car.anchorY]) > STILL_MOVE_M) {
     car.anchorX = c.x;
     car.anchorY = c.y;
     car.movedT = t;
-    car.retired = false;
   }
 }
 
@@ -414,6 +410,7 @@ function onDetection(det) {
     return;
   }
   for (const d of det.drivers) involved.set(d, det.msector);
+  if (det.type === "IMPACT" || det.type === "MULTI") for (const d of det.drivers) crashed.add(String(d));
   feedRow("det", det.type, `${who}, sector ${det.msector}`,
           `${escapeHtml(det.evidence)}, severity ${num(det.severity)}`, det.t);
 }
@@ -428,7 +425,9 @@ function onOfficial(ev) {
     const off = { t: ev.t, flag: ev.flag, msector: ev.msector, trackWide: ev.msector === null };
     officialSeen.push(off);
     const ours = matchFor(off);
-    if (ours && ours.t < off.t) {
+    if (inStoppage(off.t)) {
+      meta += ", red flag stoppage: for marshals, no car on track";
+    } else if (ours && ours.t < off.t) {
       meta += `, <span class="lead-good">Fast Flag <span class="mono">${(off.t - ours.t).toFixed(1)} s</span> earlier</span>`;
     }
   }
@@ -476,10 +475,13 @@ function buildLegend() {
   document.getElementById("car-legend").innerHTML = [
     [dot(CAR_FILL.stricken, "stricken"), "In an incident"],
     [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 4px ${FLAG_COLORS.YELLOW}`), "In a yellow sector"],
-    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px ${FLAG_COLORS.SC}`), "Under our SC or VSC"],
+    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px ${TRACK_RING}`), "Under our VSC, SC or red flag"],
     [dot(CAR_FILL.low, "", `box-shadow:0 0 0 5px ${RISK_HALO.elevated}73`), "Elevated risk"],
     [dot(CAR_FILL.low, "", `box-shadow:0 0 0 5px ${RISK_HALO.high}73`), "High risk"],
     [dot(CAR_FILL.stopped, "ring"), "Stopped"],
+    [`<svg class="legend-hazard" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 15 14H1z" fill="${CAR_FILL.stricken}" ` +
+      `stroke="#05070a" stroke-width="1.2"/><text x="8" y="12.2" text-anchor="middle" font-size="8" font-weight="900" ` +
+      `fill="#fff">!</text></svg>`, "Crash site (car out)"],
     [dot(CAR_FILL.low, "watch"), "Watch (anomaly)"],
     [dot(CAR_FILL.pit, "pit"), "In pit lane"],
   ].map(([d, text]) => `<div class="legend-row">${d}<span>${text}</span></div>`).join("");
@@ -490,13 +492,14 @@ function buildLegend() {
 function resetForJump() {
   // the engine and the dashboard both wipe state on a jump over RESET_JUMP_S
   sectorFlags.clear();
-  trackFlag = "CLEAR";
-  renderTrackState(trackFlagEl, trackFlag);
+  trackFlag = "CLEAR";          // shown once /cars answers: by then the catch-up has set it
   clearFeed();
   risk.clear();
   watchUntil.clear();
   involved.clear();
-  lastFieldStopT = -Infinity;
+  crashed.clear();
+  outReady = false;             // asked again at the next tick; the map holds its last frame until the answer
+  carsGen++;
   cars.clear();                 // every car is placed fresh: a seek snaps, never glides
   burstT = null;
   dispT = null;
@@ -537,8 +540,9 @@ async function checkRace() {
 
 function applyStatus(status) {
   const range = status.t_start !== replay.t_start || status.t_end !== replay.t_end;
-  replay = { t_start: status.t_start, t_end: status.t_end, speed: status.speed };
-  entryCars = Array.isArray(status.cars) ? status.cars.map(String) : [];
+  const modeChanged = status.mode !== replay.mode;
+  replay = { t_start: status.t_start, t_end: status.t_end, speed: status.speed, mode: status.mode };
+  if (modeChanged) renderLeadSummary();
   if (status.speed > 0) lastSpeed = status.speed;
   speedEl.textContent = status.speed > 0 ? `${status.speed}x` : "paused";
   playEl.textContent = status.speed > 0 ? "Pause" : "Play";
@@ -571,16 +575,23 @@ function matchFor(off) {
   return null;
 }
 
+function inStoppage(t) {
+  return stoppages.some(([a, b]) => t >= a && t <= b + 1);
+}
+
 function leadSummary() {
-  const n = officialSeen.length;
-  if (n === 0) return "No official flag since the last seek";
-  const leads = officialSeen.map(matchFor).map((r, i) => (r ? officialSeen[i].t - r.t : null));
+  const counted = officialSeen.filter((o) => !inStoppage(o.t));
+  const n = counted.length;
+  const span = replay.mode === "precomputed" ? "so far" : "since the last seek";   // a precomputed race keeps its past
+  if (n === 0) return `No official flag ${span}`;
+  const leads = counted.map(matchFor).map((r, i) => (r ? counted[i].t - r.t : null));
   const earlier = leads.filter((l) => l !== null && l > 0).sort((a, b) => a - b);
-  if (!earlier.length) return `Fast Flag first on <span class="mono">0</span> of <span class="mono">${n}</span> official flags`;
+  const flags = n === 1 ? "flag" : "flags";
+  if (!earlier.length) return `Fast Flag first on <span class="mono">0</span> of <span class="mono">${n}</span> official ${flags} ${span}`;
   const mid = earlier.length / 2;
   const median = earlier.length % 2 ? earlier[Math.floor(mid)] : (earlier[mid - 1] + earlier[mid]) / 2;
   return `Fast Flag first on <span class="mono">${earlier.length}</span> of <span class="mono">${n}</span> official ` +
-    `flags since the last seek, median lead <span class="mono">${median.toFixed(1)} s</span>`;
+    `${flags} ${span}, median lead <span class="mono">${median.toFixed(1)} s</span>`;
 }
 
 function renderLeadSummary() {
@@ -795,10 +806,15 @@ function wireControls() {
     seekTo(replay.t_start + f * (replay.t_end - replay.t_start));
   });
   document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && e.target === document.body) {
+    const typing = e.target.closest && e.target.closest("input, textarea, select, [contenteditable]");
+    if (e.code === "Space" && !typing) {
       e.preventDefault();
-      togglePlay();
+      if (!e.repeat) togglePlay();
     }
+  });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest && e.target.closest("button");
+    if (b) b.blur();              // Space never re-fires the last button clicked
   });
   for (const tab of document.querySelectorAll(".tab")) {
     tab.addEventListener("click", () => {
@@ -933,23 +949,13 @@ function carStates() {
   const out = [];
   let onTrack = 0;
   let still = 0;
-  let freshAll = 0;
-  let stillAll = 0;
   for (const [drv, car] of cars) {
-    if (car.retired) continue;  // out of the race: off the map, and not part of the field counts
+    if (!outReady || outCars.has(drv)) continue;   // out of the race (GET /cars): off the map, not in the counts
     const age = replayT - car.seenT;
-    if (age >= OUT_AFTER_S) {
-      retire(car, "no data", car.seenT);
-      continue;
-    }
     if (age >= FADE_AFTER_S + FADE_S) continue;
     const alpha = age <= FADE_AFTER_S ? 1 : 1 - (age - FADE_AFTER_S) / FADE_S;
     const fresh = age < 1;      // stopped means fresh ticks keep showing the same spot, not missing data
     const stillFor = replayT - car.movedT;
-    if (fresh) {
-      freshAll++;
-      if (stillFor >= STOPPED_AFTER_S) stillAll++;
-    }
     if (!car.inPit && fresh) {
       onTrack++;
       if (stillFor >= STOPPED_AFTER_S) still++;
@@ -957,8 +963,6 @@ function carStates() {
     out.push({ drv, car, alpha, fresh, stillFor });
   }
   const fieldStill = still >= FIELD_STILL_MIN && still >= onTrack / 2;
-  // the whole field stopped (a red flag in the pit lane, the grid): nobody is out of the race
-  if (stillAll >= FIELD_STILL_MIN && stillAll >= freshAll / 2) lastFieldStopT = replayT;
   for (const s of out) {
     if (s.car.inPit) s.status = "PIT";
     else if (fieldStill || !s.fresh) s.status = null;
@@ -970,16 +974,6 @@ function carStates() {
     const zone = sectorFlags.get(s.car.msector);
     s.zone = s.status !== "PIT" && isFlagged(zone) ? zone : null;
     s.level = riskLevel(risk.get(s.drv));
-    // out of the race: still this long while the rest of the field keeps moving (a car queued in
-    // the pit lane under a red flag counts only from the restart), on track or in its garage, no
-    // longer part of a flagged incident (a crashed car stays on the map while its sector is
-    // flagged). It fades off the map, is listed beside it and stays off until it moves again,
-    // even when its data stops or the field lines up on the grid.
-    const retireFor = replayT - Math.max(s.car.movedT, lastFieldStopT);
-    if (s.fresh && retireFor >= OUT_AFTER_S && !s.stricken) {
-      s.alpha *= Math.max(0, 1 - (retireFor - OUT_AFTER_S) / RETIRE_FADE_S);
-      if (s.alpha <= 0.02) retire(s.car, s.car.inPit ? "in the garage" : "stopped", s.car.movedT);
-    }
   }
   // pit cars at the bottom, then running cars, then cars in a flagged sector, stopped and
   // out cars, and the stricken car on top: a car passing the scene never hides it
@@ -988,74 +982,75 @@ function carStates() {
   return out.filter((s) => s.alpha > 0.02);
 }
 
-function retire(car, why, since) {
-  car.retired = true;
-  car.outWhy = why;
-  car.outSince = since;
-  car.outSector = car.msector;
+async function fetchCars() {
+  // GET /cars: which cars are out of the race at the replay time. Until the first answer after
+  // a connect or a jump, no car is drawn, so a car out of the race never flashes back on. An
+  // answer to a question asked before the last jump is dropped
+  const gen = carsGen;
+  try {
+    const r = await (await fetch("/cars")).json();
+    if (gen !== carsGen) return;   // asked before the last jump: the next tick asks again
+    outCars = new Map((r.out || []).map((o) => [String(o.drv), o]));
+    renderTrackState(trackFlagEl, trackFlag);
+    const before = stoppages.length;
+    stoppages = Array.isArray(r.stoppages) ? r.stoppages : [];
+    if (stoppages.length !== before) renderLeadSummary();
+  } catch (e) {
+    if (gen !== carsGen) return;  // an older server without /cars: nothing is taken off the map
+    outCars = new Map();
+    renderTrackState(trackFlagEl, trackFlag);
+  }
+  outReady = true;
+}
+
+function outText(o, crash) {
+  if (o.why === "no data") return "no data";
+  if (o.why === "in the pit lane") return "in the garage";
+  const where = o.msector === null || o.msector === undefined ? "" : `, sector ${o.msector}`;
+  return `${crash ? "crashed" : "stopped"}${where}`;
 }
 
 function renderOut() {
-  // cars out of the race, listed beside the map; the DOM is only touched when the list changes.
-  // Cars this page saw stop or go silent come first, with the time; then cars of the race that
-  // sent no data at all since the page started watching (the time they stopped is not known)
-  const out = [...cars.entries()].filter(([, c]) => c.retired).sort((a, b) => a[1].outSince - b[1].outSince)
-    .map(([d, c]) => ({ d, why: c.outWhy === "stopped" && c.outSector !== null ? `stopped, sector ${c.outSector}` : c.outWhy,
-      title: `Out since ${fmtTime(c.outSince)} session time` }));
-  if (watchFromT !== null && replayT - watchFromT >= NEVER_SEEN_S) {
-    for (const d of entryCars) {
-      if (!cars.has(d)) out.push({ d, why: "no data", title: `No data from this car since ${fmtTime(watchFromT)} session time` });
-    }
-  }
-  const key = out.map((o) => `${o.d}:${o.why}`).join(",");
+  // cars out of the race, listed beside the map; the DOM is only touched when the list changes
+  const out = [...outCars.values()];
+  const key = out.map((o) => `${o.drv}:${o.why}:${crashed.has(String(o.drv))}`).join(",");
   if (key === outKey) return;
   outKey = key;
-  outNoteEl.textContent = out.length ? `${out.length} car${out.length === 1 ? "" : "s"}, off the map` : "none";
-  outListEl.innerHTML = out.map((o) => `<li class="out-car" title="${escapeHtml(o.title)}: ${escapeHtml(o.why)}">` +
-    `<span class="out-num">#${escapeHtml(o.d)}</span><span>${escapeHtml(o.why)}</span></li>`).join("");
+  outNoteEl.textContent = out.length ? `${out.length} car${out.length === 1 ? "" : "s"}, off the track` : "none";
+  outListEl.innerHTML = out.map((o) => {
+    const d = String(o.drv);
+    const crash = crashed.has(d) && o.why === "stopped";
+    const since = o.since === null || o.since === undefined ? "" : ` since ${fmtTime(o.since)} session time`;
+    return `<li class="out-car${crash ? " crashed" : ""}" title="Out of the race${since}">` +
+      `<span class="out-num">#${escapeHtml(d)}</span><span>${escapeHtml(outText(o, crash))}</span></li>`;
+  }).join("");
 }
 
-function saveCars() {
-  // a page switch or reload keeps how long each car has been still, so a car out of the race
-  // does not come back on the map for a minute while this page learns it again
-  if (!raceId || replayT === null) return;
-  const out = {};
-  for (const [d, c] of cars) {
-    out[d] = { x: c.x, y: c.y, ax: c.anchorX, ay: c.anchorY, movedT: c.movedT, seenT: c.seenT,
-      retired: c.retired, outWhy: c.outWhy, outSince: c.outSince, outSector: c.outSector };
-  }
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ race: raceId, t: replayT, cars: out }));
-  } catch (e) {
-    // private window or blocked storage: the page simply learns again
-  }
-}
-
-function loadSavedCars() {
-  try {
-    return JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
-  } catch (e) {
-    return null;
-  }
-}
-
-function restoreCars(t) {
-  // first tick after the page opened: a car still where the last page saw it standing keeps its
-  // stillness; a car out of the race with no data stays listed. Nothing from after `t` is used
-  const saved = savedCars;
-  savedCars = null;
-  if (!saved || saved.race !== raceId || !saved.cars) return;
-  for (const [d, v] of Object.entries(saved.cars)) {
-    const car = cars.get(d);
-    if (car) {
-      if (v.movedT > t || dist([car.x, car.y], [v.ax, v.ay]) > STILL_MOVE_M) continue;
-      Object.assign(car, { anchorX: v.ax, anchorY: v.ay, movedT: v.movedT });
-      if (v.retired) Object.assign(car, { retired: true, outWhy: v.outWhy, outSince: v.outSince, outSector: v.outSector });
-    } else if (v.retired && v.outWhy === "no data" && v.outSince <= t) {
-      const ghost = newCar({ x: v.x, y: v.y, in_pit: false, msector: v.outSector }, v.seenT);
-      Object.assign(ghost, { retired: true, outWhy: v.outWhy, outSince: v.outSince, outSector: v.outSector });
-      cars.set(d, ghost);
-    }
+function drawCrashSites(now) {
+  // a car out of the race is off the map; while the sector of its incident is still flagged, a
+  // hazard marker stays where it stopped
+  for (const o of outCars.values()) {
+    const inc = involved.get(String(o.drv));
+    if (inc === undefined || !isFlagged(sectorFlags.get(inc)) || o.x === null || o.x === undefined) continue;
+    const [cx, cy] = toCanvas(transform, o.x, o.y);
+    const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+    ring(cx, cy, 17 + 5 * pulse, 2, `rgba(214, 40, 57, ${0.55 - 0.35 * pulse})`);
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 12);
+    ctx.lineTo(cx + 11.5, cy + 8.5);
+    ctx.lineTo(cx - 11.5, cy + 8.5);
+    ctx.closePath();
+    ctx.fillStyle = CAR_FILL.stricken;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#05070a";
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `900 12px ${MONO_FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("!", cx, cy + 1.5);
   }
 }
 
@@ -1117,7 +1112,7 @@ function drawCar(s, now) {
   } else if (s.zone) {
     ring(cx, cy, DOT_RADIUS_PX + 3.5, 3.5, FLAG_COLORS[s.zone]);          // driving through a flagged sector
   } else if (TRACK_FLAGS.has(trackFlag)) {
-    ring(cx, cy, DOT_RADIUS_PX + 3, 2, FLAG_COLORS[trackFlag]);           // under our VSC, SC or red flag
+    ring(cx, cy, DOT_RADIUS_PX + 3, 2, TRACK_RING);                       // under our VSC, SC or red flag
   }
   if (!stopped && !s.stricken && (watchUntil.get(s.drv) ?? -Infinity) >= replayT) {
     ring(cx, cy, DOT_RADIUS_PX + 8, 2, WATCH_COLOR, [4, 3]);
@@ -1194,6 +1189,7 @@ function drawDebug(now) {
 function draw(now) {
   requestAnimationFrame(draw);
   if (!segments || !transform) return;
+  if (!outReady && replayT !== null && now - holdSince < HOLD_MS) return;   // after a jump: no empty frame
   ctx.clearRect(0, 0, canvasW, canvasH);
   drawTrack();
   drawTimeline();
@@ -1205,6 +1201,7 @@ function draw(now) {
   const states = carStates();
   renderOut();
   for (const s of states) drawCar(s, now);
+  drawCrashSites(now);
   for (const s of states) {
     if (!s.tagAt) continue;
     ctx.globalAlpha = s.alpha;
@@ -1232,7 +1229,6 @@ function handleTick(tick) {
   }
   lastTickWall = now;
   const first = replayT === null;
-  if (first || jumped) watchFromT = tick.t;
   replayT = tick.t;
   replayLap = tick.lap;
   if (first || jumped) {
@@ -1240,7 +1236,10 @@ function handleTick(tick) {
     renderTrackState(officialFlagEl, officialFlag);
   }
   for (const c of tick.cars) updateCar(c, tick.t);
-  if (first && !jumped) restoreCars(tick.t);
+  if (first || jumped) {
+    holdSince = now;
+    fetchCars();
+  }
 }
 
 function setConn(state, text) {
@@ -1254,11 +1253,13 @@ function connect() {
   ws.onopen = () => {
     // the catch-up replays everything since the last seek: start from a clean page, so a
     // reconnect never doubles the feed. Our flag is CLEAR unless the catch-up says otherwise.
-    // The cars' stillness is kept like on a page switch, and applied at the first tick
-    saveCars();
-    savedCars = loadSavedCars();
     resetForJump();
     replayT = null;
+    officialFlag = null;
+    renderTrackState(officialFlagEl, officialFlag);
+    renderTrackState(trackFlagEl, trackFlag);
+    outCars = new Map();
+    renderOut();
     setConn("connected", "stream connected");
   };
 
@@ -1302,8 +1303,7 @@ async function init() {
   await loadTrack();
   connect();
   setInterval(checkRace, 2000);   // replay speed and race, set by POST /replay from anywhere
-  setInterval(saveCars, 1000);
-  window.addEventListener("pagehide", saveCars);
+  setInterval(() => { if (replayT !== null && outReady) fetchCars(); }, CARS_POLL_MS);
   requestAnimationFrame(draw);
 }
 

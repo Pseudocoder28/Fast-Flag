@@ -97,6 +97,11 @@ class RaceData:
         self._live = np.isfinite(c["x"].astype(float)) & np.isfinite(c["y"].astype(float)) \
             & np.isfinite(c["speed"].astype(float)) & np.isfinite(c["dist"].astype(float)) \
             & np.isfinite(c["gear"].astype(float)) & np.isfinite(c["rpm"].astype(float))
+        # after race control's CHEQUERED FLAG (meta t_end) nothing is an incident: the detectors
+        # skip those ticks, at every call site
+        t_end = self.meta.get("t_end") if isinstance(self.meta, dict) else None
+        if t_end is not None and "after_chequered" not in f:
+            f["after_chequered"] = f["t"].to_numpy() > float(t_end)
         # the entry list: every car in the race, with live data or not (GET /status)
         self.cars = sorted({str(d) for d in c["drv"]}, key=lambda d: (not d.isdigit(), int(d) if d.isdigit() else 0, d))
 

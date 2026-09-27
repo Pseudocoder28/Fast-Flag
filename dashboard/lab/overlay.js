@@ -14,9 +14,13 @@
 //
 // It connects with ?catchup=1: the server first sends everything since the last seek
 // (src/replay/hub.py), so the flags already out and race control's messages show at once
-// when the page opens, or reopens after a switch from the pit wall. Those arrive before the
-// first tick; a call made before the page opened gets its banner and lead, but no exposure
-// clock (the cars that passed before then were not seen).
+// when the page opens, or reopens after a switch from the pit wall. In a precomputed race
+// the server does the same after every seek: the tick at the new time, then everything
+// before it. An envelope older than the latest tick by more than RESET_JUMP_S (or before the
+// first tick) is catch-up: a call made before the page saw it gets its banner and lead, but
+// no exposure clock (the cars that passed before then were not seen), and an old clear shows
+// no green banner. Cars out of the race (GET /cars, the same list as the pit wall) leave the
+// map and are listed beside it.
 //
 // Replay controls (top): seek back and forward, play or pause, speed. They send the same
 // POST /replay as the pit wall, so every open page follows.
@@ -125,6 +129,8 @@ function flagIcon(flag) {
 
 const S = {
   t: null,                    // latest replay time from the ticks
+  resetT: null,               // the first tick's time since the page connected or jumped (catch-up is older)
+  quietTimer: null,
   lapLength: null,            // from GET /track, else the largest dist seen
   nSectors: 1000,             // from GET /track, else no wrap
   detections: new Map(),      // id -> detection
@@ -142,10 +148,10 @@ const S = {
 };
 
 const el = (id) => document.getElementById(id);
-const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
+const ui = { stage: el("stage"), conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
   clockFlag: el("clock-flag"), clockValue: el("clock-value"), clockCars: el("clock-cars"),
   clockResult: el("clock-result"), ticker: el("ticker"), standby: el("standby"), sbRace: el("sb-race"),
-  sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty"), mapbox: el("mapbox"), map: el("map"),
+  sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty"), mapbox: el("mapbox"), map: el("map"), mapOut: el("map-out"),
   mapRace: el("map-race"), mapFoot: el("map-foot"), chipFF: el("chip-ff"), chipRC: el("chip-rc") };
 
 // --- standby: shown while no flag is out, so the overlay never looks dead ----------------
@@ -159,7 +165,8 @@ function raceTitle(id) {
 }
 
 function updateStandby() {
-  const paused = view.lastTickWall === null || performance.now() - view.lastTickWall > PAUSED_AFTER_MS;
+  // paused: the server says so (a paused seek still sends one tick), or no tick for a while
+  const paused = view.speed === 0 || view.lastTickWall === null || performance.now() - view.lastTickWall > PAUSED_AFTER_MS;
   ui.standby.classList.toggle("hidden", S.banners.size > 0);
   ui.standby.classList.toggle("paused", paused);
   ui.standby.querySelector(".sb-badge").textContent = !view.connected ? "OFFLINE" : paused ? "PAUSED" : "MONITORING";
@@ -177,7 +184,9 @@ function updateStandby() {
 }
 
 function resetAll() {
+  quiet();
   S.t = null;
+  S.resetT = null;
   S.detections.clear();
   S.cars.clear();
   S.hist.clear();
@@ -196,6 +205,11 @@ function resetAll() {
   M.cars.clear();
   M.top = null;
   M.rcStatus = null;
+  M.out = new Map();            // asked again at the next tick
+  M.outReady = false;
+  M.gen++;
+  M.crashed.clear();
+  renderOut();
   updateStandby();
 }
 
@@ -299,7 +313,7 @@ function showBanner(rec, cause, scope) {
     S.banners.delete(scope);            // re-inserted below, so Map order stays oldest first
   }
   const div = document.createElement("div");
-  div.className = `banner flag-${rec.flag}`;
+  div.className = `banner flag-${rec.flag}${ui.stage.classList.contains("catchup") ? " instant" : ""}`;
   div.dataset.scope = String(scope);
   div.innerHTML = bannerHtml(rec, cause, scope);
   ui.banners.appendChild(div);
@@ -339,8 +353,11 @@ function showClearBanner(rec, scope) {
   // our track clear while race control's own SC, VSC or red is still out: racing does not resume yet
   const rcOut = Math.max(0, ...(S.official.get(TRACK) || []).map((o) => o.rank));
   const rcFlag = Object.keys(RANK).find((f) => RANK[f] === rcOut);
+  // ... or the field is still stopped (a red flag stoppage, GET /cars): the restart is still to come
+  const stopped = M.stoppages.some(([a, b]) => S.t !== null && S.t >= a && S.t <= b + 2);
   const line1 = !track ? `SECTOR ${escapeHtml(rec.msector)}`
-    : rcOut > 0 ? `RACE CONTROL'S ${FLAG_TEXT[rcFlag]} STILL OUT` : "GREEN FLAG, RACING RESUMES";
+    : rcOut > 0 ? `RACE CONTROL'S ${FLAG_TEXT[rcFlag]} STILL OUT`
+    : stopped ? "RACE STILL STOPPED · RESTART TO COME" : "GREEN FLAG, RACING RESUMES";
   const div = document.createElement("div");
   div.className = "banner flag-CLEAR";
   div.dataset.scope = String(scope);
@@ -532,7 +549,57 @@ const EASE_MAX_MS = 400;           // longest ease between two ticks (1x replay 
 const MODE_MOVE_MS = 700;          // redraw every frame this long after the map changes size
 
 const M = { track: null, cars: new Map(), top: null, rcStatus: null, tickMs: 250, lastTickWall: null,
-  active: null, busyUntil: 0, dirty: true };
+  active: null, busyUntil: 0, dirty: true,
+  out: new Map(), outReady: false, outKey: "", crashed: new Set(), gen: 0,   // out of the race (GET /cars)
+  stoppages: [] };                 // [start, end] field stops (red flag, grid), from GET /cars
+const CARS_POLL_MS = 1000;
+const CATCHUP_QUIET_MS = 250;      // animations stay off this long after the last catch-up envelope
+
+function isCatchup(t) {
+  // from before this page saw the replay: sent before the first tick since the page connected
+  // or jumped (the server's history is strictly before that tick; live envelopes never are)
+  return S.resetT === null || t < S.resetT;
+}
+
+function quiet() {
+  // a seek or a connect rebuilds the page from history: a clean cut, no banner slide-ins and no
+  // map resize while it does, until the history has stopped arriving
+  ui.stage.classList.add("catchup");
+  clearTimeout(S.quietTimer);
+  S.quietTimer = setTimeout(() => ui.stage.classList.remove("catchup"), CATCHUP_QUIET_MS);
+}
+
+async function fetchCars() {
+  // until the first answer after a connect or a seek no car is drawn, so a car out of the race
+  // never flashes back on; an answer to a question asked before the last seek is dropped
+  const gen = M.gen;
+  try {
+    const r = await (await fetch("/cars")).json();
+    if (gen !== M.gen) return;    // asked before the last seek: the next tick asks again
+    M.out = new Map((r.out || []).map((o) => [String(o.drv), o]));
+    M.stoppages = Array.isArray(r.stoppages) ? r.stoppages : [];
+    if (M.top && M.out.has(String(M.top.drv))) M.top = null;   // the next tick finds the fastest car still racing
+  } catch (e) {
+    if (gen !== M.gen) return;    // an older server without /cars: nothing is taken off the map
+  }
+  M.outReady = true;
+  renderOut();
+  M.dirty = true;
+}
+
+function renderOut() {
+  const out = [...M.out.values()];
+  const key = out.map((o) => `${o.drv}:${o.why}:${M.crashed.has(String(o.drv))}`).join(",");
+  if (key === M.outKey) return;
+  M.outKey = key;
+  ui.mapOut.innerHTML = !out.length ? "" : `<li class="out-head">OUT OF THE RACE</li>` + out.map((o) => {
+    const d = String(o.drv);
+    const crash = M.crashed.has(d) && o.why === "stopped";
+    const why = o.why === "no data" ? "NO DATA" : o.why === "in the pit lane" ? "GARAGE"
+      : `${crash ? "CRASHED" : "STOPPED"}${o.msector === null || o.msector === undefined ? "" : ` · S${o.msector}`}`;
+    return `<li class="out-item${crash ? " crashed" : ""}"><b>#${escapeHtml(d)}</b><span>${escapeHtml(why)}</span></li>`;
+  }).join("");
+}
 
 function buildTrack(track) {
   // reference line, cumulative distance and each segment's marshal sector (as the pit wall map)
@@ -577,7 +644,7 @@ function mapTick(tick, t) {
     const from = m ? carAt(m, now) : [x, y];
     M.cars.set(drv, { fx: from[0], fy: from[1], x, y, wall: now, t, inPit: Boolean(car.in_pit) });
     const speed = Number(car.speed) || 0;
-    if (!car.in_pit && (!M.top || speed > M.top.speed)) M.top = { drv, speed };
+    if (!car.in_pit && !M.out.has(drv) && (!M.top || speed > M.top.speed)) M.top = { drv, speed };
   }
   for (const [drv, m] of M.cars) if (t - m.t > CAR_STALE_S) M.cars.delete(drv);
   M.dirty = true;
@@ -616,11 +683,12 @@ function updateMapPanel(paused) {
   const rc = TRACK_STATUS[M.rcStatus];
   ui.chipRC.className = `chip lvl-${rc ? rc[1] : "NONE"}`;
   ui.chipRC.innerHTML = `RACE CONTROL <b>${rc ? rc[0] : "WAITING"}</b>`;
-  const onTrack = [...M.cars.values()].filter((m) => !m.inPit).length;
-  const inPit = M.cars.size - onTrack;
+  const racing = [...M.cars.entries()].filter(([d]) => !M.out.has(d)).map(([, m]) => m);
+  const onTrack = racing.filter((m) => !m.inPit).length;
+  const inPit = racing.length - onTrack;
   ui.mapFoot.innerHTML = !M.cars.size ? (view.connected ? "Press play to start the replay" : "Waiting for the replay")
-    : `ON TRACK <b>${onTrack}</b> · IN PIT <b>${inPit}</b>` +
-      (M.top ? ` · TOP SPEED <b>#${escapeHtml(M.top.drv)} ${M.top.speed.toFixed(0)} km/h</b>` : "") +
+    : `ON TRACK <b>${onTrack}</b> · IN PIT <b>${inPit}</b>` + (M.out.size ? ` · OUT <b>${M.out.size}</b>` : "") +
+      (M.top && M.top.speed > 0 ? ` · TOP SPEED <b>#${escapeHtml(M.top.drv)} ${M.top.speed.toFixed(0)} km/h</b>` : "") +
       (paused ? " · PAUSED" : "");
   M.dirty = true;
 }
@@ -714,9 +782,36 @@ function drawMap(now) {
       ctx.fillText(String(c.n), px + (px - cx) / d * r * 2.2, py + (py - cy) / d * r * 2.2);
     }
   }
-  // cars: the field, then the cars behind a flag on top, pulsing
+  // a car out of the race is off the map; while it is behind a live flag banner, a hazard
+  // marker stays where it stopped
   const hit = strickenCars();
-  const order = [...M.cars.entries()].sort(([a], [b]) => (hit.has(a) ? 1 : 0) - (hit.has(b) ? 1 : 0));
+  for (const [drv, o] of M.out) {
+    if (!hit.has(drv) || o.x === null || o.x === undefined) continue;
+    const [px, py] = P(o.x, o.y);
+    const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+    ctx.beginPath();
+    ctx.arc(px, py, r * (1.5 + 0.6 * pulse), 0, 2 * Math.PI);
+    ctx.fillStyle = `rgba(225, 6, 0, ${0.16 + 0.18 * (1 - pulse)})`;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(px, py - r * 1.05);
+    ctx.lineTo(px + r, py + r * 0.75);
+    ctx.lineTo(px - r, py + r * 0.75);
+    ctx.closePath();
+    ctx.fillStyle = "#e10600";
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.8)";
+    ctx.stroke();
+    ctx.fillStyle = "#fff";
+    ctx.font = `900 ${Math.round(r * 1.05)}px system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("!", px, py + r * 0.12);
+  }
+  // cars: the field, then the cars behind a flag on top, pulsing (none until GET /cars answered)
+  const order = [...M.cars.entries()].filter(([d]) => M.outReady && !M.out.has(d))
+    .sort(([a], [b]) => (hit.has(a) ? 1 : 0) - (hit.has(b) ? 1 : 0));
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `800 ${Math.round(r * 1.1)}px system-ui, -apple-system, sans-serif`;
@@ -759,11 +854,16 @@ function mapFrame(now) {
 function onTick(tick) {
   const t = Number(tick.t);
   if (S.t !== null && Math.abs(t - S.t) > RESET_JUMP_S) resetAll();     // a seek or loop, back or forward
+  const first = S.t === null;
   S.t = t;
+  if (first) {
+    S.resetT = t;
+    fetchCars();
+  }
   ui.replayT.textContent = `REPLAY t ${t.toFixed(1)} s · LAP ${tick.lap}`;
   view.lastTickWall = performance.now();
   view.lap = tick.lap;
-  view.watching = tick.cars.filter((c) => !c.in_pit).length;
+  view.watching = tick.cars.filter((c) => !c.in_pit && !M.out.has(String(c.drv))).length;
   mapTick(tick, t);
   updateStandby();
   let maxDist = 0;
@@ -791,6 +891,8 @@ function onTick(tick) {
 
 function onDetection(det) {
   S.detections.set(String(det.id), det);
+  if (isCatchup(Number(det.t))) quiet();
+  if (det.type === "IMPACT" || det.type === "MULTI") for (const d of det.drivers || []) M.crashed.add(String(d));
 }
 
 function onRec(rec) {
@@ -799,6 +901,7 @@ function onRec(rec) {
   const msector = Number(rec.msector);
   const t = Number(rec.t);
   if (!Number.isFinite(msector) || !Number.isFinite(t)) return;
+  if (isCatchup(t)) quiet();
   if (flag === "CLEAR") return onClear(rec, msector, t);
   const rank = RANK[flag];
   const cause = causeOf(rec, msector);
@@ -811,8 +914,8 @@ function onRec(rec) {
   }
   raiseScope(scope, t, rank);
   showBanner(rec, cause, scope);
-  // S.t is null until the first tick: this rec is catch-up, from before the page opened
-  if (scope === TRACK && rank > cur && S.t !== null && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
+  // catch-up (from before the page saw this time): no exposure clock
+  if (scope === TRACK && rank > cur && !isCatchup(t) && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
 }
 
 function maybeStartClock(rec, cause, rank, t) {
@@ -834,7 +937,7 @@ function onClear(rec, msector, t) {
   if ((S.level.get(scope) || 0) === 0) return;
   S.level.set(scope, 0);
   if (sectorClear) S.cause.delete(msector);
-  if (S.t === null) {                                   // catch-up: an old clear, no green banner
+  if (isCatchup(t)) {                                   // catch-up: an old clear, no green banner
     const b = S.banners.get(scope);
     if (b) b.el.remove();
     S.banners.delete(scope);
@@ -873,7 +976,7 @@ function pushOfficial(off, flag, scope, t) {
       : d <= -MIN_LEAD_S ? `<span class="rc-lead behind">RACE CONTROL FIRST</span>` : "";
   }
   const li = document.createElement("li");
-  li.className = `rc-row flag-${flag}`;
+  li.className = `rc-row flag-${flag}${ui.stage.classList.contains("catchup") ? " instant" : ""}`;
   li.innerHTML = `<span class="rc-badge">${RC_TEXT[flag]}</span>` +
     `<span class="rc-msg">${escapeHtml(off.message || "")}</span>` +
     `<span class="rc-t">t ${t.toFixed(1)} s</span>${lead}`;
@@ -887,6 +990,7 @@ function onOfficial(off) {
   if (!Object.hasOwn(RANK, flag)) return;
   const t = Number(off.t);
   if (!Number.isFinite(t)) return;
+  if (isCatchup(t)) quiet();
   const scope = off.msector === null || off.msector === undefined ? TRACK : Number(off.msector);
   pushOfficial(off, flag, scope, t);
   if (flag === "CLEAR") {
@@ -1006,6 +1110,8 @@ function togglePlay() {
 }
 
 function wireControls() {
+  // a clicked button loses focus, so the space bar is play or pause, never that button again
+  for (const b of document.querySelectorAll(".controls .ctl")) b.addEventListener("click", () => b.blur());
   el("play").addEventListener("click", togglePlay);
   for (const b of document.querySelectorAll("[data-seek]")) {
     b.addEventListener("click", () => seekBy(Number(b.dataset.seek)));
@@ -1032,6 +1138,7 @@ async function init() {
   await watchRace();
   setInterval(watchRace, STATUS_POLL_MS);
   setInterval(updateStandby, 500);          // notices a paused replay (no ticks) within a second
+  setInterval(() => { if (S.t !== null && M.outReady) fetchCars(); }, CARS_POLL_MS);
   window.addEventListener("resize", () => { M.dirty = true; });
   requestAnimationFrame(mapFrame);
   connect();
