@@ -4,7 +4,7 @@ A drop-in section for the main demo script (Ishaan's). It shows one crash throug
 
 **The crash:** 2021 Azerbaijan GP, lap 31. Lance Stroll (car 18) has a tyre failure at full speed on the main straight, marshal sector 20. Crash onset: SessionTime 5274.25 s.
 
-Why this race: it is out of sample twice. Our models never saw it, and 2021 cars ran under different technical rules from our 2023 to 2026 training data. It is not a holdout race, so using it breaks no rule.
+Why this race: our machine learning models (ANOMALY and risk) never saw it, and 2021 cars ran under different technical rules from our 2023 to 2026 training data. It is not out of sample for everything: on 27 Sept some detector thresholds and race control rules were refined with this race's replay in view, so its flag timings are a demo, not a test. The out-of-sample numbers are the 20 check races and the 2026 Azerbaijan holdout in `docs/charts/NUMBERS.md`. It is not a holdout race, so using it breaks no rule.
 
 ## Honesty lines (say them, word for word)
 
@@ -14,15 +14,16 @@ Why this race: it is out of sample twice. Our models never saw it, and 2021 cars
 
 ## Setup (before going on stage)
 
-Four terminals, all in the repo root with the venv active (`source .venv/bin/activate`). Until PR #8 is merged, run them from `.claude/worktrees/lab` with `/Users/namanshah/projects/fast-flag/.venv/bin/python` instead of `python`.
+Two terminals in the repo root with the venv active (`source .venv/bin/activate`), and a browser. The server computes our detections, risk and race control flags itself and sends our recs, so no `python -m src.racecontrol` terminal is needed (the server ignores its recs; `--live` brings back the old tick-by-tick path).
 
 ```
-python -m src.replay.server --race 2021_Azerbaijan --speed 0      # 1: server, paused (loading takes about 10 s)
-python -m src.racecontrol                                          # 2: race control engine, sends our recs
-python -m src.lab.voice                                            # 3: the voice (Daniel)
+python -m src.replay.server --race 2021_Azerbaijan --speed 0      # 1: server, paused
+python -m src.lab.voice                                            # 2: the voice (Daniel)
 ```
 
-4. Chrome, full screen (Cmd+Ctrl+F), at `http://localhost:8000/lab/overlay.html`. Optionally, a second window with the pit wall dashboard at `http://localhost:8000`.
+The first start of a race runs our pipeline over the whole race once (about 1 minute) and caches it in `data/timeline/`; later starts take seconds. Start it before the judges arrive and wait until `curl -s localhost:8000/status` answers.
+
+3. Chrome, full screen (Cmd+Ctrl+F), at `http://localhost:8000/lab/overlay.html`. Optionally, a second window with the pit wall dashboard at `http://localhost:8000`.
 
 Cue it, 6 s before the crash, paused:
 
@@ -32,9 +33,9 @@ curl -s -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"
 
 Pre-flight checklist:
 - Mac volume up, output to the room speakers. Test with `say -v Daniel "Fast Flag check"`.
-- The overlay's top right reads LIVE REPLAY. The bottom left label reads "Replay of historical FastF1 data. Counterfactual."
-- Terminal 2 printed `connected`, terminal 3 printed `voice: connected`.
-- Do a full dry run once, then re-cue with the command above. Seeking back resets everything cleanly.
+- The overlay's top right reads REPLAY PAUSED (REPLAY RUNNING once it plays). The bottom left label reads "Replay of historical FastF1 data. Counterfactual."
+- Terminal 2 printed `voice: connected to ws://localhost:8000/stream?catchup=1`.
+- Do a full dry run once, then re-cue with the command above. A seek resets the overlay and the voice and replays the flags already out at the new time, so the voice stays silent about them and only speaks new calls.
 
 ### Race names and switching races
 
@@ -46,7 +47,7 @@ Pre-flight checklist:
 
 ### On Windows (Ishaan's laptop)
 
-- Same four steps, with `.venv\Scripts\python -m ...` instead of `python -m ...`. Everything runs on port 8000. Nothing extra to install, no Ollama.
+- Same steps, with `.venv\Scripts\python -m ...` instead of `python -m ...`. Everything runs on port 8000. Nothing extra to install, no Ollama.
 - The server needs `data\case_studies\2021_Azerbaijan*` (5 files, 75 MB), copied from Naman's `data` folder.
 - **The voice only speaks on a Mac** (it uses the built-in macOS `say`). On Windows it prints the lines instead. For a spoken demo, run the voice on Naman's Mac, pointed at the demo machine: `python -m src.lab.voice --url ws://<demo machine IP>:8000/stream`. The server must then be started with `--host 0.0.0.0` so the Mac can reach it.
 - The `curl` lines below are for macOS. In PowerShell, use for example:
@@ -109,13 +110,13 @@ Car 33, lap 46, onset 7278.25 s, again a tyre failure on the straight. Cue with 
 ## If something goes wrong
 
 - **No sound:** the overlay still shows everything. Keep going and read the banner lines yourself. Check the volume afterwards.
-- **No banners:** terminal 2 (race control) is not connected. Restart it, re-cue with the seek command and start again.
+- **No banners:** the overlay is not connected (top right reads RECONNECTING) or the server was started with `--no-detect`. Reload the page; if that fails, restart the server without it, re-cue with the seek command and start again.
 - **Wrong state after a mistake:** any seek resets the voice, the overlay and the race control engine. Re-cue and restart.
 - **Nothing works:** show the steward card PNG and the delay-cost chart, and tell it as a story from the timeline on the card.
 
 ## Likely judge questions
 
 - **"Is this live?"** No. It's a replay of historical FastF1 data, tick by tick. No component ever sees data from after the current tick.
-- **"Did you train on this race?"** No. 2021 is out of sample twice: never seen by our models, and different car rules from our 2023 to 2026 training data.
+- **"Did you train on this race?"** "Our machine learning models never saw it, and 2021 cars ran under different technical rules. We did refine some detector thresholds with it in view, so for a clean test look at our 20 check races: 22 of 33 official Safety Car and VSC calls, all earlier than race control."
 - **"Would 6 cars really have slowed down?"** We don't claim that. It's a counterfactual count of how they actually drove, with no model of how drivers react.
 - **"Were you earlier than the marshals?"** We only claim earlier than the race control feed. Marshals wave local flags before race control's messages appear.

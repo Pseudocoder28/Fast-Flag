@@ -472,7 +472,7 @@ def write_index(cards: list[tuple[dict, str]], out_dir: Path, doc: dict, png: bo
             "<th>Race control vs our escalation</th><th>Cars per second of delay</th><th></th></tr>")
     sections = "".join(
         f'<h2>{html.escape(race.replace("_", " "))}'
-        f'{" <span class=dim>out of sample</span>" if race in doc.get("case_study_races", []) else ""}</h2>'
+        f'{" <span class=dim>case study: ML models never saw it</span>" if race in doc.get("case_study_races", []) else ""}</h2>'
         f'<table>{head}{"".join(index_row(inc, name, png) for inc, name in rows)}</table>'
         for race, rows in by_race.items())
     back = f'<a class="back" href="{html.escape(back_link)}">Back to the pit wall</a>' if back_link else ""

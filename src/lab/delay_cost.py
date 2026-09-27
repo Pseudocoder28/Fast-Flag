@@ -46,7 +46,7 @@ from matplotlib.ticker import MaxNLocator  # noqa: E402
 from src.detect.anomaly import attach_scores, train as train_anomaly  # noqa: E402
 from src.detect.detectors import DetectorSuite  # noqa: E402
 from src.detect.pipeline import load_config  # noqa: E402
-from src.eval.case_study import (COUNTERFACTUAL, OUT_OF_SAMPLE, REST_KMH, REST_WITHIN_S, driver_names,  # noqa: E402
+from src.eval.case_study import (COUNTERFACTUAL, REST_KMH, REST_WITHIN_S, driver_names,  # noqa: E402
                                  passes, recommendations, rest_position)
 from src.eval.incidents import INCIDENT_FLAGS, build_incidents, race_files, suspended_times  # noqa: E402
 from src.eval.latency_by_type import ALERT_AFTER_S, ALERT_BEFORE_S, ONSET_AFTER_S, ONSET_BEFORE_S, in_sectors  # noqa: E402
@@ -58,6 +58,9 @@ from src.replay.engine import Engine, RaceData, available_races, race_dir  # noq
 
 OUT_DIR = Path("docs/lab")
 CASE_RACES = ["2021_Azerbaijan"]           # replayable case studies, never listed as training races
+CASE_NOTE = ("Case study: our machine learning models never saw this race, and 2021 cars ran under different "
+             "technical rules. Not out of sample for the detector rules: some thresholds were refined with its "
+             "replay in view on 27 Sept.")
 ESCALATIONS = ("VSC", "SC", "RED")
 SECTOR_FLAGS = ("YELLOW", "DOUBLE_YELLOW")
 RACING_SHARE = 0.8                          # racing speed: at least this share of the car's own normal speed
@@ -354,7 +357,7 @@ def plot(inc: dict, path: Path) -> None:
              fontsize=8.5, color=INK2, va="top", wrap=True)
     foot = f"Onset: {RULE}."
     if inc["race"] in CASE_RACES:
-        foot += f" {OUT_OF_SAMPLE}"
+        foot += f" {CASE_NOTE}"
     if inc["passes_without_reference"]:
         foot += f" {inc['passes_without_reference']} passes had no own reference speed and are not counted."
     fig.text(0.01, 0.012, foot, fontsize=7, color=INK2, va="bottom", wrap=True)
@@ -369,7 +372,7 @@ def write_outputs(incidents: list[dict], out_dir: Path, races: list[str]) -> Non
     out_dir.mkdir(parents=True, exist_ok=True)
     doc = {"note": NOTE, "counterfactual": COUNTERFACTUAL, "onset_rule": RULE, "racing_share": RACING_SHARE,
            "max_delay_s": MAX_DELAY_S, "step_s": STEP_S, "delays_s": delays(), "races": races,
-           "case_study_races": [r for r in races if r in CASE_RACES], "case_study_note": OUT_OF_SAMPLE,
+           "case_study_races": [r for r in races if r in CASE_RACES], "case_study_note": CASE_NOTE,
            "incidents": incidents}
     (out_dir / "delay_cost.json").write_text(json.dumps(doc, indent=2), encoding="utf-8")
     lines = ["# Delay-cost curves", "", f"{NOTE} {COUNTERFACTUAL}", "",
@@ -379,8 +382,8 @@ def write_outputs(incidents: list[dict], out_dir: Path, races: list[str]) -> Non
              f"between the onset and onset + d at {RACING_SHARE:.0%} or more of their own normal speed there "
              "(median of their previous 3 clean laps). Markers: our first alert, our escalation recommendation "
              "(only one caused by a car of this crash), "
-             "the official yellow and the official escalation. 2021 Azerbaijan is a case study, out of sample twice: "
-             + OUT_OF_SAMPLE, "", "## Summary, one line per incident", ""]
+             "the official yellow and the official escalation. 2021 Azerbaijan: "
+             + CASE_NOTE, "", "## Summary, one line per incident", ""]
     lines += [f"- {inc['summary']}" for inc in incidents]
     lines += ["", "## Charts", ""]
     lines += [f"![{inc['race']} car {inc['car']}]({inc['png']})" for inc in incidents]
@@ -391,7 +394,7 @@ def main() -> None:
     p = argparse.ArgumentParser(description="Delay-cost curves per incident (counterfactual)")
     p.add_argument("races", nargs="*", help="race ids, default: every training race plus 2021_Azerbaijan")
     p.add_argument("--out", default=str(OUT_DIR))
-    p.add_argument("--workers", type=int, default=min(6, os.cpu_count() or 2))
+    p.add_argument("--workers", type=int, default=min(3, os.cpu_count() or 2))   # 24 GB laptop: at most 3
     p.add_argument("--replot", action="store_true", help="redraw the PNGs from the saved JSON, no recomputation")
     a = p.parse_args()
     out_dir = Path(a.out)

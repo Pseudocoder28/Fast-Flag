@@ -154,7 +154,7 @@
   "case_study_races": [
     "2021_Azerbaijan"
   ],
-  "case_study_note": "Out of sample twice: our models never saw this race, and 2021 cars ran under different technical rules from our 2023 to 2026 training data.",
+  "case_study_note": "Case study: our machine learning models never saw this race, and 2021 cars ran under different technical rules. Not out of sample for the detector rules: some thresholds were refined with its replay in view on 27 Sept.",
   "incidents": [
     {
       "race": "2023_Australian",
@@ -1247,14 +1247,14 @@
       "racing_share": 0.8,
       "markers": {
         "our_first_alert": {
-          "t_after_onset": 9.0,
+          "t_after_onset": 12.0,
           "type": "STOPPED",
-          "evidence": "speed 75 km/h vs ref 303 km/h, on the racing line",
+          "evidence": "speed 59 km/h vs ref 309 km/h, on the racing line",
           "drivers": [
             "63"
           ],
           "on_onset_car": true,
-          "cars_by_then": 6
+          "cars_by_then": 10
         },
         "our_escalation": {
           "t_after_onset": 29.5,
@@ -2242,28 +2242,21 @@
       },
       "detections": [
         {
-          "t_after_onset": 9.0,
+          "t_after_onset": 12.0,
           "type": "STOPPED",
           "severity": 0.7,
           "drivers": [
             "63"
           ],
-          "evidence": "speed 75 km/h vs ref 303 km/h, on the racing line"
+          "evidence": "speed 59 km/h vs ref 309 km/h, on the racing line"
         }
       ],
       "recommendations": [
         {
-          "t_after_onset": 9.0,
+          "t_after_onset": 12.0,
           "flag": "DOUBLE_YELLOW",
           "confidence": 0.7,
           "reason": "car 63 stopped (on track)",
-          "message": "DOUBLE YELLOW IN TRACK SECTOR 20"
-        },
-        {
-          "t_after_onset": 11.5,
-          "flag": "DOUBLE_YELLOW",
-          "confidence": 0.7,
-          "reason": "car 63 stopped, rolled on from sector 20",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 1"
         },
         {
@@ -2281,7 +2274,7 @@
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
         }
       ],
-      "summary": "2023 Australian, RUS (car 63) at 6422.8 s: each second of delay here averaged 0.23 cars (14 cars passed at racing speed in the 60 s after onset); our first alert +9.0 s; our VSC +29.5 s (14 cars by then); official VSC +31.4 s (14 cars by then).",
+      "summary": "2023 Australian, RUS (car 63) at 6422.8 s: each second of delay here averaged 0.23 cars (14 cars passed at racing speed in the 60 s after onset); our first alert +12.0 s; our VSC +29.5 s (14 cars by then); official VSC +31.4 s (14 cars by then).",
       "png": "delay_cost_2023_Australian_car63_6422.png"
     },
     {
@@ -4393,9 +4386,9 @@
       "racing_share": 0.8,
       "markers": {
         "our_first_alert": {
-          "t_after_onset": 0.0,
+          "t_after_onset": 1.0,
           "type": "IMPACT",
-          "evidence": "lost 82 km/h in 1 s (195 to 50 km/h), without braking",
+          "evidence": "lost 104 km/h in 1 s (113 to 56 km/h), without braking",
           "drivers": [
             "22"
           ],
@@ -5347,13 +5340,13 @@
       },
       "detections": [
         {
-          "t_after_onset": 0.0,
+          "t_after_onset": 1.0,
           "type": "IMPACT",
-          "severity": 0.66,
+          "severity": 0.71,
           "drivers": [
             "22"
           ],
-          "evidence": "lost 82 km/h in 1 s (195 to 50 km/h), without braking"
+          "evidence": "lost 104 km/h in 1 s (113 to 56 km/h), without braking"
         },
         {
           "t_after_onset": 4.25,
@@ -5367,9 +5360,9 @@
       ],
       "recommendations": [
         {
-          "t_after_onset": 0.0,
+          "t_after_onset": 1.0,
           "flag": "YELLOW",
-          "confidence": 0.66,
+          "confidence": 0.71,
           "reason": "car 22 impact signature",
           "message": "YELLOW IN TRACK SECTOR 3"
         },
@@ -5400,7 +5393,7 @@
           "message": "YELLOW IN TRACK SECTOR 3"
         }
       ],
-      "summary": "2023 Mexico City, TSU (car 22) at 9232.8 s: each second of delay here averaged 0.17 cars (10 cars passed at racing speed in the 60 s after onset); our first alert +0.0 s; official yellow +1.2 s (0 cars by then); no official escalation.",
+      "summary": "2023 Mexico City, TSU (car 22) at 9232.8 s: each second of delay here averaged 0.17 cars (10 cars passed at racing speed in the 60 s after onset); our first alert +1.0 s; official yellow +1.2 s (0 cars by then); no official escalation.",
       "png": "delay_cost_2023_Mexico_City_car22_9232.png"
     },
     {
@@ -32887,7 +32880,7 @@
           "drivers": [
             "5"
           ],
-          "evidence": "lost 135 km/h in 1 s (192 to 75 km/h), without braking"
+          "evidence": "lost 135 km/h in 1 s (192 to 75 km/h), with brakes on"
         },
         {
           "t_after_onset": 120.0,
@@ -37834,7 +37827,7 @@
           "drivers": [
             "31"
           ],
-          "evidence": "lost 90 km/h in 1 s (140 to 68 km/h), without braking"
+          "evidence": "lost 90 km/h in 1 s (140 to 68 km/h), with brakes on"
         },
         {
           "t_after_onset": 0.75,
@@ -43148,9 +43141,9 @@
       "racing_share": 0.8,
       "markers": {
         "our_first_alert": {
-          "t_after_onset": 8.75,
+          "t_after_onset": 12.0,
           "type": "STOPPED",
-          "evidence": "speed 73 km/h vs ref 288 km/h, on the racing line",
+          "evidence": "speed 52 km/h vs ref 277 km/h, on the racing line",
           "drivers": [
             "6"
           ],
@@ -44151,18 +44144,18 @@
       },
       "detections": [
         {
-          "t_after_onset": 8.75,
+          "t_after_onset": 12.0,
           "type": "STOPPED",
           "severity": 0.7,
           "drivers": [
             "6"
           ],
-          "evidence": "speed 73 km/h vs ref 288 km/h, on the racing line"
+          "evidence": "speed 52 km/h vs ref 277 km/h, on the racing line"
         }
       ],
       "recommendations": [
         {
-          "t_after_onset": 8.75,
+          "t_after_onset": 12.0,
           "flag": "DOUBLE_YELLOW",
           "confidence": 0.7,
           "reason": "car 6 stopped (on track)",
@@ -44193,7 +44186,7 @@
           "message": "DOUBLE YELLOW IN TRACK SECTOR 13"
         }
       ],
-      "summary": "2026 Australian, HAD (car 6) at 4654.5 s: each second of delay here averaged 0.22 cars (13 cars passed at racing speed in the 60 s after onset); our first alert +8.8 s; our VSC +23.5 s (10 cars by then); official yellow +34.9 s (13 cars by then); official VSC +26.9 s (11 cars by then).",
+      "summary": "2026 Australian, HAD (car 6) at 4654.5 s: each second of delay here averaged 0.22 cars (13 cars passed at racing speed in the 60 s after onset); our first alert +12.0 s; our VSC +23.5 s (10 cars by then); official yellow +34.9 s (13 cars by then); official VSC +26.9 s (11 cars by then).",
       "png": "delay_cost_2026_Australian_car6_4654.png"
     },
     {
@@ -45242,16 +45235,7 @@
       "step_s": 0.5,
       "racing_share": 0.8,
       "markers": {
-        "our_first_alert": {
-          "t_after_onset": 1.25,
-          "type": "IMPACT",
-          "evidence": "lost 98 km/h in 1 s (212 to 112 km/h), without braking",
-          "drivers": [
-            "63"
-          ],
-          "on_onset_car": true,
-          "cars_by_then": 0
-        },
+        "our_first_alert": null,
         "our_escalation": null,
         "official_yellow": null,
         "cars_by_official_yellow": null,
@@ -46223,26 +46207,8 @@
           175.0
         ]
       },
-      "detections": [
-        {
-          "t_after_onset": 1.25,
-          "type": "IMPACT",
-          "severity": 0.7,
-          "drivers": [
-            "63"
-          ],
-          "evidence": "lost 98 km/h in 1 s (212 to 112 km/h), without braking"
-        }
-      ],
-      "recommendations": [
-        {
-          "t_after_onset": 1.25,
-          "flag": "YELLOW",
-          "confidence": 0.7,
-          "reason": "car 63 impact signature",
-          "message": "YELLOW IN TRACK SECTOR 17"
-        }
-      ],
+      "detections": [],
+      "recommendations": [],
       "official_messages": [
         {
           "t_after_onset": 59.38,
@@ -46250,7 +46216,7 @@
           "message": "VSC DEPLOYED"
         }
       ],
-      "summary": "2026 Australian, RUS (car 63) at 6614.0 s: each second of delay here averaged 0.22 cars (13 cars passed at racing speed in the 60 s after onset); our first alert +1.2 s; official VSC +59.4 s (13 cars by then).",
+      "summary": "2026 Australian, RUS (car 63) at 6614.0 s: each second of delay here averaged 0.22 cars (13 cars passed at racing speed in the 60 s after onset); official VSC +59.4 s (13 cars by then).",
       "png": "delay_cost_2026_Australian_car63_6614.png"
     },
     {
@@ -58768,7 +58734,7 @@
         "our_first_alert": {
           "t_after_onset": 1.25,
           "type": "IMPACT",
-          "evidence": "lost 87 km/h in 1 s (140 to 7 km/h), without braking",
+          "evidence": "lost 87 km/h in 1 s (140 to 7 km/h), with brakes on",
           "drivers": [
             "16"
           ],
@@ -59726,7 +59692,7 @@
           "drivers": [
             "16"
           ],
-          "evidence": "lost 87 km/h in 1 s (140 to 7 km/h), without braking"
+          "evidence": "lost 87 km/h in 1 s (140 to 7 km/h), with brakes on"
         },
         {
           "t_after_onset": 2.25,

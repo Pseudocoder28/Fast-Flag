@@ -102,7 +102,7 @@ def summary(rows: list[dict]) -> dict:
 def main() -> None:
     from src.replay.engine import available_races
     races = available_races() + [CHECK_RACE]
-    with ProcessPoolExecutor(max_workers=min(6, os.cpu_count() or 2)) as ex:
+    with ProcessPoolExecutor(max_workers=min(3, os.cpu_count() or 2)) as ex:
         dets = dict(ex.map(detections, races))
         results = {label: list(ex.map(replay, [(rid, dets[rid], patch) for rid in races]))
                    for label, patch in VARIANTS}
