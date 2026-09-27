@@ -96,6 +96,26 @@ html, body {
 }
 
 .back:hover, .back:focus-visible { color: var(--ink); border-color: var(--ink-3); }
+.back, #status span { white-space: nowrap; }
+#top { gap: 16px; }
+
+/* replay controls (top centre): seek and speed, the same POST /replay as the pit wall */
+.controls { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.ctl {
+  padding: 6px 8px 5px;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink-2);
+  font: 800 11px var(--sans);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ctl:hover, .ctl:focus-visible { color: var(--ink); border-color: var(--ink-3); }
+.ctl.active { color: var(--ink); border-color: var(--ink-3); background: rgba(255, 255, 255, 0.10); }
+.ctl.play { min-width: 64px; }
+.ctl-sep { width: 1px; height: 20px; margin: 0 4px; background: var(--edge); }
 
 /* --- race control panel (top left) ------------------------------------------ */
 

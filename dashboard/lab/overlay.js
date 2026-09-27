@@ -12,6 +12,15 @@
 // While no flag is out, a standby panel shows the race, the lap and how many cars are
 // being watched (or that the replay is paused), so the overlay never looks dead.
 //
+// It connects with ?catchup=1: the server first sends everything since the last seek
+// (src/replay/hub.py), so the flags already out and race control's messages show at once
+// when the page opens, or reopens after a switch from the pit wall. Those arrive before the
+// first tick; a call made before the page opened gets its banner and lead, but no exposure
+// clock (the cars that passed before then were not seen).
+//
+// Replay controls (top): seek back and forward, play or pause, speed. They send the same
+// POST /replay as the pit wall, so every open page follows.
+//
 // - Every rec at YELLOW or above slides in a lower-third banner.
 // - Exposure Clock: when our rec reaches VSC, SC or RED before the official message
 //   of that level, and race control has no track-wide flag out yet, it counts replay
@@ -22,7 +31,7 @@
 // - Race control panel: the official messages as they arrive, clears included. The message
 //   that first confirms one of our banners shows that banner's lead; repeats show none.
 
-const WS_URL = `ws://${location.host}/stream`;
+const WS_URL = `ws://${location.host}/stream?catchup=1`;
 const RESET_JUMP_S = 2.0;          // same rule as the race control engine and the dashboard
 const CONFIRM_WINDOW_S = 120.0;    // an official message this long before our raise, or after it once our flag is
                                    // down, is about something else (the voice's rule, src/lab/voice.py)
@@ -41,6 +50,8 @@ const BANNER_MAX = 3;              // CLEAR banners make way first, a live flag 
 const HIDE_AFTER_CLEAR_S = 12;     // frozen clock stays this long (replay time) after the track clears
 const CLEAR_BANNER_MS = 5000;      // a green CLEAR banner stays this long (wall time, like the slide-out)
 const RC_MAX = 4;                  // race control messages shown
+const SEEK_SMALL_S = 10;           // arrow keys; shift for SEEK_BIG_S
+const SEEK_BIG_S = 30;
 
 const RANK = { CLEAR: 0, YELLOW: 1, DOUBLE_YELLOW: 2, VSC: 3, SC: 4, RED: 5 };
 const GLOBAL_FLAGS = new Set(["VSC", "SC", "RED"]);
@@ -134,7 +145,8 @@ const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), 
 // --- standby: shown while no flag is out, so the overlay never looks dead ----------------
 
 const PAUSED_AFTER_MS = 1500;      // no tick for this long (wall time): the replay is paused or stopped
-const view = { raceName: null, lap: null, watching: 0, connected: false, lastTickWall: null };
+const view = { raceName: null, lap: null, watching: 0, connected: false, lastTickWall: null,
+  speed: null, lastSpeed: 1, tStatus: null };
 
 function raceTitle(id) {
   return id ? String(id).split("|")[0].replace(/_/g, " ").toUpperCase() : null;
@@ -150,7 +162,7 @@ function updateStandby() {
   const at = S.t === null ? "" : ` at t ${S.t.toFixed(1)} s`;
   ui.sbState.textContent = !view.connected ? "Connecting to the replay server"
     : S.t === null ? "Connected. Start the replay to see the cars"
-    : paused ? `Replay paused${at}. Press play on the pit wall`
+    : paused ? `Replay paused${at}. Press play`
     : `Watching ${view.watching} cars · no flag from Fast Flag${at}`;
   ui.conn.textContent = !view.connected ? "RECONNECTING" : paused ? "REPLAY PAUSED" : "REPLAY RUNNING";
   ui.conn.classList.toggle("on", view.connected && !paused);
@@ -552,7 +564,8 @@ function onRec(rec) {
   }
   raiseScope(scope, t, rank);
   showBanner(rec, cause, scope);
-  if (scope === TRACK && rank > cur && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
+  // S.t is null until the first tick: this rec is catch-up, from before the page opened
+  if (scope === TRACK && rank > cur && S.t !== null && (!S.clock || S.clock.frozen)) maybeStartClock(rec, cause, rank, t);
 }
 
 function maybeStartClock(rec, cause, rank, t) {
@@ -574,6 +587,13 @@ function onClear(rec, msector, t) {
   if ((S.level.get(scope) || 0) === 0) return;
   S.level.set(scope, 0);
   if (sectorClear) S.cause.delete(msector);
+  if (S.t === null) {                                   // catch-up: an old clear, no green banner
+    const b = S.banners.get(scope);
+    if (b) b.el.remove();
+    S.banners.delete(scope);
+    updateStandby();
+    return;
+  }
   showClearBanner(rec, scope);
   if (!sectorClear && S.clock) {
     if (!S.clock.frozen) endClockWithoutOfficial(t);
@@ -644,6 +664,7 @@ function onOfficial(off) {
 function connect() {
   const ws = new WebSocket(WS_URL);
   ws.onopen = () => {
+    resetAll();                 // the catch-up replays everything since the last seek: never twice
     view.connected = true;
     updateStandby();
   };
@@ -696,13 +717,68 @@ async function watchRace() {
     }
     S.race = id;
     view.raceName = raceTitle(id);
+    applyStatus(st);
     updateStandby();
   } catch (e) {
     // the server is restarting: the websocket reconnect handles it
   }
 }
 
+// --- replay controls ----------------------------------------------------------------------
+
+function applyStatus(st) {
+  view.speed = Number(st.speed);
+  if (view.speed > 0) view.lastSpeed = view.speed;
+  view.tStatus = Number(st.t);
+  el("play").textContent = view.speed > 0 ? "PAUSE" : "PLAY";
+  for (const b of document.querySelectorAll("[data-speed]")) {
+    b.classList.toggle("active", Number(b.dataset.speed) === view.speed);
+  }
+}
+
+async function postReplay(body) {
+  try {
+    const res = await fetch("/replay", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify(body) });
+    applyStatus(await res.json());
+  } catch (e) {
+    console.warn("overlay: POST /replay failed", e);
+  }
+}
+
+function seekBy(ds) {
+  // a jump over RESET_JUMP_S wipes every page and race control: flags start fresh from there
+  const t = S.t ?? view.tStatus;
+  if (t !== null && Number.isFinite(t)) postReplay({ seek_t: t + ds });
+}
+
+function togglePlay() {
+  postReplay({ speed: view.speed > 0 ? 0 : view.lastSpeed || 1 });
+}
+
+function wireControls() {
+  el("play").addEventListener("click", togglePlay);
+  for (const b of document.querySelectorAll("[data-seek]")) {
+    b.addEventListener("click", () => seekBy(Number(b.dataset.seek)));
+  }
+  for (const b of document.querySelectorAll("[data-speed]")) {
+    b.addEventListener("click", () => postReplay({ speed: Number(b.dataset.speed) }));
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.target !== document.body) return;
+    if (e.code === "Space") {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+      e.preventDefault();
+      const ds = e.shiftKey ? SEEK_BIG_S : SEEK_SMALL_S;
+      seekBy(e.code === "ArrowLeft" ? -ds : ds);
+    }
+  });
+}
+
 async function init() {
+  wireControls();
   await loadTrack();
   await watchRace();
   setInterval(watchRace, STATUS_POLL_MS);
