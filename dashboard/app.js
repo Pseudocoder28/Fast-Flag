@@ -15,7 +15,11 @@ const MATCH_BEFORE_S = 60;     // our rec pairs with an official flag from 60 s 
 const MATCH_AFTER_S = 10;      // ... to 10 s after it (PROJECT_BRIEF.md 6.7)
 const TL_WINDOW_S = 90;        // the timeline shows the last 90 s of replay time
 const INCIDENT_GAP_S = 60;     // official flags further apart than this are separate incidents
-const JUMP_BEFORE_S = 30;      // a jump lands this long before race control's first message
+const JUMP_BEFORE_S = 30;
+
+// open the page with ?debug to see frame rate, display lag and message rate on the map
+const DEBUG = new URLSearchParams(location.search).has("debug");
+const dbg = { fps: 0, frameMs: 0, last: 0, msgs: 0, msgRate: 0, windowStart: 0 };      // a jump lands this long before race control's first message
 
 // car movement: ticks come every 0.25 s of replay time. At 1x that is one tick every
 // ~256 ms of wall time, at 10x the server sends bursts of 2 ticks every ~57 ms, at 50x
@@ -69,7 +73,8 @@ const HALO_ALPHA = 0.55;
 const MAP_BG = "#101318";      // matches the map panel, used for the gap in the double stripe
 
 const TRACK_FLAGS = new Set(["VSC", "SC", "RED"]);   // track-wide recs (PROJECT_BRIEF.md 7.4)
-const CAR_FILL = { low: "#343c49", elevated: "#a56200", high: "#c2185b", stopped: "#4a4d52", pit: "#6b7480" };
+const CAR_FILL = { low: "#343c49", stricken: "#d62839", stopped: "#4a4d52", pit: "#6b7480" };
+const RISK_HALO = { elevated: "#e0a800", high: "#ff4fa3" };   // risk is a secondary cue: a halo, never the fill
 const RING_STOPPED = "#9aa0a6";
 const WATCH_COLOR = "#a99cff";  // ANOMALY: advisory only, never a flag, kept apart from flag and risk colours
 const WATCH_S = 10;             // a watched car keeps its dashed ring this long (replay time)
@@ -236,7 +241,8 @@ let officialEvents = [];        // GET /official, used only for the state at or 
 
 const cars = new Map();         // drv -> car (see newCar)
 const risk = new Map();         // drv -> risk_30s
-const watchUntil = new Map();   // drv -> replay time until which an ANOMALY watch ring shows
+const watchUntil = new Map();
+const involved = new Map();     // drv -> sector of its latest physical detection (stricken while that sector is flagged)   // drv -> replay time until which an ANOMALY watch ring shows
 const sectorFlags = new Map();  // msector -> sector flag (CLEAR, YELLOW, DOUBLE_YELLOW)
 let trackFlag = null;           // our track-wide flag: CLEAR, VSC, SC or RED. null: not known yet,
                                 // recs only arrive on changes, so a page opened mid-incident has
@@ -271,6 +277,7 @@ function newCar(c, t) {
     hist: [[t, c.x, c.y]],       // recent distinct positions: [replay t, x, y], oldest first
     x: c.x, y: c.y,              // latest tick position
     inPit: c.in_pit,
+    msector: c.msector,
     seenT: t,                    // replay time of the latest tick with this car
     anchorX: c.x, anchorY: c.y,  // where the car was when it last moved STILL_MOVE_M
     movedT: t,
@@ -305,6 +312,7 @@ function updateCar(c, t) {
   car.x = c.x;
   car.y = c.y;
   car.inPit = c.in_pit;
+  car.msector = c.msector;
   car.seenT = t;
   if (dist([c.x, c.y], [car.anchorX, car.anchorY]) > STILL_MOVE_M) {
     car.anchorX = c.x;
@@ -374,6 +382,7 @@ function onDetection(det) {
             escapeHtml(det.evidence), det.t);
     return;
   }
+  for (const d of det.drivers) involved.set(d, det.msector);
   feedRow("det", det.type, `${who}, sector ${det.msector}`,
           `${escapeHtml(det.evidence)}, severity ${num(det.severity)}`, det.t);
 }
@@ -432,11 +441,12 @@ function buildLegend() {
         (flag === "CLEAR" ? TRACK_LINE : FLAG_COLORS[flag])}"></span>`;
     return `<div class="legend-row">${flagIcon(flag, FLAG_COLORS[flag])}${line}<span>${FLAG_LABEL[flag]}</span></div>`;
   }).join("");
-  const dot = (fill, cls = "") => `<span class="legend-dot ${cls}" style="background:${fill}"></span>`;
+  const dot = (fill, cls = "", extra = "") => `<span class="legend-dot ${cls}" style="background:${fill};${extra}"></span>`;
   document.getElementById("car-legend").innerHTML = [
-    [dot(CAR_FILL.low), "Risk normal"],
-    [dot(CAR_FILL.elevated), "Risk elevated"],
-    [dot(CAR_FILL.high), "Risk high"],
+    [dot(CAR_FILL.stricken, "stricken"), "In an incident"],
+    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 4px ${FLAG_COLORS.YELLOW}`), "In a yellow sector"],
+    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px ${FLAG_COLORS.SC}`), "Under our SC or VSC"],
+    [dot(CAR_FILL.low, "", `box-shadow:0 0 0 4px ${RISK_HALO.high}77`), "Risk halo"],
     [dot(CAR_FILL.stopped, "ring"), "Stopped or out"],
     [dot(CAR_FILL.low, "watch"), "Watch (anomaly)"],
     [dot(CAR_FILL.pit, "pit"), "In pit lane"],
@@ -453,6 +463,7 @@ function resetForJump() {
   clearFeed();
   risk.clear();
   watchUntil.clear();
+  involved.clear();
   cars.clear();                 // every car is placed fresh: a seek snaps, never glides
   burstT = null;
   dispT = null;
@@ -882,7 +893,9 @@ function drawSectorLabels() {
 }
 
 function carStates() {
-  // which cars to draw, how visible, and whether they are stopped, out or in the pit lane
+  // which cars to draw, how visible, stopped, out or in the pit lane, and their situation:
+  // stricken (named in a detection in a sector that is still flagged), inside a flagged
+  // sector, or under a track-wide flag. Risk is only a secondary cue.
   const out = [];
   let onTrack = 0;
   let still = 0;
@@ -905,17 +918,34 @@ function carStates() {
     else if (s.stillFor >= OUT_AFTER_S) s.status = "OUT";
     else if (s.stillFor >= STOPPED_AFTER_S) s.status = "STOPPED";
     else s.status = null;
-    s.level = s.status ? null : riskLevel(risk.get(s.drv));
+    const inc = involved.get(s.drv);
+    s.stricken = s.status !== "PIT" && inc !== undefined && isFlagged(sectorFlags.get(inc));
+    const zone = sectorFlags.get(s.car.msector);
+    s.zone = s.status !== "PIT" && isFlagged(zone) ? zone : null;
+    s.level = riskLevel(risk.get(s.drv));
   }
-  // pit cars at the bottom, then by risk; stopped and out cars on top, so a car passing
-  // the scene never hides the stricken car
-  const order = { PIT: 0, OUT: 4, STOPPED: 5 };
-  const rank = { low: 1, elevated: 2, high: 3 };
-  out.sort((p, q) => (order[p.status] ?? rank[p.level]) - (order[q.status] ?? rank[q.level]));
+  // pit cars at the bottom, then running cars, then cars in a flagged sector, stopped and
+  // out cars, and the stricken car on top: a car passing the scene never hides it
+  const layer = (s) => (s.status === "PIT" ? 0 : s.stricken ? 5 : s.status ? 4 : s.zone ? 3 : 1);
+  out.sort((p, q) => layer(p) - layer(q));
   return out;
 }
 
-function drawCar(s) {
+function isFlagged(flag) {
+  return flag === "YELLOW" || flag === "DOUBLE_YELLOW";
+}
+
+function ring(cx, cy, r, width, color, dash) {
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.lineWidth = width;
+  ctx.strokeStyle = color;
+  if (dash) ctx.setLineDash(dash);
+  ctx.stroke();
+  if (dash) ctx.setLineDash([]);
+}
+
+function drawCar(s, now) {
   const [x, y] = drawnPos(s.car, dispT);
   const [cx, cy] = toCanvas(transform, x, y);
   ctx.globalAlpha = s.alpha;
@@ -929,29 +959,42 @@ function drawCar(s) {
     return;
   }
   const stopped = s.status === "STOPPED" || s.status === "OUT";
+
+  // secondary cue: a soft risk halo behind the dot
+  if (!stopped && !s.stricken && (s.level === "elevated" || s.level === "high")) {
+    ctx.globalAlpha = s.alpha * 0.45;
+    ctx.beginPath();
+    ctx.arc(cx, cy, DOT_RADIUS_PX + 9, 0, Math.PI * 2);
+    ctx.fillStyle = RISK_HALO[s.level];
+    ctx.fill();
+    ctx.globalAlpha = s.alpha;
+  }
+
   ctx.beginPath();
   ctx.arc(cx, cy, DOT_RADIUS_PX, 0, Math.PI * 2);
-  ctx.fillStyle = stopped ? CAR_FILL.stopped : CAR_FILL[s.level];
+  ctx.fillStyle = s.stricken ? CAR_FILL.stricken : stopped ? CAR_FILL.stopped : CAR_FILL.low;
   ctx.fill();
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = "#05070a";
   ctx.stroke();
-  if (stopped) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, DOT_RADIUS_PX + 4, 0, Math.PI * 2);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = RING_STOPPED;
-    ctx.stroke();
+
+  if (s.stricken) {
+    // pulsing ring, about once a second
+    const p = (Math.sin((now / 1000) * Math.PI * 2 * 1.1) + 1) / 2;
+    ctx.globalAlpha = s.alpha * (0.35 + 0.55 * (1 - p));
+    ring(cx, cy, DOT_RADIUS_PX + 4 + 6 * p, 3, CAR_FILL.stricken);
+    ctx.globalAlpha = s.alpha;
+  } else if (stopped) {
+    ring(cx, cy, DOT_RADIUS_PX + 4, 3, RING_STOPPED);
+  } else if (s.zone) {
+    ring(cx, cy, DOT_RADIUS_PX + 3.5, 3.5, FLAG_COLORS[s.zone]);          // driving through a flagged sector
+  } else if (TRACK_FLAGS.has(trackFlag)) {
+    ring(cx, cy, DOT_RADIUS_PX + 3, 2, FLAG_COLORS[trackFlag]);           // under our VSC, SC or red flag
   }
-  if (!stopped && (watchUntil.get(s.drv) ?? -Infinity) >= replayT) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, DOT_RADIUS_PX + 4, 0, Math.PI * 2);
-    ctx.setLineDash([4, 3]);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = WATCH_COLOR;
-    ctx.stroke();
-    ctx.setLineDash([]);
+  if (!stopped && !s.stricken && (watchUntil.get(s.drv) ?? -Infinity) >= replayT) {
+    ring(cx, cy, DOT_RADIUS_PX + 8, 2, WATCH_COLOR, [4, 3]);
   }
+
   ctx.fillStyle = "#ffffff";
   ctx.font = `700 13px ${LABEL_FONT}`;
   ctx.textAlign = "center";
@@ -995,6 +1038,31 @@ function advanceDisplayClock(now) {
   dispT = Math.min(dispT, replayT);
 }
 
+function drawDebug(now) {
+  const dt = dbg.last ? now - dbg.last : 16;
+  dbg.last = now;
+  dbg.frameMs = dbg.frameMs ? 0.9 * dbg.frameMs + 0.1 * dt : dt;
+  dbg.fps = 1000 / Math.max(dbg.frameMs, 1);
+  if (now - dbg.windowStart >= 1000) {
+    dbg.msgRate = (dbg.msgs * 1000) / (now - dbg.windowStart || 1000);
+    dbg.msgs = 0;
+    dbg.windowStart = now;
+  }
+  const lines = [
+    `fps ${dbg.fps.toFixed(0)}  (frame ${dbg.frameMs.toFixed(1)} ms)`,
+    `display lag ${replayT === null || dispT === null ? "-" : (replayT - dispT).toFixed(2)} s replay`,
+    `replay rate ${(rate * 1000).toFixed(1)}x, burst ${burstSpan.toFixed(2)} s`,
+    `messages ${dbg.msgRate.toFixed(0)}/s, cars ${cars.size}`,
+  ];
+  ctx.font = `600 11px ${MONO_FONT}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "rgba(10, 12, 15, 0.85)";
+  ctx.fillRect(10, 10, 270, 16 * lines.length + 10);
+  ctx.fillStyle = "#e8eaed";
+  lines.forEach((l, i) => ctx.fillText(l, 16, 15 + 16 * i));
+}
+
 function draw(now) {
   requestAnimationFrame(draw);
   if (!segments || !transform) return;
@@ -1007,13 +1075,14 @@ function draw(now) {
   renderCurrentIncident();
   advanceDisplayClock(now);
   const states = carStates();
-  for (const s of states) drawCar(s);
+  for (const s of states) drawCar(s, now);
   for (const s of states) {
     if (!s.tagAt) continue;
     ctx.globalAlpha = s.alpha;
     drawTag(s.status, s.tagAt[0], s.tagAt[1]);
     ctx.globalAlpha = 1;
   }
+  if (DEBUG) drawDebug(now);
 }
 
 // --- websocket ---------------------------------------------------------------
@@ -1066,6 +1135,7 @@ function connect() {
   };
 
   ws.onmessage = (event) => {
+    dbg.msgs++;
     let env;
     try {
       env = JSON.parse(event.data);

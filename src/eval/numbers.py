@@ -45,6 +45,54 @@ def pct(x: float) -> str:
     return f"{100 * x:.1f}%"
 
 
+def ai_summary() -> list[str]:
+    """Where the machine learning is, with its key figures (details in the sections below)."""
+    t = pd.read_csv(CHARTS / "risk_eval.csv", encoding="utf-8").set_index(["horizon_s", "model"])
+    ew = pd.read_csv(CHARTS / "risk_early_warning.csv", encoding="utf-8")
+    ev = pd.read_csv(CHARTS / "detect_eval.csv", encoding="utf-8")
+    line = ew[ew["model"] == "lightgbm"].sort_values("neg_tick_rate").iloc[0]         # the frozen high-risk line
+    pr = lambda h, m="lightgbm": float(t.loc[(h, m), "pr_auc_precursor"])  # noqa: E731
+    base = lambda h: float(t.loc[(h, "lightgbm"), "base_rate"])  # noqa: E731
+    adv = ev[ev["system"] == "anomaly_advisory"]
+    n_adv, hours = int(adv["alerts"].sum()), float(adv["hours"].sum())
+    near = n_adv - int(adv["false_alarms"].sum())
+    out = ["## Where the AI is (for the AI slide)", "",
+           "Two machine learning models, both trained only on the 20 training races and tested on races they never "
+           "saw (leave-one-race-out, then once on the 2026 Azerbaijan holdout). Rules sit on top of them to make the "
+           "final flag call, so every recommendation can be explained. Details and definitions: the sections below.", "",
+           "- Anomaly model (IsolationForest, unsupervised machine learning): learned what normal driving looks like "
+           "from the training races without being shown a single crash. It marks unusual driving as a \"watch\" "
+           "marker on the dashboard, confirms race control's calls and feeds the risk model. On its own it is noisy "
+           f"({n_adv} advisories in {hours:.1f} race hours, {near} near an official incident), so it advises and "
+           "never raises a flag by itself.",
+           "- Risk model (LightGBM, supervised machine learning): every second, each car's probability of an incident "
+           "in the next 10, 20 and 30 s, with the two features pushing it up. On races it never trained on, at 10 s "
+           f"it scores {pr(10) / base(10):.0f} times the chance level (precursor PR-AUC {pr(10):.4f} against a base "
+           f"rate of {base(10):.4f}), {pr(10) / pr(10, 'anomaly_score'):.0f} times the ANOMALY score and "
+           f"{pr(10) / pr(10, 'speed_threshold'):.0f} times a speed threshold; at 30 s {pr(30) / base(30):.1f} times "
+           f"the chance level. With the frozen high-risk line it flags {pct(line['flagged_3s_before'])} of "
+           f"{int(line['car_incidents'])} car incidents at least 3 s before detection (median "
+           f"{line['median_s_before_when_flagged']:.1f} s), with {line['false_episodes_per_hour']:.0f} false high-risk "
+           "episodes per race hour: a heat indicator, not an alarm."]
+    for path in sorted(CHARTS.glob("holdout_*.json")):
+        h = json.loads(path.read_text(encoding="utf-8"))["risk"]["horizons"]
+        h10, h30 = h["10"], h["30"]
+        x = lambda v: v["lightgbm_pr_auc_precursor"] / v["base_rate"]  # noqa: E731
+        out.append(f"- Holdout, {path.stem.removeprefix('holdout_').replace('_', ' ')}: at 10 s the risk model scored "
+                   f"{x(h10):.0f} times the chance level (precursor PR-AUC {h10['lightgbm_pr_auc_precursor']:.4f} "
+                   f"against {h10['base_rate']:.4f}), ahead of the ANOMALY score "
+                   f"({h10['anomaly_score_pr_auc_precursor']:.4f}) and a speed threshold "
+                   f"({h10['speed_threshold_pr_auc_precursor']:.4f}); at 30 s it is barely above chance "
+                   f"({x(h30):.1f} times).")
+    out += ["- Not machine learning, on purpose: the incident detectors (physics rules, thresholds tuned on the "
+            "training races) and the race control engine (rules that pick the flag). The narration uses templates; no "
+            "paid AI service runs at race time.",
+            "- Say: \"Two machine learning models, an unsupervised anomaly detector and a supervised risk predictor, "
+            "trained on 20 races of telemetry and tested on a race they never saw. Rules sit on top so every flag "
+            "decision can be explained.\"", ""]
+    return out
+
+
 def detection_loro() -> list[str]:
     t = read_md_table(CHARTS / "tune_results.md")
     out = ["## Detection, headline (leave-one-race-out, same false-alarm budget)", "",
@@ -293,7 +341,7 @@ def build() -> str:
             "- Say \"earlier than the race control feed\" (the official messages), never \"earlier than the marshals\".",
             holdout_line(),
             "- Risk is a heat indicator, not an alarm. Case-study windows are counterfactuals.", ""]
-    body = (detection_loro() + detection_deployed() + latency_from_onset() + risk() + pipeline_speed()
+    body = (ai_summary() + detection_loro() + detection_deployed() + latency_from_onset() + risk() + pipeline_speed()
             + escalation() + case_studies() + lab_delay_cost())
     return "\n".join(head + body + holdout())
 

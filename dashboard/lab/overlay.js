@@ -5,8 +5,12 @@
 //
 // Strictly causal: everything on screen comes from envelopes already received,
 // and every clock runs on replay time from the ticks, never on the wall clock. The only
-// wall-clock timers are the websocket reconnect, the banner slide-out and a GET /status
-// poll that resets the overlay when another race is loaded; none of them is displayed.
+// wall-clock timers are the websocket reconnect, the banner slide-out, a GET /status
+// poll that resets the overlay when another race is loaded, and the standby check that
+// notices a paused replay; none of them is displayed as a time.
+//
+// While no flag is out, a standby panel shows the race, the lap and how many cars are
+// being watched (or that the replay is paused), so the overlay never looks dead.
 //
 // - Every rec at YELLOW or above slides in a lower-third banner.
 // - Exposure Clock: when our rec reaches VSC, SC or RED before the official message
@@ -113,7 +117,34 @@ const S = {
 const el = (id) => document.getElementById(id);
 const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
   clockFlag: el("clock-flag"), clockValue: el("clock-value"), clockCars: el("clock-cars"),
-  clockResult: el("clock-result"), ticker: el("ticker") };
+  clockResult: el("clock-result"), ticker: el("ticker"), standby: el("standby"), sbRace: el("sb-race"),
+  sbState: el("sb-state") };
+
+// --- standby: shown while no flag is out, so the overlay never looks dead ----------------
+
+const PAUSED_AFTER_MS = 1500;      // no tick for this long (wall time): the replay is paused or stopped
+const view = { raceName: null, lap: null, watching: 0, connected: false, lastTickWall: null };
+
+function raceTitle(id) {
+  return id ? String(id).split("|")[0].replace(/_/g, " ").toUpperCase() : null;
+}
+
+function updateStandby() {
+  const paused = view.lastTickWall === null || performance.now() - view.lastTickWall > PAUSED_AFTER_MS;
+  ui.standby.classList.toggle("hidden", S.banners.size > 0);
+  ui.standby.classList.toggle("paused", paused);
+  ui.standby.querySelector(".sb-badge").textContent = !view.connected ? "OFFLINE" : paused ? "PAUSED" : "MONITORING";
+  const race = view.raceName ? `${view.raceName} GP` : "FAST FLAG";
+  ui.sbRace.textContent = view.lap === null ? race : `${race} · LAP ${view.lap}`;
+  const at = S.t === null ? "" : ` at t ${S.t.toFixed(1)} s`;
+  ui.sbState.textContent = !view.connected ? "Connecting to the replay server"
+    : S.t === null ? "Connected. Start the replay to see the cars"
+    : paused ? `Replay paused${at}. Press play on the pit wall`
+    : `Watching ${view.watching} cars · no flag from Fast Flag${at}`;
+  ui.conn.textContent = !view.connected ? "RECONNECTING" : paused ? "REPLAY PAUSED" : "REPLAY RUNNING";
+  ui.conn.classList.toggle("on", view.connected && !paused);
+  ui.conn.classList.toggle("paused", view.connected && paused);
+}
 
 function resetAll() {
   S.t = null;
@@ -129,6 +160,7 @@ function resetAll() {
   S.banners.clear();
   S.clock = null;
   hideClock();
+  updateStandby();
 }
 
 // --- our episodes and the official feed ------------------------------------------------
@@ -219,6 +251,7 @@ function showBanner(rec, cause, scope) {
   div.dataset.scope = String(scope);
   div.innerHTML = bannerHtml(rec, cause, scope);
   ui.banners.appendChild(div);
+  updateStandby();
   S.banners.set(scope, { el: div, rec, cause, scope });
   while (S.banners.size > BANNER_MAX) {
     const [k, b] = S.banners.entries().next().value;   // the oldest
@@ -241,6 +274,7 @@ function dropBanner(scope) {
   if (!b) return;
   S.banners.delete(scope);
   b.el.classList.add("out");
+  updateStandby();
   setTimeout(() => b.el.remove(), 450);
 }
 
@@ -405,6 +439,10 @@ function onTick(tick) {
   if (S.t !== null && Math.abs(t - S.t) > RESET_JUMP_S) resetAll();     // a seek or loop, back or forward
   S.t = t;
   ui.replayT.textContent = `REPLAY t ${t.toFixed(1)} s · LAP ${tick.lap}`;
+  view.lastTickWall = performance.now();
+  view.lap = tick.lap;
+  view.watching = tick.cars.filter((c) => !c.in_pit).length;
+  updateStandby();
   let maxDist = 0;
   for (const car of tick.cars) maxDist = Math.max(maxDist, Number(car.dist) || 0);
   if (maxDist > 0 && !(S.lapLength >= maxDist)) S.lapLength = maxDist + (S.lapLength ? 0.5 : 100);   // the track's last sector ends before the line
@@ -495,12 +533,12 @@ function onOfficial(off) {
 function connect() {
   const ws = new WebSocket(WS_URL);
   ws.onopen = () => {
-    ui.conn.textContent = "LIVE REPLAY";
-    ui.conn.classList.add("on");
+    view.connected = true;
+    updateStandby();
   };
   ws.onclose = () => {
-    ui.conn.textContent = "RECONNECTING";
-    ui.conn.classList.remove("on");
+    view.connected = false;
+    updateStandby();
     setTimeout(connect, 2000);
   };
   ws.onerror = () => ws.close();
@@ -546,6 +584,8 @@ async function watchRace() {
       await loadTrack();
     }
     S.race = id;
+    view.raceName = raceTitle(id);
+    updateStandby();
   } catch (e) {
     // the server is restarting: the websocket reconnect handles it
   }
@@ -555,6 +595,7 @@ async function init() {
   await loadTrack();
   await watchRace();
   setInterval(watchRace, STATUS_POLL_MS);
+  setInterval(updateStandby, 500);          // notices a paused replay (no ticks) within a second
   connect();
 }
 
