@@ -78,6 +78,7 @@ class Replay:
         self.cars = self.out.ids
         self.tick_t = self.t0
         self.pending: list[dict] | None = None      # history to push after the next tick (a seek)
+        self.epoch = 0                              # a seek: a play loop in progress stops
         self.hub = Hub()
 
     def seek(self, t: float) -> None:
@@ -87,6 +88,7 @@ class Replay:
             self.hub.reset()              # the pages and race control wipe their state too
         self.sim_t = t
         self.cursor = bisect.bisect_left(self.times, self.sim_t)
+        self.epoch += 1
         if jump:
             self.pending = self.history()
 
@@ -103,7 +105,10 @@ class Replay:
     async def play(self, envs: list[dict]) -> None:
         """Broadcast in order; after a seek the first tick goes out, then the history to the
         catch-up pages, then the rest."""
+        epoch = self.epoch
         for env in envs:
+            if self.epoch != epoch:
+                return                    # a seek came in while sending: the rest is the old position
             if env["kind"] == "tick":
                 self.tick_t = float(env["data"]["t"])
             await self.hub.broadcast(env)

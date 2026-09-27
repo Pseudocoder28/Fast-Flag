@@ -129,6 +129,8 @@ function flagIcon(flag) {
 
 const S = {
   t: null,                    // latest replay time from the ticks
+  resetT: null,               // the first tick's time since the page connected or jumped (catch-up is older)
+  quietTimer: null,
   lapLength: null,            // from GET /track, else the largest dist seen
   nSectors: 1000,             // from GET /track, else no wrap
   detections: new Map(),      // id -> detection
@@ -146,7 +148,7 @@ const S = {
 };
 
 const el = (id) => document.getElementById(id);
-const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
+const ui = { stage: el("stage"), conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
   clockFlag: el("clock-flag"), clockValue: el("clock-value"), clockCars: el("clock-cars"),
   clockResult: el("clock-result"), ticker: el("ticker"), standby: el("standby"), sbRace: el("sb-race"),
   sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty"), mapbox: el("mapbox"), map: el("map"), mapOut: el("map-out"),
@@ -181,7 +183,9 @@ function updateStandby() {
 }
 
 function resetAll() {
+  quiet();
   S.t = null;
+  S.resetT = null;
   S.detections.clear();
   S.cars.clear();
   S.hist.clear();
@@ -202,6 +206,7 @@ function resetAll() {
   M.rcStatus = null;
   M.out = new Map();            // asked again at the next tick
   M.outReady = false;
+  M.gen++;
   M.crashed.clear();
   renderOut();
   updateStandby();
@@ -541,22 +546,34 @@ const MODE_MOVE_MS = 700;          // redraw every frame this long after the map
 
 const M = { track: null, cars: new Map(), top: null, rcStatus: null, tickMs: 250, lastTickWall: null,
   active: null, busyUntil: 0, dirty: true,
-  out: new Map(), outReady: false, outKey: "", crashed: new Set() };   // out of the race (GET /cars)
+  out: new Map(), outReady: false, outKey: "", crashed: new Set(), gen: 0 };   // out of the race (GET /cars)
 const CARS_POLL_MS = 1000;
+const CATCHUP_QUIET_MS = 250;      // animations stay off this long after the last catch-up envelope
 
 function isCatchup(t) {
-  // from before this page saw the replay at this time: the first ticks, or a seek's history
-  return S.t === null || t < S.t - RESET_JUMP_S;
+  // from before this page saw the replay: sent before the first tick since the page connected
+  // or jumped (the server's history is strictly before that tick; live envelopes never are)
+  return S.resetT === null || t < S.resetT;
+}
+
+function quiet() {
+  // a seek or a connect rebuilds the page from history: a clean cut, no banner slide-ins and no
+  // map resize while it does, until the history has stopped arriving
+  ui.stage.classList.add("catchup");
+  clearTimeout(S.quietTimer);
+  S.quietTimer = setTimeout(() => ui.stage.classList.remove("catchup"), CATCHUP_QUIET_MS);
 }
 
 async function fetchCars() {
   // until the first answer after a connect or a seek no car is drawn, so a car out of the race
-  // never flashes back on
+  // never flashes back on; an answer to a question asked before the last seek is dropped
+  const gen = M.gen;
   try {
     const r = await (await fetch("/cars")).json();
+    if (gen !== M.gen || (S.t !== null && Math.abs(r.t - S.t) > RESET_JUMP_S)) return;
     M.out = new Map((r.out || []).map((o) => [String(o.drv), o]));
   } catch (e) {
-    // an older server without /cars: nothing is taken off the map
+    if (gen !== M.gen) return;    // an older server without /cars: nothing is taken off the map
   }
   M.outReady = true;
   renderOut();
@@ -832,7 +849,10 @@ function onTick(tick) {
   if (S.t !== null && Math.abs(t - S.t) > RESET_JUMP_S) resetAll();     // a seek or loop, back or forward
   const first = S.t === null;
   S.t = t;
-  if (first) fetchCars();
+  if (first) {
+    S.resetT = t;
+    fetchCars();
+  }
   ui.replayT.textContent = `REPLAY t ${t.toFixed(1)} s · LAP ${tick.lap}`;
   view.lastTickWall = performance.now();
   view.lap = tick.lap;
@@ -864,6 +884,7 @@ function onTick(tick) {
 
 function onDetection(det) {
   S.detections.set(String(det.id), det);
+  if (isCatchup(Number(det.t))) quiet();
   if (det.type === "IMPACT" || det.type === "MULTI") for (const d of det.drivers || []) M.crashed.add(String(d));
 }
 
@@ -873,6 +894,7 @@ function onRec(rec) {
   const msector = Number(rec.msector);
   const t = Number(rec.t);
   if (!Number.isFinite(msector) || !Number.isFinite(t)) return;
+  if (isCatchup(t)) quiet();
   if (flag === "CLEAR") return onClear(rec, msector, t);
   const rank = RANK[flag];
   const cause = causeOf(rec, msector);
@@ -961,6 +983,7 @@ function onOfficial(off) {
   if (!Object.hasOwn(RANK, flag)) return;
   const t = Number(off.t);
   if (!Number.isFinite(t)) return;
+  if (isCatchup(t)) quiet();
   const scope = off.msector === null || off.msector === undefined ? TRACK : Number(off.msector);
   pushOfficial(off, flag, scope, t);
   if (flag === "CLEAR") {

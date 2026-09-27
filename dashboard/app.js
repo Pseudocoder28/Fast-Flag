@@ -259,6 +259,7 @@ let trackFlag = null;           // our track-wide flag: CLEAR, VSC, SC or RED. n
 let officialFlag = null;        // official track-wide flag at the replay time (null before the first tick)
 let outCars = new Map();        // drv -> {why, since, msector, x, y}: out of the race per GET /cars, never drawn
 let outReady = false;           // GET /cars answered since the page connected or jumped: cars may be drawn
+let carsGen = 0;                // bumped on every reset: an answer to an older question is dropped
 let outKey = "";                // the out-of-the-race list as last rendered
 const crashed = new Set();      // cars named in an IMPACT or MULTI detection since the last jump
 let replayT = null;             // SessionTime of the latest tick
@@ -493,6 +494,7 @@ function resetForJump() {
   crashed.clear();
   outCars = new Map();          // asked again at the next tick; no car is drawn until the answer
   outReady = false;
+  carsGen++;
   cars.clear();                 // every car is placed fresh: a seek snaps, never glides
   burstT = null;
   dispT = null;
@@ -964,12 +966,15 @@ function carStates() {
 
 async function fetchCars() {
   // GET /cars: which cars are out of the race at the replay time. Until the first answer after
-  // a connect or a jump, no car is drawn, so a car out of the race never flashes back on
+  // a connect or a jump, no car is drawn, so a car out of the race never flashes back on. An
+  // answer to a question asked before the last jump is dropped
+  const gen = carsGen;
   try {
     const r = await (await fetch("/cars")).json();
+    if (gen !== carsGen || (replayT !== null && Math.abs(r.t - replayT) > RESET_JUMP_S)) return;
     outCars = new Map((r.out || []).map((o) => [String(o.drv), o]));
   } catch (e) {
-    // an older server without /cars: nothing is taken off the map
+    if (gen !== carsGen) return;  // an older server without /cars: nothing is taken off the map
   }
   outReady = true;
 }

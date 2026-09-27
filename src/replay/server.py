@@ -86,6 +86,7 @@ class LiveReplay:
             self.timeline = None
             self.engine = Engine(race, self.make_processors(race))
         self.cars = Cars.from_race(race)
+        self.epoch = getattr(self, "epoch", 0) + 1   # a seek or race switch: the playback loop drops its step
         self.tick_t = float(race.times[0]) if len(race.times) else 0.0
         self.pending: list[dict] | None = None      # history to push after the next tick (a seek)
         self.hub.reset()
@@ -94,6 +95,7 @@ class LiveReplay:
         jump = abs(t - self.engine.clock) > RESET_JUMP_S
         if jump:
             self.hub.reset()              # the pages and race control wipe their state too
+        self.epoch += 1
         self.engine.seek(t)
         if jump and self.timeline is not None:
             self.pending = self.history()
@@ -164,13 +166,18 @@ class LiveReplay:
                 self.latency.maybe_report()
                 continue
             to_t = self.engine.clock + STEP_S * self.speed
+            epoch = self.epoch
             for step in self.engine.steps(to_t):
                 t0 = perf_counter()
                 await self.play(step.envelopes + self.extras(step.t))
+                if self.epoch != epoch:
+                    break                 # a seek came in while sending: never play on to the old to_t
                 sent = perf_counter()
                 step.stage_s["send"] = sent - t0
                 if self.timeline is None:
                     self.latency.record(step.stage_s, sent - step.emitted_at)
+            if self.epoch != epoch:
+                continue
             for env in self.engine.finish(to_t):
                 await self.hub.broadcast(env)
             self.latency.maybe_report()
