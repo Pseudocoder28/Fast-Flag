@@ -17,6 +17,9 @@
 //   of that level, it counts replay seconds and the cars passing the stricken car
 //   at racing speed. The official message freezes it.
 // - After the official message: FAST FLAG AHEAD BY X.X s, or RACE CONTROL FIRST BY X.X s.
+// - When we lift a flag, its banner turns into a green CLEAR banner for a few seconds.
+// - Race control panel: the official messages as they arrive, clears included, each raise
+//   with how much earlier Fast Flag called it.
 
 const WS_URL = `ws://${location.host}/stream`;
 const RESET_JUMP_S = 2.0;          // same rule as the race control engine and the dashboard
@@ -34,11 +37,15 @@ const FIELD_MAX = 40;              // samples kept per bin for the field referen
 const TICKER_MAX = 6;
 const BANNER_MAX = 3;
 const HIDE_AFTER_CLEAR_S = 12;     // frozen clock stays this long (replay time) after the track clears
+const CLEAR_BANNER_MS = 5000;      // a green CLEAR banner stays this long (wall time, like the slide-out)
+const RC_MAX = 4;                  // race control messages shown
 
 const RANK = { CLEAR: 0, YELLOW: 1, DOUBLE_YELLOW: 2, VSC: 3, SC: 4, RED: 5 };
 const GLOBAL_FLAGS = new Set(["VSC", "SC", "RED"]);
 const FLAG_TEXT = { YELLOW: "YELLOW FLAG", DOUBLE_YELLOW: "DOUBLE YELLOW", VSC: "VIRTUAL SAFETY CAR",
   SC: "SAFETY CAR", RED: "RED FLAG" };
+const RC_TEXT = { YELLOW: "YELLOW", DOUBLE_YELLOW: "DOUBLE YELLOW", VSC: "VSC", SC: "SAFETY CAR", RED: "RED FLAG",
+  CLEAR: "CLEAR" };
 const TYPE_TEXT = { IMPACT: "IMPACT", STOPPED: "STOPPED", SPIN: "SPIN", DROPOUT: "NO DATA",
   MULTI: "MULTI-CAR", ANOMALY: "ANOMALY" };
 const TRACK = "track";
@@ -91,7 +98,7 @@ function flagIcon(flag) {
     return `<svg viewBox="0 0 44 40" aria-hidden="true">${pole}<rect x="9" y="6" width="30" height="20" rx="2" fill="${ink}"/>` +
       `<text x="24" y="21" text-anchor="middle" font-family="system-ui, sans-serif" font-size="${flag === "VSC" ? 10 : 12}" font-weight="900" fill="${flag === "RED" ? "#e10600" : "#fff"}">${flag}</text></svg>`;
   }
-  const fill = flag === "RED" ? "#e10600" : "#ffd400";
+  const fill = flag === "RED" ? "#e10600" : flag === "CLEAR" ? "#4cc36a" : "#ffd400";
   return `<svg viewBox="0 0 44 40" aria-hidden="true">${pole}${wave(9, 8, fill)}</svg>`;
 }
 
@@ -118,7 +125,7 @@ const el = (id) => document.getElementById(id);
 const ui = { conn: el("conn"), replayT: el("replay-t"), banners: el("banners"), clock: el("clockbox"),
   clockFlag: el("clock-flag"), clockValue: el("clock-value"), clockCars: el("clock-cars"),
   clockResult: el("clock-result"), ticker: el("ticker"), standby: el("standby"), sbRace: el("sb-race"),
-  sbState: el("sb-state") };
+  sbState: el("sb-state"), rcList: el("rc-list"), rcEmpty: el("rc-empty") };
 
 // --- standby: shown while no flag is out, so the overlay never looks dead ----------------
 
@@ -158,6 +165,8 @@ function resetAll() {
   S.cause.clear();
   for (const b of S.banners.values()) b.el.remove();
   S.banners.clear();
+  ui.rcList.innerHTML = "";
+  ui.rcEmpty.classList.remove("hidden");
   S.clock = null;
   hideClock();
   updateStandby();
@@ -262,11 +271,38 @@ function showBanner(rec, cause, scope) {
 
 function refreshLeads() {
   for (const b of S.banners.values()) {
+    if (b.clear) continue;                // a CLEAR banner has no lead
     const leadEl = b.el.querySelector(".lead");
     const lead = leadFor(b.scope, RANK[b.rec.flag]);
     leadEl.className = `lead ${lead.cls}`;
     leadEl.textContent = lead.text;
   }
+}
+
+function showClearBanner(rec, scope) {
+  // our flag for this scope was lifted: a green banner for a few seconds, then it slides out
+  const old = S.banners.get(scope);
+  if (old) {
+    old.el.remove();
+    S.banners.delete(scope);
+  }
+  const track = scope === TRACK;
+  const div = document.createElement("div");
+  div.className = "banner flag-CLEAR";
+  div.dataset.scope = String(scope);
+  div.innerHTML = `<div class="badge">${flagIcon("CLEAR")}<span>${track ? "TRACK CLEAR" : "CLEAR"}</span></div>` +
+    `<div class="body"><div class="line1">${track ? "GREEN FLAG, RACING RESUMES" : `SECTOR ${escapeHtml(rec.msector)}`}</div>` +
+    `<div class="line2">${escapeHtml(rec.reason || rec.message || "")}</div></div><div class="mark">FAST FLAG</div>`;
+  ui.banners.appendChild(div);
+  const entry = { el: div, rec, cause: { cars: [], type: null }, scope, clear: true };
+  S.banners.set(scope, entry);
+  updateStandby();
+  while (S.banners.size > BANNER_MAX) {
+    const [k, b] = S.banners.entries().next().value;
+    b.el.remove();
+    S.banners.delete(k);
+  }
+  setTimeout(() => { if (S.banners.get(scope) === entry) dropBanner(scope); }, CLEAR_BANNER_MS);
 }
 
 function dropBanner(scope) {
@@ -502,11 +538,32 @@ function onClear(rec, msector, t) {
   if ((S.level.get(scope) || 0) === 0) return;
   S.level.set(scope, 0);
   if (sectorClear) S.cause.delete(msector);
-  dropBanner(scope);
+  showClearBanner(rec, scope);
   if (!sectorClear && S.clock) {
     if (!S.clock.frozen) endClockWithoutOfficial(t);
     S.clock.clearedAt = t;
   }
+}
+
+function pushOfficial(off, flag, scope, t) {
+  // the race control panel: newest first, each raise with how much earlier Fast Flag called it
+  let lead = "";
+  if (flag !== "CLEAR") {
+    const ours = ourFirstAt(scope, RANK[flag]);
+    if (ours !== null && Math.abs(t - ours) <= CONFIRM_WINDOW_S) {
+      const d = t - ours;
+      lead = d >= MIN_LEAD_S ? `<span class="rc-lead ahead">FAST FLAG ${d.toFixed(1)} s EARLIER</span>`
+        : d <= -MIN_LEAD_S ? `<span class="rc-lead behind">RACE CONTROL FIRST</span>` : "";
+    }
+  }
+  const li = document.createElement("li");
+  li.className = `rc-row flag-${flag}`;
+  li.innerHTML = `<span class="rc-badge">${RC_TEXT[flag]}</span>` +
+    `<span class="rc-msg">${escapeHtml(off.message || "")}</span>` +
+    `<span class="rc-t">t ${t.toFixed(1)} s</span>${lead}`;
+  ui.rcList.insertBefore(li, ui.rcList.firstChild);
+  while (ui.rcList.children.length > RC_MAX) ui.rcList.removeChild(ui.rcList.lastChild);
+  ui.rcEmpty.classList.add("hidden");
 }
 
 function onOfficial(off) {
@@ -515,6 +572,7 @@ function onOfficial(off) {
   const t = Number(off.t);
   if (!Number.isFinite(t)) return;
   const scope = off.msector === null || off.msector === undefined ? TRACK : Number(off.msector);
+  pushOfficial(off, flag, scope, t);
   if (flag === "CLEAR") {
     if (scope === TRACK) S.official.clear();       // TRACK CLEAR ends every official flag
     else S.official.delete(scope);

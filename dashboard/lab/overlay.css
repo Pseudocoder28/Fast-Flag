@@ -81,6 +81,75 @@ html, body {
 
 #conn.on { color: var(--clear); }
 
+.top-left { display: flex; align-items: center; gap: 16px; }
+
+.back {
+  padding: 8px 12px 7px;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+}
+
+.back:hover, .back:focus-visible { color: var(--ink); border-color: var(--ink-3); }
+
+/* --- race control panel (top left) ------------------------------------------ */
+
+#rcpanel {
+  position: absolute;
+  top: 10vh;
+  left: 4vw;
+  width: 380px;
+  padding: 12px 14px 10px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-top: 3px solid var(--ink-3);
+  border-radius: 6px;
+}
+
+.rc-head { font-size: 13px; font-weight: 900; letter-spacing: 0.14em; color: var(--ink); }
+.rc-sub { margin-left: 6px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-3); }
+.rc-list { list-style: none; margin: 8px 0 0; padding: 0; }
+
+.rc-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-top: 1px solid var(--edge);
+  animation: tick-in 0.25s ease-out;
+}
+
+.rc-badge {
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: var(--yellow);
+  color: #000;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.rc-row.flag-DOUBLE_YELLOW .rc-badge { background: var(--double-yellow); }
+.rc-row.flag-VSC .rc-badge { background: var(--vsc); }
+.rc-row.flag-SC .rc-badge { background: var(--sc); }
+.rc-row.flag-RED .rc-badge { background: var(--red); color: #fff; }
+.rc-row.flag-CLEAR .rc-badge { background: var(--clear); }
+.rc-msg { font-size: 13px; line-height: 1.25; color: var(--ink); overflow-wrap: anywhere; }
+.rc-t { font-family: var(--mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.rc-lead { grid-column: 2 / 4; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; }
+.rc-lead.ahead { color: var(--clear); }
+.rc-lead.behind { color: var(--sc); }
+.rc-empty { margin-top: 8px; font-size: 12px; color: var(--ink-3); }
+.rc-empty.hidden { display: none; }
+
 /* --- exposure clock (top right) ------------------------------------------ */
 
 #clockbox {
@@ -234,6 +303,7 @@ html, body {
 .flag-VSC .badge { background: var(--vsc); }
 .flag-SC .badge { background: var(--sc); }
 .flag-RED .badge { background: var(--red); color: #fff; }
+.flag-CLEAR .badge { background: var(--clear); }
 
 .body {
   padding: 12px 20px;
@@ -381,6 +451,8 @@ html, body {
   #standby .sb-line1 { font-size: 16px; }
   #standby .sb-badge { font-size: 13px; padding: 0 12px; }
   #clockbox { width: min(340px, 70vw); top: 9vh; padding: 12px 14px 10px; }
+  #rcpanel { width: min(320px, 44vw); top: 9vh; padding: 10px 12px 8px; }
+  .rc-msg { font-size: 12px; }
   .clock-value { font-size: 44px; }
   .ticker { font-size: 12px; }
   .banner { min-height: 64px; }
