@@ -8,6 +8,7 @@ Run:  python -m src.bridge                  (list serial ports and exit)
 Serial protocol (PROJECT_BRIEF.md 7.7), 115200 baud, ASCII, newline terminated:
   G,<GREEN|VSC|SC|RED>                        track-wide state
   Z,<zone 1-3>,<CLEAR|YELLOW|DOUBLE_YELLOW>   panel zone: highest flag across its sectors
+  M,<text, max 16 chars>                      after each G/Z event, e.g. M,DBL YELLOW S9
 """
 
 from __future__ import annotations
@@ -37,6 +38,9 @@ WRITE_TIMEOUT_S = 1.0
 DEFAULT_SECTORS = 20
 ZONES = (1, 2, 3)
 GLOBAL_FLAGS = ("VSC", "SC", "RED")
+MSG_MAX = 16              # 1602A LCD line width
+GLOBAL_TEXT = {"SC": "SAFETY CAR", "VSC": "VIRTUAL SC", "RED": "RED FLAG", "GREEN": "TRACK GREEN"}
+SECTOR_TEXT = {"YELLOW": "YELLOW", "DOUBLE_YELLOW": "DBL YELLOW", "CLEAR": "CLEAR"}
 
 
 def log(msg: str) -> None:
@@ -84,29 +88,43 @@ class Panel:
         flags = [f for s, f in self.sector_flags.items() if self.zone_for_sector(s) == zone]
         return max(flags, key=SECTOR_RANK.__getitem__, default="CLEAR")
 
-    def sync_zones(self, t: object) -> None:
+    def message(self, text: str, t: object, flag: str) -> None:
+        self.send(f"M,{text[:MSG_MAX]}", t, flag)
+
+    def sync_zones(self, t: object) -> bool:
+        """Send every zone whose aggregated flag changed. True if any Z line was sent."""
         # a failed write leaves zone_sent unchanged, so the next sync retries it
+        sent = False
         for zone in ZONES:
             flag = self.zone_flag(zone)
             if flag != self.zone_sent.get(zone) and self.send(f"Z,{zone},{flag}", t, flag):
                 self.zone_sent[zone] = flag
+                sent = True
+        return sent
 
-    def set_global(self, flag: str, t: object) -> None:
-        if flag != self.global_sent and self.send(f"G,{flag}", t, flag):
-            self.global_sent = flag
+    def set_global(self, flag: str, t: object, announce: bool = True) -> bool:
+        if flag == self.global_sent or not self.send(f"G,{flag}", t, flag):
+            return False
+        self.global_sent = flag
+        if announce:
+            self.message(GLOBAL_TEXT[flag], t, flag)
+        return True
 
     def full_reset(self, t: object) -> None:
         """Known state: G,GREEN and every zone CLEAR, sent unconditionally."""
         self.sector_flags.clear()
         self.global_sent = None
         self.zone_sent.clear()
-        self.set_global("GREEN", t)
-        self.sync_zones(t)
+        sent_g = self.set_global("GREEN", t, announce=False)
+        sent_z = self.sync_zones(t)
+        if sent_g or sent_z:
+            self.message(GLOBAL_TEXT["GREEN"], t, "GREEN")
 
     def set_sector_count(self, n: int) -> None:
         if n != self.n_sectors:
             self.n_sectors = n
-            self.sync_zones(self.last_tick_t)  # same sector flags, new zone split
+            # same sector flags, new zone split; no M line, since no new flag event happened
+            self.sync_zones(self.last_tick_t)
 
     def on_rec(self, rec: dict) -> None:
         flag = rec.get("flag")
@@ -127,7 +145,9 @@ class Panel:
             self.sector_flags.pop(msector, None)
         else:
             self.sector_flags[msector] = flag
-        self.sync_zones(t)
+        if self.sync_zones(t):
+            # the text names this rec's sector and flag, even when the zone shows a higher one
+            self.message(f"{SECTOR_TEXT[flag]} S{msector}", t, flag)
 
     def on_tick_t(self, t: float) -> None:
         # the engine emits no CLEAR recs on reset, so the panel resets itself here
