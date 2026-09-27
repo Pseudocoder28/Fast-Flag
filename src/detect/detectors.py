@@ -42,9 +42,13 @@ CRASH_TYPES = {"STOPPED", "IMPACT", "SPIN"}
 class Config:
     stop_ratio: float = 0.30          # speed / reference below this counts as stopped or crawling
     stop_sustain_s: float = 1.5
+    stop_max_kmh: float = 60.0        # and STOPPED fires only below this: a car at the pit limiter on a 325 km/h
+                                      # straight is 25% of reference but moving (2021 Baku car 31, 27 Sept)
     recover_ratio: float = 0.60
     recover_s: float = 5.0
     impact_drop_kmh: float = 80.0     # speed lost within 1 s
+    impact_brake_window_s: float = 1.0   # "without braking" means no brake sample in the whole second the drop
+                                         # spans, not just the latest one (2021 Baku cars 3 and 22, 27 Sept)
     impact_end_ratio: float = 0.40    # while braking, an impact must end this far below reference
     impact_confirm_s: float = 0.5     # still slow this long after, so data glitches do not fire
     impact_hard_kmh: float = 180.0    # harder than 99.99% of braking in green running: fires even while braking
@@ -66,6 +70,8 @@ class Config:
     grid_field_slow: float = 0.5
     grid_field_ratio: float = 0.3     # whole field this slow = procession / forming up
     grid_hold_s: float = 15.0
+    resume_min_susp_s: float = 60.0   # after a suspension this long, the lap to the grid is not racing: grid
+    resume_max_s: float = 240.0       # mode until the field forms up (the grid gate), at most this long
     stop_lap_ratio: float = 0.5       # STOPPED also needs speed below this share of last lap's
     impact_lap_ratio: float = 0.6     # IMPACT is confirmed only below this share of last lap's
     anomaly_sustain: int = 2          # ticks above threshold
@@ -78,7 +84,8 @@ class CarState:
     slow_since: float | None = None
     stopped: bool = False
     recover_since: float | None = None
-    impact_cand: tuple[float, float, float, bool] | None = None   # (t, drop, speed before, hard)
+    impact_cand: tuple[float, float, float, bool, bool] | None = None   # (t, drop, speed before, hard, braked)
+    last_brake_t: float = -np.inf
     spin_since: float | None = None
     slowdown_since: float | None = None
     last_seen: float | None = None
@@ -102,6 +109,8 @@ class DetectorSuite:
     def reset(self) -> None:
         self.cars: dict[str, CarState] = {}
         self.grid_until = -np.inf
+        self.susp_since: float | None = None  # a suspension (red flag) in progress since
+        self.resume_until = -np.inf           # the lap to the grid after a suspension: grid mode until then
         self.recent: list[dict] = []          # crash-type detections in the last multi window
         self.multi_recent: list[dict] = []    # MULTI detections within the cooldown
 
@@ -124,15 +133,24 @@ class DetectorSuite:
     def on_tick(self, t: float, frame: pd.DataFrame, tick: dict) -> list[dict]:
         cols = {c: frame[c].to_numpy() for c in COLS if c in frame}
         score = frame["anomaly_score"].to_numpy() if "anomaly_score" in frame else None
+        if "after_chequered" in frame and bool(frame["after_chequered"].iat[0]):
+            return []                         # the race is over: the winner slowing after the line is no incident
         if bool(cols["suspended"][0]):
+            if self.susp_since is None:
+                self.susp_since = t
             for c in self.cars.values():
                 c.slow_since = c.spin_since = c.impact_cand = None
             return []
+        if self.susp_since is not None:
+            if t - self.susp_since >= self.cfg.resume_min_susp_s:
+                self.resume_until = t + self.cfg.resume_max_s   # the formation lap after a red flag
+            self.susp_since = None
         status = str(cols["track_status"][0])
         if (float(cols["field_slow"][0]) >= self.cfg.grid_field_slow
                 or float(cols["field_ratio"][0]) < self.cfg.grid_field_ratio):
             self.grid_until = t + self.cfg.grid_hold_s
-        grid = t < self.grid_until
+            self.resume_until = -np.inf       # formed up on the grid: the grid hold covers the start
+        grid = t < self.grid_until or t < self.resume_until
         neutral = status in NEUTRAL
         speed = cols["speed"].astype(float)
         live = np.isfinite(speed) & np.isfinite(cols["x"].astype(float))
@@ -188,6 +206,8 @@ class DetectorSuite:
             return []
         if c.slow_since is None or t - c.slow_since < cfg.stop_sustain_s:
             return []
+        if speed >= cfg.stop_max_kmh:
+            return []                     # still slow: fires on the first tick below the ceiling
         c.stopped = True
         c.last_emit["STOPPED"] = t
         on_line = abs(lat) < cfg.on_line_m
@@ -199,8 +219,11 @@ class DetectorSuite:
 
     def impact(self, t, c, drv, speed, ratio, lap, msector, dspeed, brake) -> list[dict]:
         cfg = self.cfg
+        if brake:
+            c.last_brake_t = t
+        braked = t - c.last_brake_t <= cfg.impact_brake_window_s + 1e-9
         if c.impact_cand is not None:
-            t0, drop, before, hard = c.impact_cand
+            t0, drop, before, hard, was_braking = c.impact_cand
             if t - t0 < cfg.impact_confirm_s:
                 return []
             c.impact_cand = None
@@ -210,14 +233,14 @@ class DetectorSuite:
             if still_slow and self.can_emit(c, "IMPACT", t):
                 c.last_emit["IMPACT"] = t
                 sev = 0.5 + min(drop, 250) / 500 + 0.2 * (ratio < cfg.stop_ratio)
-                why = "harder than braking" if hard else ("with brakes on" if brake else "without braking")
+                why = "harder than braking" if hard else ("with brakes on" if was_braking else "without braking")
                 return [self.det(t, [drv], msector, "IMPACT", sev,
                                  f"lost {drop:.0f} km/h in 1 s ({before:.0f} to {speed:.0f} km/h), {why}")]
             return []
         drop = -dspeed
-        if np.isfinite(drop) and ((drop >= cfg.impact_drop_kmh and (not brake or ratio < cfg.impact_end_ratio))
+        if np.isfinite(drop) and ((drop >= cfg.impact_drop_kmh and (not braked or ratio < cfg.impact_end_ratio))
                                   or drop >= cfg.impact_hard_kmh):
-            c.impact_cand = (t, drop, speed + drop, drop >= cfg.impact_hard_kmh)
+            c.impact_cand = (t, drop, speed + drop, drop >= cfg.impact_hard_kmh, braked)
         return []
 
     def spin(self, t, c, drv, speed, ratio, lat, msector, heading, dspeed) -> list[dict]:

@@ -90,3 +90,38 @@ def test_two_cars_in_the_same_place_give_multi() -> None:
 def test_baseline_fires_on_slow_car() -> None:
     dets = detections(finish(crash(race_frame(), "44", T0 + 20)), NaiveThreshold())
     assert [d["drivers"] for d in dets] == [["44"]]
+
+
+def test_a_car_at_the_pit_limiter_on_a_fast_straight_is_not_stopped() -> None:
+    df = race_frame()
+    df[["ref_speed", "speed"]] = 325.0                                 # a flat-out straight
+    m = (df["drv"] == "44") & (df["t"] >= T0 + 20)
+    df.loc[m, "speed"] = 78.0                                          # 24% of reference, but moving (Baku car 31)
+    race = finish(df)
+    race.frame["lap_ratio"] = race.frame["speed"] / 325.0
+    assert not [d for d in detections(race) if d["type"] == "STOPPED"]
+    assert [d for d in detections(finish(crash(race_frame(), "44", T0 + 20))) if d["type"] == "STOPPED"]
+
+
+def test_braking_anywhere_in_the_last_second_is_not_an_impact_without_braking() -> None:
+    df = race_frame()
+    m = (df["drv"] == "44") & (df["t"] >= T0 + 20) & (df["t"] < T0 + 21)
+    df.loc[m, "speed"] = np.linspace(REF, REF - 120, int(m.sum()))   # a hard stop for a corner ...
+    df.loc[m & (df["t"] < T0 + 20.75), "brake"] = 1.0                 # ... braking, the last sample reads 0
+    later = (df["drv"] == "44") & (df["t"] >= T0 + 21)
+    df.loc[later, "speed"] = REF - 120                                 # and slow for a moment
+    assert not [d for d in detections(finish(df)) if d["type"] == "IMPACT"]
+
+
+def test_the_lap_to_the_grid_after_a_red_flag_is_not_racing() -> None:
+    df = race_frame(seconds=200.0)
+    df.loc[df["t"] < T0 + 80, "suspended"] = True                     # 80 s red flag
+    df = crash(df, "44", T0 + 100)                                     # a car slow on the lap to the grid
+    assert detections(finish(df)) == []
+
+
+def test_nothing_is_an_incident_after_the_chequered_flag() -> None:
+    race = finish(crash(race_frame(), "44", T0 + 20))
+    race = RaceData.from_frame("TEST", race.frame.drop(columns=["after_chequered"], errors="ignore"), race.track,
+                               meta={"race": "TEST", "t_end": T0 + 10})
+    assert detections(race) == []

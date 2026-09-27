@@ -989,3 +989,14 @@ def test_stopped_car_that_drives_off_at_speed_is_not_followed() -> None:
     recs = tick_until(rc, 100.0, 130.0, cars)
     assert not [r for r in recs if r["msector"] == 1]
     assert not [r for r in recs if r["flag"] in ("VSC", "SC", "RED")]
+
+
+def test_a_lone_impact_under_race_controls_safety_car_raises_no_flag() -> None:
+    rc = RaceControl()
+    rc.on_tick({"t": 100.0, "lap": 10, "track_status": "4",
+                "cars": [{"drv": "22", "x": 0.0, "y": 0.0, "dist": 100.0, "lat_off": 0.0, "speed": 104.0,
+                          "throttle": 0.0, "brake": False, "gear": 3, "rpm": 8000, "msector": 5,
+                          "gap_ahead_m": 30.0, "in_pit": False}]})
+    det = {"id": "det-x", "t": 100.0, "drivers": ["22"], "msector": 5, "type": "IMPACT", "severity": 0.67,
+           "evidence": "lost 87 km/h in 1 s"}
+    assert rc.on_detection(det) == []
