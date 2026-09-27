@@ -303,7 +303,8 @@ html, body {
 .status-chip[data-flag="UNKNOWN"] { background: #2a313b; color: var(--text-dim); }
 
 .out-card {
-  min-height: 78px;             /* one row of cars reserved: the legend below never jumps */
+  flex: 0 0 auto;               /* never shrinks below its chips, so they never spill onto the legend */
+  min-height: 108px;            /* two rows of cars reserved: the legend below never jumps */
 }
 
 .out-card h2 {
