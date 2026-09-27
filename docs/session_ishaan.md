@@ -94,7 +94,7 @@ Claude: minimal explanations, bullets, step-by-step commands, no em dashes.
 **B7. Pitch (5:00am to 8:00am)**
 - Tell Naman what the dashboard still needs for the demo (he does the dashboard polish now).
 - Slides and 3-minute demo script following PROJECT_BRIEF.md Section 12, using Naman's charts in `docs/charts/`. Every number on a slide comes from `docs/charts/NUMBERS.md` (Naman writes it, ask him if a figure is missing).
-- Two demo segments are ready to drop into your script: the pit wall (`docs/demo_pitwall.md`, Saturday's 2026 Baku race, Albon) and the lab overlay (`docs/lab/DEMO.md`, 2021 Baku, Stroll). Both have exact commands, timings and lines to say.
+- Two demo segments are ready to drop into your script: the pit wall (`docs/demo_pitwall.md`: 2021 Baku, Verstappen, the demo; 2026 Baku holdout, Albon, the backup) and the lab overlay (`docs/lab/DEMO.md`, 2021 Baku, Stroll). Both have exact commands, timings and lines to say.
 - Car colours on the map are a risk prediction only on 2021 and 2026 Azerbaijan. On the 20 training races the model trained on the race itself, so never call the colours a prediction there.
 - Prepare the judge questions in Section 12.
 
