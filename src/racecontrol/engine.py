@@ -30,11 +30,16 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   reacted to it. If race control never reacts, it is released after PARKED_CAR_S as
   before. So we never recommend green while race control still neutralises a crash:
   lifting a neutralisation is race control's call, only raising one is ours.
-- No red flag by time at a crash site. A 120 s rule was tried on 26 Sept and removed: the
-  data cannot tell a crash race control handles under the Safety Car from one that needs
-  a red flag (barrier damage, debris, medical), so it recommended red for 13 training-race
-  crashes race control did not red-flag, and a red that stays out blocks the next incident's
-  escalation. The pit wall shows a crash-site clock instead, as advice (dashboard/app.js).
+- Red flag by time at a crash site, which never blocks: a crashed car still stopped at its
+  crash site RED_CRASH_SITE_S after it stopped, once race control has reacted, gets a RED
+  rec (confidence RED_CRASH_SITE_CONF). It is a soft overlay tied to that crash site: the
+  hard flag every other escalation compares against stays the crash's SC, so a new incident
+  elsewhere still escalates on its own (a pile-up MULTI still gets its RED). The soft red
+  ends when its crash site is released (race control green again, the car moved, no data);
+  if another incident still holds our VSC or SC, that flag is re-sent as the downgrade,
+  otherwise the normal TRACK CLEAR follows. The data cannot tell a crash race control
+  handles under the Safety Car from one that needs a red flag (barrier damage, debris,
+  medical), so this also recommends red where race control did not (docs/charts/escalation.md).
 - A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
   wipes all flag state.
 """
@@ -63,6 +68,8 @@ PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot .
 PARKED_CAR_S = 180.0       # ... for this long counts as recovered (about recovery time)
 CRASH_SITE_MOVE_M = 20.0   # a crashed car this far from where it stopped was driven or craned away
 OFFICIAL_GREEN_S = 20.0    # race control's track status green this long after it reacted: incident over
+RED_CRASH_SITE_S = 120.0   # a crashed car still at its crash site this long after stopping: red flag (soft)
+RED_CRASH_SITE_CONF = 0.7  # a judgement call on time alone, not a physical signal: lower confidence
 MIN_HOLD_S = 2.0
 SECTOR_CLEAR_AFTER_S = 5.0
 GLOBAL_MIN_HOLD_S = 60.0
@@ -151,6 +158,7 @@ class RaceControl:
         self.official_status = "1"                # race control's track status in the latest tick
         self.crash_sites: dict[str, CrashSite] = {}
         self.green_released: set[int] = set()     # sectors whose crash site race control's green released
+        self.soft_red: str | None = None          # drv whose crash site holds our soft (time-based) red
         self.last_physical_by_sector: dict[int, list[tuple[float, str]]] = {}
         # rec id counter is not reset here, ids stay unique across a reset
 
@@ -196,12 +204,15 @@ class RaceControl:
         for car in tick["cars"]:
             self._update_car(car, new_t)
         self.official_status = str(tick.get("track_status", "1"))
-        self._update_crash_sites()
+        released = self._update_crash_sites()
 
         recs: list[dict] = []
+        if self.soft_red is not None and self.soft_red in released:
+            recs.extend(self._end_soft_red(self.soft_red, released[self.soft_red]))
         recs.extend(self._check_sustained_stop())
         recs.extend(self._check_sector_clearing())
         recs.extend(self._check_global_clearing())
+        recs.extend(self._check_soft_red())
         return recs, did_reset
 
     def on_detection(self, det: dict) -> list[dict]:
@@ -302,9 +313,11 @@ class RaceControl:
             return True
         return not self._parked(car)
 
-    def _update_crash_sites(self) -> None:
+    def _update_crash_sites(self) -> dict[str, int]:
         """Follow race control's track status for every crash site and release the sites
-        that are over: moved away, no data, race control green again, or never reacted."""
+        that are over: moved away, no data, race control green again, or never reacted.
+        Returns the released sites as {drv: msector}."""
+        released: dict[str, int] = {}
         green = self.official_status == "1"
         for drv in list(self.crash_sites):
             site = self.crash_sites[drv]
@@ -321,7 +334,40 @@ class RaceControl:
             if car is None or self._stale(car) or car["in_pit"] or moved or over or ignored:
                 if over:
                     self.green_released.add(site.msector)
+                released[drv] = site.msector
                 del self.crash_sites[drv]
+        return released
+
+    def _check_soft_red(self) -> list[dict]:
+        """Red flag by time at a crash site: sent as a RED rec but kept apart from the hard
+        flag (self.global_.flag), so it never blocks another incident's escalation."""
+        if self.soft_red is not None or self.global_.flag in ("CLEAR", "RED"):
+            return []
+        for drv, site in sorted(self.crash_sites.items(), key=lambda kv: (kv[1].stop_t, kv[0])):
+            car = self.car_state.get(drv)
+            if car is None or not site.reacted or car["speed"] > STOPPED_SPEED_KMH:
+                continue
+            elapsed = self.t - site.stop_t
+            if elapsed >= RED_CRASH_SITE_S:
+                self.soft_red = drv
+                return [self._make_rec(self.t, site.msector, "RED", RED_CRASH_SITE_CONF,
+                                       f"car {drv} still stopped at its crash site {elapsed:.0f} s after it stopped",
+                                       _global_message("RED"), [])]
+        return []
+
+    def _end_soft_red(self, drv: str, msector: int) -> list[dict]:
+        """The soft red's crash site was released. If another incident still holds our hard
+        VSC or SC, re-send that flag (the downgrade); otherwise TRACK CLEAR follows as usual."""
+        self.soft_red = None
+        g = self.global_
+        others = sorted(s for s in g.cause_sectors if s != msector
+                        and s in self.sectors and self.sectors[s].flag != "CLEAR")
+        if g.flag not in ("VSC", "SC") or not others:
+            return []
+        return [self._make_rec(self.t, others[0], g.flag, g.confidence,
+                               f"red flag call for car {drv} ended, {g.flag} still out for sector {others[0]} "
+                               "(a downgrade, not a new call)",
+                               _global_message(g.flag), [])]
 
     # --- detection handling ---------------------------------------------
 
@@ -407,6 +453,8 @@ class RaceControl:
             self.global_.held_for_race_control = False
         self.global_.cause_sectors.add(msector)
         self.global_.flag = target
+        if target == "RED":
+            self.soft_red = None          # a hard red supersedes the soft one
         self.global_.since_t = t
         self.global_.confidence = conf
         self.global_.reason = reason
@@ -539,6 +587,7 @@ class RaceControl:
             _global_message("CLEAR"), [],
         )
         self.global_.held_for_race_control = False
+        self.soft_red = None
         self.global_.flag = "CLEAR"
         self.global_.since_t = self.t
         self.global_.cause_sectors = set()

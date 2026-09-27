@@ -16,6 +16,7 @@ from src.racecontrol.engine import (
     MIN_HOLD_S,
     OFFICIAL_GREEN_S,
     PARKED_CAR_S,
+    RED_CRASH_SITE_S,
     RESET_JUMP_S,
     SC_STOPPED_HOLD_S,
     SECTOR_CLEAR_AFTER_S,
@@ -715,7 +716,7 @@ def test_all_recs_match_contract_shape() -> None:
         assert isinstance(r["msector"], int)
 
 
-# --- crash sites: held until race control is green, never a red flag by time -------------
+# --- crash sites: held until race control is green, a soft red that never blocks --------
 
 
 def crash_scene() -> tuple[RaceControl, list[dict]]:
@@ -729,31 +730,34 @@ def stopped_33(x: float = 100.0):
     return lambda t: [make_car("33", 5, speed=0.0, x=x), moving_car("44", 2, t)]
 
 
-def test_crash_site_holds_sc_past_parked_until_race_control_is_green() -> None:
+def test_crash_site_holds_sc_and_calls_a_soft_red_until_race_control_is_green() -> None:
     rc, recs = crash_scene()
     sc_from_20 = lambda t: "4" if t >= 20.0 else "1"      # race control: SC from t=20
     recs += tick_until(rc, 10.0, 400.0, stopped_33(), track_status=sc_from_20)
     flags = [(r["t"], r["flag"]) for r in recs if r["flag"] in ("SC", "RED", "CLEAR")]
-    assert flags == [(10.0 + SC_STOPPED_HOLD_S, "SC")]      # no red by time, no clear while parked
+    assert flags == [(10.0 + SC_STOPPED_HOLD_S, "SC"), (10.0 + RED_CRASH_SITE_S, "RED")]   # no clear while parked
+    assert all("crash site" in r["reason"] for r in recs if r["flag"] == "RED")
+    assert rc.global_.flag == "SC"                          # the red is soft: the hard flag stays the crash's SC
     after = tick_until(rc, 400.0, 480.0, stopped_33(), track_status="1")
-    track_clear = [r for r in after if r["message"] == "TRACK CLEAR"]
-    assert len(track_clear) == 1 and track_clear[0]["t"] >= 400.0 + OFFICIAL_GREEN_S
-    assert "race control" in track_clear[0]["reason"]
-    assert not any(r["flag"] == "RED" for r in after)
+    assert [r["message"] for r in after if r["flag"] in ("VSC", "SC", "RED") or r["message"] == "TRACK CLEAR"] \
+        == ["TRACK CLEAR"]                                  # the red ends with its crash site: no downgrade needed
+    track_clear = [r for r in after if r["message"] == "TRACK CLEAR"][0]
+    assert track_clear["t"] >= 400.0 + OFFICIAL_GREEN_S and "race control" in track_clear["reason"]
 
 
 def test_crash_site_released_when_the_car_is_moved_away() -> None:
     rc, recs = crash_scene()
     craned = lambda t: stopped_33(100.0 if t < 60.0 else 100.0 + CRASH_SITE_MOVE_M + 10.0)(t)
     recs += tick_until(rc, 10.0, 300.0, craned, track_status="4")
+    assert not any(r["flag"] == "RED" for r in recs)        # moved at t=60, before the red timer
     clear = [r for r in recs if r["message"] == "TRACK CLEAR"]
-    # moved at t=60: no longer a crash site, so the parked rule applies from there (60 + 180 s),
+    # no longer a crash site, so the parked rule applies from the move (60 + 180 s),
     # even though race control is still under its Safety Car
     assert clear and 60.0 + PARKED_CAR_S <= clear[0]["t"] <= 60.0 + PARKED_CAR_S + 15.0
     assert "race control" not in clear[0]["reason"]
 
 
-def test_crash_site_released_as_before_when_race_control_never_reacts() -> None:
+def test_no_soft_red_and_released_as_before_when_race_control_never_reacts() -> None:
     rc, recs = crash_scene()
     recs += tick_until(rc, 10.0, 260.0, stopped_33(), track_status="1")
     assert not any(r["flag"] == "RED" for r in recs)
@@ -761,11 +765,32 @@ def test_crash_site_released_as_before_when_race_control_never_reacts() -> None:
     assert clear and clear[0]["t"] >= 10.0 + PARKED_CAR_S
 
 
-def test_a_new_incident_escalates_above_a_held_crash_site() -> None:
-    """A crash site holds our SC; a pile-up elsewhere still escalates to RED (MULTI)."""
+def test_soft_red_never_blocks_a_new_incidents_own_escalation() -> None:
+    """A pile-up elsewhere under our soft red still gets its own RED (MULTI), as it would
+    without the timer (2026 Azerbaijan: the Turn 1 restart pile-up)."""
     rc, recs = crash_scene()
     recs += tick_until(rc, 10.0, 200.0, stopped_33(), track_status="4")
+    assert any(r["flag"] == "RED" and "crash site" in r["reason"] for r in recs)
     multi = {"id": "det-m", "t": 200.0, "drivers": ["44", "55"], "msector": 2, "type": "MULTI",
              "severity": 0.97, "evidence": "test"}
     red = [r for r in rc.on_detection(multi) if r["flag"] == "RED"]
-    assert len(red) == 1 and red[0]["t"] == 200.0
+    assert len(red) == 1 and red[0]["t"] == 200.0 and red[0]["reason"] == "multi-car incident"
+    assert rc.global_.flag == "RED" and rc.soft_red is None   # the hard red supersedes the soft one
+
+
+def test_soft_red_ends_with_its_crash_site_and_the_other_incident_keeps_its_sc() -> None:
+    rc, recs = crash_scene()
+    def cars(t: float) -> list[dict]:
+        out = stopped_33()(t)
+        if t >= 300.0:
+            out += [make_car("55", 8, speed=0.0, x=500.0), make_car("66", 8, speed=0.0, x=510.0)]
+        return out
+    recs += tick_until(rc, 10.0, 300.0, cars, track_status="4")
+    multi = {"id": "det-m2", "t": 300.0, "drivers": ["55", "66"], "msector": 8, "type": "MULTI",
+             "severity": 0.9, "evidence": "test"}           # SC level: supports our SC, no new rec
+    assert not [r for r in rc.on_detection(multi) if r["flag"] in ("VSC", "SC", "RED")]
+    recs += tick_until(rc, 300.0, 440.0, cars, track_status=lambda t: "1" if t >= 400.0 else "4")
+    down = [r for r in recs if r["t"] > 400.0 and r["flag"] == "SC"]
+    assert len(down) == 1 and "a downgrade, not a new call" in down[0]["reason"] and down[0]["msector"] == 8
+    assert down[0]["t"] == 400.0 + OFFICIAL_GREEN_S
+    assert not any(r["message"] == "TRACK CLEAR" for r in recs)   # sector 8 still holds the SC
