@@ -80,6 +80,7 @@ class Replay:
         self.pending: list[dict] | None = None      # history to push after the next tick (a seek)
         self.epoch = 0                              # a seek: a play loop in progress stops
         self.hub = Hub()
+        self.send_lock = asyncio.Lock()             # one tick and its history at a time, never interleaved
 
     def seek(self, t: float) -> None:
         t = min(max(t, self.t0), self.t1)
@@ -90,6 +91,11 @@ class Replay:
         if abs(nxt - self.tick_t) > RESET_JUMP_S:   # the pages' rule: tick time against tick time
             self.hub.reset()              # the pages and race control wipe their state too
             self.pending = self.history()
+        elif self.pending is not None:
+            # back near the pages' time before an earlier seek's tick went out: push nothing,
+            # rebuild the catch-up for a page opened later
+            self.pending = None
+            self.hub.restart_history(self.history())
 
     def history(self) -> list[dict]:
         """Every official message, detection and rec before the cursor, then the latest risk per car."""
@@ -104,16 +110,27 @@ class Replay:
     async def play(self, envs: list[dict]) -> None:
         """Broadcast in order; after a seek the first tick goes out, then the history to the
         catch-up pages, then the rest."""
-        epoch = self.epoch
-        for env in envs:
-            if self.epoch != epoch:
-                return                    # a seek came in while sending: the rest is the old position
-            if env["kind"] == "tick":
-                self.tick_t = float(env["data"]["t"])
-            await self.hub.broadcast(env)
-            if env["kind"] == "tick" and self.pending is not None:
-                await self.hub.push_catchup(self.hub.restart_history(self.pending))
-                self.pending = None
+        async with self.send_lock:
+            epoch = self.epoch
+            pending, self.pending = self.pending, None     # taken before any await: a later seek sets its own
+            if pending is not None:
+                # the tick the pages reset on goes first, as on the real server: nothing due
+                # before it is sent only to be wiped
+                first = next((i for i, env in enumerate(envs) if env["kind"] == "tick"), None)
+                if first is None:
+                    self.pending = pending                 # no tick in this batch: wait for one
+                else:
+                    tick = envs[first]
+                    self.tick_t = float(tick["data"]["t"])
+                    await self.hub.broadcast(tick)
+                    await self.hub.push_catchup(self.hub.restart_history(pending))
+                    envs = envs[:first] + envs[first + 1:]
+            for env in envs:
+                if self.epoch != epoch:
+                    return                # a seek came in while sending: the rest is the old position
+                if env["kind"] == "tick":
+                    self.tick_t = float(env["data"]["t"])
+                await self.hub.broadcast(env)
 
     def due(self) -> list[dict]:
         """Envelopes with t <= sim_t not yet sent. Never anything from the future."""

@@ -70,6 +70,7 @@ class LiveReplay:
         self.use_timeline = timeline
         self.flags = flags                # (detect, predict), part of the timeline cache key
         self.hub = Hub()
+        self.send_lock = asyncio.Lock()           # one tick and its history at a time, never interleaved
         self.speed = 1.0
         self.latency = LatencyTracker()
         self.warned = False
@@ -109,6 +110,12 @@ class LiveReplay:
             self.hub.reset()              # the pages and race control wipe their state too
             if self.timeline is not None:
                 self.pending = self.history()
+        elif self.pending is not None:
+            # back near the pages' time before an earlier seek's tick went out: the pages do
+            # not reset, so push nothing; the catch-up for a page opened later is rebuilt
+            self.pending = None
+            if self.timeline is not None:
+                self.hub.restart_history(self.history())
 
     def history(self) -> list[dict]:
         """Everything the pages had by now in a continuous run: official messages, detections
@@ -140,18 +147,19 @@ class LiveReplay:
         """Broadcast one tick's envelopes. After a seek in a precomputed race the tick goes
         first (every page resets on the jump), then the catch-up pages get the history,
         then the rest."""
-        if self.pending is not None:
+        async with self.send_lock:
+            pending, self.pending = self.pending, None     # taken before any await: a later seek sets its own
+            if pending is not None:
+                for env in envs:
+                    if env["kind"] == "tick":
+                        self.tick_t = float(env["data"]["t"])
+                        await self.hub.broadcast(env)
+                await self.hub.push_catchup(self.hub.restart_history(pending))
+                envs = [env for env in envs if env["kind"] != "tick"]
             for env in envs:
                 if env["kind"] == "tick":
                     self.tick_t = float(env["data"]["t"])
-                    await self.hub.broadcast(env)
-            await self.hub.push_catchup(self.hub.restart_history(self.pending))
-            self.pending = None
-            envs = [env for env in envs if env["kind"] != "tick"]
-        for env in envs:
-            if env["kind"] == "tick":
-                self.tick_t = float(env["data"]["t"])
-            await self.hub.broadcast(env)
+                await self.hub.broadcast(env)
 
     async def client_rec(self, data: dict) -> None:
         """A rec from a race control client: rebroadcast when live. In a precomputed race
