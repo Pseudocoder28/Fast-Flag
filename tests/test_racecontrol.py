@@ -5,14 +5,21 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from tests.test_contracts import check_rec
 
+import src.racecontrol.engine as engine_module
 from src.racecontrol.engine import (
     CRASH_SITE_MOVE_M,
     GLOBAL_CLEAR_AFTER_S,
     GLOBAL_MIN_HOLD_S,
     GLOBAL_RANK,
     IMPACT_BEFORE_STOP_S,
+    LATE_RED_CONF,
+    LATE_RED_KEY,
+    LATE_RED_LAPS,
+    LATE_RED_MIN_LAPS,
     MIN_HOLD_S,
     OFFICIAL_GREEN_S,
     PARKED_CAR_S,
@@ -23,6 +30,7 @@ from src.racecontrol.engine import (
     SECTOR_RANK,
     STALE_CAR_S,
     VSC_STOPPED_HOLD_S,
+    race_laps_from_track,
     RaceControl,
 )
 
@@ -51,7 +59,7 @@ def make_tick(t: float, cars: list[dict], lap: int = 1, track_status: str = "1")
     return {"t": t, "lap": lap, "track_status": track_status, "cars": cars}
 
 
-def tick_until(rc: RaceControl, t_from: float, t_to: float, cars, track_status="1") -> list[dict]:
+def tick_until(rc: RaceControl, t_from: float, t_to: float, cars, track_status="1", lap: int = 1) -> list[dict]:
     """Tick every TICK_S after t_from up to and including t_to, like the real stream (a gap
     over RESET_JUMP_S would count as a seek). cars is a list, or a function of t; so is
     track_status (race control's official status). Returns recs."""
@@ -59,7 +67,7 @@ def tick_until(rc: RaceControl, t_from: float, t_to: float, cars, track_status="
     for i in range(1, round((t_to - t_from) / TICK_S) + 1):
         t = t_from + i * TICK_S
         status = track_status(t) if callable(track_status) else track_status
-        out, did_reset = rc.on_tick(make_tick(t, cars(t) if callable(cars) else cars, track_status=status))
+        out, did_reset = rc.on_tick(make_tick(t, cars(t) if callable(cars) else cars, lap=lap, track_status=status))
         assert not did_reset
         recs.extend(out)
     return recs
@@ -719,6 +727,14 @@ def test_all_recs_match_contract_shape() -> None:
 # --- crash sites: held until race control is green, a soft red that never blocks --------
 
 
+@pytest.fixture
+def legacy_red(monkeypatch):
+    """The red flag rules before the late-race red (RED_BY_TIME, RED_FROM_MULTI): kept
+    switchable for comparison, so their behaviour stays tested."""
+    monkeypatch.setattr(engine_module, "RED_BY_TIME", True)
+    monkeypatch.setattr(engine_module, "RED_FROM_MULTI", True)
+
+
 def crash_scene() -> tuple[RaceControl, list[dict]]:
     """Car 33 crashes in sector 5 at t=10 (IMPACT at 9, STOPPED at 10); car 44 keeps racing."""
     rc = RaceControl()
@@ -730,7 +746,7 @@ def stopped_33(x: float = 100.0):
     return lambda t: [make_car("33", 5, speed=0.0, x=x), moving_car("44", 2, t)]
 
 
-def test_crash_site_holds_sc_and_calls_a_soft_red_until_race_control_is_green() -> None:
+def test_crash_site_holds_sc_and_calls_a_soft_red_until_race_control_is_green(legacy_red) -> None:
     rc, recs = crash_scene()
     sc_from_20 = lambda t: "4" if t >= 20.0 else "1"      # race control: SC from t=20
     recs += tick_until(rc, 10.0, 400.0, stopped_33(), track_status=sc_from_20)
@@ -789,7 +805,7 @@ def cars_33_55(x33: float = 100.0):
     return lambda t: stopped_33(x33)(t) + [make_car("55", 8, speed=0.0, x=500.0)]
 
 
-def test_soft_red_passes_to_another_crash_site_without_a_flip() -> None:
+def test_soft_red_passes_to_another_crash_site_without_a_flip(legacy_red) -> None:
     rc, recs = two_crash_scene()
     recs += tick_until(rc, 30.0, 299.0, cars_33_55(), track_status="4")
     assert rc.soft_red == "33" and sum(r["flag"] == "RED" for r in recs) == 1
@@ -799,7 +815,7 @@ def test_soft_red_passes_to_another_crash_site_without_a_flip() -> None:
     assert not [r for r in at if r["flag"] in ("VSC", "SC", "RED")]     # ... with no SC-then-RED flip
 
 
-def test_moved_crash_car_in_the_same_sector_sends_the_downgrade() -> None:
+def test_moved_crash_car_in_the_same_sector_sends_the_downgrade(legacy_red) -> None:
     rc, recs = crash_scene()
     moved = lambda t: stopped_33(100.0 if t < 200.0 else 140.0)(t)     # set down 40 m away, still in sector 5
     recs += tick_until(rc, 10.0, 205.0, moved, track_status="4")
@@ -824,7 +840,7 @@ def test_no_soft_red_and_released_as_before_when_race_control_never_reacts() -> 
     assert clear and clear[0]["t"] >= 10.0 + PARKED_CAR_S
 
 
-def test_soft_red_never_blocks_a_new_incidents_own_escalation() -> None:
+def test_soft_red_never_blocks_a_new_incidents_own_escalation(legacy_red) -> None:
     """A pile-up elsewhere under our soft red still gets its own RED (MULTI), as it would
     without the timer (2026 Azerbaijan: the Turn 1 restart pile-up)."""
     rc, recs = crash_scene()
@@ -837,7 +853,7 @@ def test_soft_red_never_blocks_a_new_incidents_own_escalation() -> None:
     assert rc.global_.flag == "RED" and rc.soft_red is None   # the hard red supersedes the soft one
 
 
-def test_soft_red_ends_with_its_crash_site_and_the_other_incident_keeps_its_sc() -> None:
+def test_soft_red_ends_with_its_crash_site_and_the_other_incident_keeps_its_sc(legacy_red) -> None:
     rc, recs = crash_scene()
     def cars(t: float) -> list[dict]:
         out = stopped_33()(t)
@@ -853,3 +869,81 @@ def test_soft_red_ends_with_its_crash_site_and_the_other_incident_keeps_its_sc()
     assert len(down) == 1 and "a downgrade, not a new call" in down[0]["reason"] and down[0]["msector"] == 8
     assert down[0]["t"] == 400.0 + OFFICIAL_GREEN_S
     assert not any(r["message"] == "TRACK CLEAR" for r in recs)   # sector 8 still holds the SC
+
+
+# --- red flag: late in the race, advisory at a long recovery (docs/lab/red_flag.md) ------
+
+
+def test_long_recovery_is_an_advisory_not_a_red() -> None:
+    """2021 Baku, Stroll: our SC, race control's SC, no red. The crash site still stopped
+    RED_CRASH_SITE_S after its stop gets an advisory on its sector flag, never a red."""
+    rc, recs = crash_scene()
+    recs += tick_until(rc, 10.0, 400.0, stopped_33(), track_status=lambda t: "4" if t >= 20.0 else "1")
+    assert [r["flag"] for r in recs if r["flag"] in ("VSC", "SC", "RED")] == ["SC"]
+    advice = [r for r in recs if "advisory" in r["reason"]]
+    assert len(advice) == 1 and advice[0]["t"] == 10.0 + RED_CRASH_SITE_S
+    assert advice[0]["flag"] == "DOUBLE_YELLOW" and advice[0]["msector"] == 5
+    assert "red flag" in advice[0]["reason"] and "flag unchanged" in advice[0]["reason"]
+    all_recs_valid(advice)
+
+
+def late_crash(race_laps: int, lap: int) -> tuple[RaceControl, list[dict]]:
+    rc = RaceControl(race_laps=race_laps)
+    rc.on_tick(make_tick(9.0, [make_car("33", 5, x=100.0), moving_car("44", 2, 9.0)], lap=lap))
+    recs = crash(rc, 10.0, "33", 5)
+    recs += tick_until(rc, 10.0, 60.0, stopped_33(), lap=lap)
+    return rc, recs
+
+
+def test_late_race_neutralisation_gets_a_red() -> None:
+    """2021 Baku, Verstappen (lap 47 of 51) and 2023 Australia, Magnussen: race control
+    red-flags a late SC so the race can restart and finish racing."""
+    rc, recs = late_crash(race_laps=52, lap=48)
+    flags = [(r["t"], r["flag"]) for r in recs if r["flag"] in ("VSC", "SC", "RED")]
+    assert flags == [(10.0 + SC_STOPPED_HOLD_S, "SC"), (10.0 + SC_STOPPED_HOLD_S, "RED")]
+    red = [r for r in recs if r["flag"] == "RED"][0]
+    assert "4 laps left" in red["reason"] and "finish racing" in red["reason"] and red["msector"] == 5
+    assert red["message"] == "RED FLAG" and red["confidence"] == LATE_RED_CONF
+    assert rc.global_.flag == "SC" and rc.soft_red == LATE_RED_KEY   # soft: never blocks a new incident
+    all_recs_valid(recs)
+
+
+def test_no_late_red_mid_race_or_with_too_few_laps_left() -> None:
+    for lap in (30, 52 - LATE_RED_LAPS - 1, 52 - LATE_RED_MIN_LAPS + 1, 52):
+        _, recs = late_crash(race_laps=52, lap=lap)
+        assert not any(r["flag"] == "RED" for r in recs), f"lap {lap}"
+
+
+def test_no_late_red_without_a_race_length() -> None:
+    rc = RaceControl()
+    rc.on_tick(make_tick(9.0, [make_car("33", 5, x=100.0)], lap=50))
+    crash(rc, 10.0, "33", 5)
+    recs = tick_until(rc, 10.0, 60.0, stopped_33(), lap=50)
+    assert not any(r["flag"] == "RED" for r in recs)
+
+
+def test_late_red_ends_with_our_track_clear() -> None:
+    rc, recs = late_crash(race_laps=52, lap=48)
+    moved = lambda t: [make_car("33", 6, speed=150.0, x=100.0 + 50.0 * t), moving_car("44", 2, t)]   # drove on
+    after = tick_until(rc, 60.0, 120.0, moved, lap=48)
+    assert [r["message"] for r in after if r["message"] == "TRACK CLEAR"] == ["TRACK CLEAR"]
+    assert rc.soft_red is None and rc.global_.flag == "CLEAR"
+
+
+def test_multi_car_incident_alone_calls_sc_not_red() -> None:
+    """7 of 8 MULTI reds on the training races were not race control's (a two-car tangle
+    under the SC): a MULTI calls the SC, and the late-race rule decides about red."""
+    rc = RaceControl()
+    rc.on_tick(make_tick(100.0, [make_car("44", 2), make_car("55", 2)]))
+    multi = {"id": "det-m", "t": 100.0, "drivers": ["44", "55"], "msector": 2, "type": "MULTI",
+             "severity": 1.0, "evidence": "test"}
+    flags = [r["flag"] for r in rc.on_detection(multi) if r["flag"] in ("VSC", "SC", "RED")]
+    assert flags == ["SC"]
+
+
+def test_race_laps_from_track() -> None:
+    track = {"race": "2023_Australian", "msectors": [{"id": 1, "start_dist": 5227.7, "end_dist": 223.1},
+                                                     {"id": 2, "start_dist": 223.1, "end_dist": 510.0}]}
+    assert race_laps_from_track(track) == 59                 # 305 km / 5227.7 m, rounded up (real: 58)
+    assert race_laps_from_track({**track, "race": "2023_Monaco"}) == 50
+    assert race_laps_from_track({"race": "x", "msectors": []}) is None

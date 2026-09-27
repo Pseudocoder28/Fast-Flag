@@ -34,18 +34,23 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   only raising one is ours. Without this, a car that stopped with no impact (2023
   Australia, Magnussen: TRACK CLEAR 5 s before race control's red flag) or a crashed car
   moved a few metres by a crane would let us recommend green under race control's SC.
-- Red flag by time at a crash site, which never blocks: a crashed car still stopped at its
-  crash site RED_CRASH_SITE_S after it stopped, once race control has reacted, gets a RED
-  rec (confidence RED_CRASH_SITE_CONF). It is a soft overlay tied to that crash site: the
-  hard flag every other escalation compares against stays the crash's SC, so a new incident
-  elsewhere still escalates on its own (a pile-up MULTI still gets its RED). The soft red
-  ends when its crash site is released (race control green again, the car moved, no data).
-  Another crash site that has waited as long takes it over silently. Otherwise, if our hard
-  VSC or SC stays out (race control still neutralises, or a car still holds a cause
-  sector), that flag is re-sent as the downgrade; if not, TRACK CLEAR follows within
-  seconds. The data cannot tell a crash race control handles under the Safety Car from one
-  that needs a red flag (barrier damage, debris, medical), so this also recommends red
-  where race control did not (docs/charts/escalation.md).
+- Red flag, late in the race, which never blocks: while our VSC or SC is out for an
+  incident that is still there and LATE_RED_MIN_LAPS to LATE_RED_LAPS laps are left, a RED
+  rec (confidence LATE_RED_CONF): a red flag lets the race restart and finish racing instead
+  of ending behind the Safety Car. The race length comes from the lap length before the race
+  (race_laps_from_track). It is a soft overlay: the hard flag every other escalation compares
+  against stays our VSC or SC, so a new incident elsewhere still escalates on its own. It
+  ends with our track-wide flag (TRACK CLEAR).
+  Why this rule (docs/lab/red_flag.md, training races): race control's reds follow late
+  neutralisations or damage car data cannot see (barrier, gravel, debris, rain). The old red
+  by time at a crash site caught 2 mid-race reds but sent 11 reds race control never called;
+  a MULTI at RED_SEV caught 1 red and sent 7 it never called. A crash site still stopped
+  RED_CRASH_SITE_S after its stop, once race control reacted, now only gets an advisory:
+  its sector flag re-sent unchanged, "recovery taking long, race control may need a red
+  flag". RED_BY_TIME and RED_FROM_MULTI bring the old reds back for comparison. With
+  RED_BY_TIME, the red by time is tied to its crash site: released (race control green
+  again, the car moved, no data), another crash site that waited as long takes it over;
+  otherwise our VSC or SC is re-sent as the downgrade.
 - A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
   wipes all flag state.
 """
@@ -74,8 +79,15 @@ PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot .
 PARKED_CAR_S = 180.0       # ... for this long counts as recovered (about recovery time)
 CRASH_SITE_MOVE_M = 20.0   # a crashed car this far from where it stopped was driven or craned away
 OFFICIAL_GREEN_S = 20.0    # race control's track status green this long after it reacted: incident over
-RED_CRASH_SITE_S = 120.0   # a crashed car still at its crash site this long after stopping: red flag (soft)
+RED_CRASH_SITE_S = 120.0   # a crashed car still at its crash site this long after stopping ...
+RED_BY_TIME = False        # ... was a red flag (soft); now only an advisory (docs/lab/red_flag.md)
 RED_CRASH_SITE_CONF = 0.7  # a judgement call on time alone, not a physical signal: lower confidence
+RED_FROM_MULTI = False     # a MULTI at RED_SEV or more called red: 1 of 8 matched a race control red
+LATE_RED_LAPS = 4          # our VSC or SC out for a live incident with this many laps or fewer left: red
+LATE_RED_MIN_LAPS = 2      # ... but not with fewer than this left: too late to restart the race
+LATE_RED_CONF = 0.75
+RACE_DISTANCE_M = 305_000.0      # an F1 race: the fewest laps that cover this distance ...
+MONACO_DISTANCE_M = 260_000.0    # ... except Monaco
 OFFICIAL_NEUTRAL = {"4", "5", "6", "7"}   # race control's track status: SC, red, VSC, VSC ending
 GREEN_REASON_SLACK_S = 5.0  # a sector clear this soon after a green release is credited to race control
 MIN_HOLD_S = 2.0
@@ -85,6 +97,8 @@ GLOBAL_CLEAR_AFTER_S = 5.0
 RISK_SC_SUPPORT = 0.5
 RISK_CONF_BOOST = 0.1
 MAX_CONF = 0.95
+
+LATE_RED_KEY = "late-race"     # self.soft_red for a late-race red (a crash site's red holds its drv)
 
 SECTOR_RANK = {"CLEAR": 0, "YELLOW": 1, "DOUBLE_YELLOW": 2}
 GLOBAL_RANK = {"CLEAR": 0, "VSC": 1, "SC": 2, "RED": 3}
@@ -141,6 +155,19 @@ def _sector_message(flag: str, msector: int) -> str:
     return f"{flag.replace('_', ' ')} IN TRACK SECTOR {msector}"
 
 
+def race_laps_from_track(track: dict) -> int | None:
+    """The scheduled race length, known before the race: the fewest laps that cover 305 km
+    (260 km at Monaco), from the lap length in GET /track. It comes out 1 to 3 laps long on
+    most circuits (the track's sector ends fall short of the real lap), so late-race rules
+    see about that many laps too many left."""
+    ends = [max(float(s.get("start_dist", 0.0)), float(s.get("end_dist", 0.0))) for s in track.get("msectors", [])]
+    length = max(ends, default=0.0)
+    if length < 1000.0:
+        return None
+    distance = MONACO_DISTANCE_M if "monaco" in str(track.get("race", "")).lower() else RACE_DISTANCE_M
+    return math.ceil(distance / length)
+
+
 def _global_message(flag: str) -> str:
     return {
         "SC": "SAFETY CAR DEPLOYED",
@@ -153,11 +180,13 @@ def _global_message(flag: str) -> str:
 class RaceControl:
     """Consumes tick/detection/risk envelopes, emits rec envelopes (Section 7.4)."""
 
-    def __init__(self) -> None:
+    def __init__(self, race_laps: int | None = None) -> None:
+        self.race_laps = race_laps    # scheduled race length (race_laps_from_track); None: no late-race red
         self._reset_state()
 
     def _reset_state(self) -> None:
         self.t: float | None = None
+        self.lap: int | None = None
         self.sectors: dict[int, SectorState] = {}
         self.global_ = GlobalState()
         self.car_state: dict[str, dict] = {}
@@ -166,7 +195,8 @@ class RaceControl:
         self.official_status = "1"                # race control's track status in the latest tick
         self.crash_sites: dict[str, CrashSite] = {}
         self.green_released: dict[int, float] = {}   # sector -> when race control's green released its crash site
-        self.soft_red: str | None = None          # drv whose crash site holds our soft (time-based) red
+        self.soft_red: str | None = None          # our soft red: LATE_RED_KEY, or (by time) the crash site's drv
+        self.advised: set[str] = set()            # crash sites that already got the long-recovery advisory
         self.last_physical_by_sector: dict[int, list[tuple[float, str]]] = {}
         # rec id counter is not reset here, ids stay unique across a reset
 
@@ -212,6 +242,8 @@ class RaceControl:
         for car in tick["cars"]:
             self._update_car(car, new_t)
         self.official_status = str(tick.get("track_status", "1"))
+        if isinstance(tick.get("lap"), int):
+            self.lap = tick["lap"]
         released = self._update_crash_sites()
 
         recs: list[dict] = []
@@ -221,6 +253,7 @@ class RaceControl:
         recs.extend(self._check_sector_clearing())
         recs.extend(self._check_global_clearing())
         recs.extend(self._check_soft_red())
+        recs.extend(self._check_recovery_advisory())
         return recs, did_reset
 
     def on_detection(self, det: dict) -> list[dict]:
@@ -357,10 +390,42 @@ class RaceControl:
                 return drv, self.t - site.stop_t
         return None
 
+    def laps_left(self) -> int | None:
+        if self.race_laps is None or self.lap is None:
+            return None
+        return max(self.race_laps - self.lap, 0)
+
+    def _live_cause_sector(self) -> int | None:
+        """A cause sector of our track-wide flag that is still flagged and still held by a
+        flagged car: the neutralisation is for an incident that is still there."""
+        g = self.global_
+        for s in sorted(g.cause_sectors):
+            sec = self.sectors.get(s)
+            if sec is not None and sec.flag != "CLEAR" and any(self._holds_sector(d, s) for d in sec.cause_drivers):
+                return s
+        return None
+
     def _check_soft_red(self) -> list[dict]:
-        """Red flag by time at a crash site: sent as a RED rec but kept apart from the hard
-        flag (self.global_.flag), so it never blocks another incident's escalation."""
+        """Our red flag, kept apart from the hard flag (self.global_.flag) so it never blocks
+        another incident's escalation. Late in the race: our VSC or SC is out for an incident
+        that is still there and LATE_RED_LAPS laps or fewer are left, so the race would likely
+        end behind the neutralisation. Race control's reds in the data come mostly from such
+        late neutralisations (docs/lab/red_flag.md); a mid-race red needs barrier damage,
+        gravel or debris that car data cannot see. RED_BY_TIME brings back the old red by
+        time at a crash site (off: 13 of its 16 reds were not race control's)."""
         if self.soft_red is not None or self.global_.flag in ("CLEAR", "RED"):
+            return []
+        left = self.laps_left()
+        if left is not None and LATE_RED_MIN_LAPS <= left <= LATE_RED_LAPS and self.global_.flag in ("VSC", "SC"):
+            where = self._live_cause_sector()
+            if where is not None:
+                self.soft_red = LATE_RED_KEY
+                g = self.global_.flag
+                return [self._make_rec(self.t, where, "RED", LATE_RED_CONF,
+                                       f"{g} out for a live incident with about {left} laps left: a red flag "
+                                       f"lets the race restart and finish racing, not behind the {g}",
+                                       _global_message("RED"), [])]
+        if not RED_BY_TIME:
             return []
         cand = self._soft_red_candidate()
         if cand is None:
@@ -371,6 +436,28 @@ class RaceControl:
         return [self._make_rec(self.t, site.msector, "RED", RED_CRASH_SITE_CONF,
                                f"car {drv} still stopped at its crash site {elapsed:.0f} s after it stopped",
                                _global_message("RED"), [])]
+
+    def _check_recovery_advisory(self) -> list[dict]:
+        """A crashed car still at its crash site RED_CRASH_SITE_S after it stopped, once race
+        control has reacted: the recovery is taking long. Only an advisory: the crash
+        sector's own flag is re-sent unchanged with that reason (every client treats a
+        same-level re-send as an update, never a new call). Race control decides whether
+        that needs a red flag; car data cannot see barrier damage or gravel on the track."""
+        if RED_BY_TIME:
+            return []
+        cand = self._soft_red_candidate()
+        if cand is None or cand[0] in self.advised:
+            return []
+        drv, elapsed = cand
+        self.advised.add(drv)
+        site = self.crash_sites[drv]
+        sec = self.sectors.get(site.msector)
+        if sec is None or sec.flag == "CLEAR":
+            return []
+        return [self._make_rec(self.t, site.msector, sec.flag, sec.confidence,
+                               f"car {drv} still at its crash site {elapsed:.0f} s after it stopped: "
+                               "recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+                               _sector_message(sec.flag, site.msector), sec.cause_detection_ids)]
 
     def _end_soft_red(self, drv: str, msector: int) -> list[dict]:
         """The soft red's crash site was released. Another qualifying crash site takes the
@@ -456,7 +543,7 @@ class RaceControl:
 
     def _maybe_escalate_global_from_multi(self, det: dict, msector: int) -> list[dict]:
         sev = det["severity"]
-        if sev >= RED_SEV:
+        if sev >= RED_SEV and RED_FROM_MULTI:
             target = "RED"
         elif sev >= MULTI_SC_SEV:
             target = "SC"
