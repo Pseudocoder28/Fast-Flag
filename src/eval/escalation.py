@@ -25,14 +25,21 @@ Per official escalation:
 
 Per recommendation of ours that matched no official escalation:
 - during an official neutralisation: the official track status was already SC,
-  VSC or red. It supports what race control had done, so it is not counted as extra.
+  VSC or red (or the race was suspended). It supports what race control had done,
+  so it is not counted as extra.
+- red while race control kept its SC or VSC: the same, but ours is a red flag and
+  race control showed no red around it (no red status, and no RED message from
+  MATCH_BEFORE_S before to RED_WINDOW_S after). Our red asks for more than race
+  control did, so it is extra.
 - official yellows only: it fits an official incident (window and sectors as in
   src.eval.run) that race control kept at yellow or double yellow
 - escalated incident, outside the match window: it fits an escalated incident,
   but not within the match window of its official escalation
 - no official flag: nothing official nearby
-Extra escalations per race hour counts the last three, over race hours outside red
-flag suspensions (as src.eval.run).
+Extra escalations per race hour counts every category but the first, over race
+hours outside red flag suspensions (as src.eval.run). The report also counts every
+red flag we sent, and our TRACK CLEARs while race control's track status showed
+its own SC, VSC or red (the engine never sends one then).
 
 Run: python -m src.eval.escalation
 Writes docs/charts/escalation.md, escalation.json, escalation_official.csv,
@@ -71,8 +78,9 @@ OFFICIAL_COLUMNS = ["race", "t_incident", "t_official", "official_flag", "offici
                     "our_t", "our_flag", "our_top", "miss_kind", "onset_car", "onset_car_alerts", "detail",
                     "official_red_t", "our_red_t"]
 RED_WINDOW_S = 1200.0      # an incident with no official TRACK CLEAR is followed this long for the red check
-OURS_COLUMNS = ["race", "t", "flag", "msector", "reason", "category"]
-EXTRA = ("official yellows only", "escalated incident, outside the match window", "no official flag")
+OURS_COLUMNS = ["race", "t", "flag", "msector", "reason", "category", "race_control_red"]
+RED_UNCALLED = "red while race control kept its SC or VSC"
+EXTRA = ("official yellows only", "escalated incident, outside the match window", "no official flag", RED_UNCALLED)
 
 
 # ---- our side: detections streamed through the race control engine
@@ -96,12 +104,16 @@ def replay(race: RaceData, suite: Processor) -> tuple[list[dict], list[dict], li
     return dets, recs, resets
 
 
-def escalation_recs(recs: list[dict]) -> list[dict]:
+def escalation_recs(recs: list[dict], resets: list[float] | tuple = ()) -> list[dict]:
     """Our VSC, SC and RED recs that raise or restate our track-wide flag. A lower one sent
     while a higher flag is out is a downgrade (race control re-sends the SC when its soft red
-    ends), not a new call, so it is neither an escalation nor an extra."""
+    ends), not a new call, so it is neither an escalation nor an extra. An engine reset
+    (a tick jump) wipes the flag like a TRACK CLEAR."""
     out, level = [], -1
+    pending, j = sorted(resets), 0
     for r in recs:
+        while j < len(pending) and pending[j] <= r["t"]:
+            level, j = -1, j + 1
         if r["flag"] == "CLEAR" and r["message"] == "TRACK CLEAR":
             level = -1
         elif r["flag"] in ESCALATIONS:
@@ -130,10 +142,16 @@ def track_wide_at(changes: list[tuple[float, str, int | None]], t: float) -> tup
     return flag, since, cause
 
 
-def official_neutral(status: pd.Series, susp: pd.Series, t: float) -> bool:
-    """Official track status SC, VSC or red at t (as of the last tick), or suspended."""
+def status_at(status: pd.Series, t: float) -> str:
+    """Race control's track status at t, as of the last tick."""
     i = max(int(status.index.searchsorted(t, side="right")) - 1, 0)
-    return str(status.iloc[i]) in NEUTRAL_STATUS or was_suspended(susp, t)
+    return str(status.iloc[i])
+
+
+def official_neutral(status: pd.Series, susp: pd.Series, t: float) -> bool:
+    """Official track status SC, VSC or red at t, or suspended (red flag, or most of the
+    field in the pit lane)."""
+    return status_at(status, t) in NEUTRAL_STATUS or was_suspended(susp, t)
 
 
 # ---- one race
@@ -186,7 +204,8 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
     frame = add_own_ratio(race.frame, length)
     ons = onsets(frame, length)
     status = frame.drop_duplicates("t").set_index("t")["track_status"].sort_index()
-    esc = escalation_recs(recs)
+    esc = escalation_recs(recs, resets)
+    off_reds = [e["t"] for e in official if e["flag"] == "RED"]
     changes = track_wide_changes(recs, resets)
 
     official_rows, matched_ids = [], set()
@@ -225,12 +244,18 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
                 row.update(status="missed", **miss_detail(inc, recs, car, frame, n, t_hi))
         official_rows.append(row)
 
+    def race_control_red(t: float) -> bool:
+        """Race control showed a red around t: its red flag status, or a RED message from
+        MATCH_BEFORE_S before to RED_WINDOW_S after."""
+        return status_at(status, t) == "5" or any(t - MATCH_BEFORE_S <= x <= t + RED_WINDOW_S for x in off_reds)
+
     ours_rows = []
     for r in esc:
+        rc_red = race_control_red(r["t"]) if r["flag"] == "RED" else None
         if r["id"] in matched_ids:
             category = "matched"
         elif official_neutral(status, susp, r["t"]):
-            category = "during an official neutralisation"
+            category = RED_UNCALLED if r["flag"] == "RED" and not rc_red else "during an official neutralisation"
         else:
             fit = [i for i in incidents if belongs(r, i, n)]
             if any(f in ESCALATIONS for i in fit for f in i.flags):
@@ -238,13 +263,16 @@ def race_scorecard(rid: str, suite_for: Callable[[RaceData], Processor] = loro_s
             else:
                 category = "official yellows only" if fit else "no official flag"
         ours_rows.append({"race": rid, "t": r["t"], "flag": r["flag"], "msector": r["msector"],
-                          "reason": r["reason"], "category": category})
+                          "reason": r["reason"], "category": category, "race_control_red": rc_red})
+    # the engine's own rule: no TRACK CLEAR while race control's track status is SC, VSC or red
+    clears_neutral = sum(1 for r in recs if r["message"] == "TRACK CLEAR" and status_at(status, r["t"]) in NEUTRAL_STATUS)
 
     dt = np.diff(susp.index.to_numpy(), append=susp.index[-1])
     hours = float(dt[~susp.to_numpy()].sum()) / 3600
     stopped = race.frame.loc[(race.frame["speed"] < STOPPED_KMH) & ~race.frame["in_pit"].astype(bool), "lat_off"]
     stopped = stopped.abs().dropna()
     return {"race": rid, "official": official_rows, "ours": ours_rows, "hours": hours, "resets": len(resets),
+            "track_clears_under_neutral": clears_neutral,
             "stopped_rows": len(stopped), "stopped_within_1m": int((stopped <= 1.0).sum()),
             "stopped_off_line": int((stopped > OFF_LINE_M).sum()),
             "stopped_off_line_cars": sorted(race.frame.loc[stopped.index[stopped > OFF_LINE_M], "drv"].unique())}
@@ -295,10 +323,24 @@ def summarise(results: list[dict]) -> dict:
         "extra_by_flag": counts(extra["flag"], ESCALATIONS),
         "our_by_flag": counts(ours["flag"], ESCALATIONS),
         "red_check": red_check(off),
+        "our_reds": our_reds(ours),
+        "track_clears_under_neutral": int(sum(res.get("track_clears_under_neutral", 0) for res in results)),
         "engine_resets": int(sum(res["resets"] for res in results)),
         "stopped_lateral_offset": stopped_offset(results),
         "impact_signal": impact_signal(off),
     }
+
+
+def our_reds(ours: pd.DataFrame) -> dict:
+    """Every red flag we sent: by time at a crash site or for a multi-car crash, and whether
+    race control showed a red around it (its red status, or a RED message from 60 s before to
+    RED_WINDOW_S after)."""
+    red = ours[ours["flag"] == "RED"]
+    timed = red["reason"].str.contains("crash site", na=False)
+    called = red["race_control_red"].astype(bool)
+    return {"total": len(red), "time_based": int(timed.sum()), "multi_car": int((~timed).sum()),
+            "with_race_control_red": int(called.sum()), "without_race_control_red": int((~called).sum()),
+            "time_based_without": int((timed & ~called).sum())}
 
 
 def red_check(off: pd.DataFrame) -> dict:
@@ -345,8 +387,9 @@ SEGMENTS = [("earlier", "Earlier than race control", BLUE, SURFACE),
             ("later", "Later than race control", ORANGE, INK),
             ("car collapse seen", "Missed: a car collapse we could see", GRAY_DARK, SURFACE),
             ("no car collapse", "Missed: no car collapse (re-flag, debris, weather, lap 1)", GRAY_LIGHT, INK)]
-IN_SAMPLE = ("In-sample: the detector settings were tuned and the race control rules were set on these races; "
-             "the holdout run (A7) gives the out-of-sample version.")
+IN_SAMPLE = ("In-sample: the detector settings were tuned and the race control rules were set on these races. The A7 "
+             "holdout run tested the engine frozen before the 26 Sept race control changes;\nthose changes were checked "
+             "on replays of the holdout, so they have no out-of-sample test.")
 COUNTERFACTUAL = ("Counterfactual: assumes race control acted on our recommendation at once. Race control also has "
                   "marshal reports and CCTV, and picks VSC or SC by recovery work we cannot see. Claim earlier than "
                   "the race control feed, never earlier than the marshals.")
@@ -434,19 +477,22 @@ def plot(off: pd.DataFrame, summ: dict, path: Path, title: str | None = None, sc
              fontsize=9.5, color=INK2, va="top", linespacing=1.4)
     fig.text(0.02, 0.015, f"Our {summ['our_escalations']} recommendations: {c['matched']} matched, "
              f"{c['during an official neutralisation']} during an official neutralisation, "
-             f"{c['official yellows only']} where race control kept yellows only, {c['no official flag']} with no "
-             f"official flag. Replay of historical FastF1 data.\n{scope_note}\n"
+             f"{c['official yellows only']} where race control kept yellows only,\n{c['no official flag']} with no "
+             f"official flag, {c[RED_UNCALLED]} red{'' if c[RED_UNCALLED] == 1 else 's'} while race control kept its SC "
+             f"or VSC. Replay of historical FastF1 data.\n{scope_note}\n"
              + COUNTERFACTUAL.replace(" Claim", "\nClaim"), fontsize=7.5, color=INK2, va="bottom", linespacing=1.4)
     fig.savefig(path, dpi=160, facecolor=SURFACE)
     plt.close(fig)
 
 
-def red_text(r: dict) -> str:
+def red_text(r: dict, o: dict) -> str:
     lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
-    return (f"- Red flags, per official escalation until race control's TRACK CLEAR: race control called "
-            f"{r['both'] + r['race_control_only']}, we called {r['both']} of them{lead}, and {r['ours_only']} that race "
-            "control handled without a red flag (mostly our red for a crashed car still at its crash site after "
-            "2 minutes: the data cannot see barrier damage, debris or medical needs).")
+    return (f"- Red flags: race control showed a red in {r['both'] + r['race_control_only']} of its escalated "
+            f"incidents and we recommended red in {r['both']} of them{lead}. In all we sent {o['total']} red flags "
+            f"({o['time_based']} by time at a crash site, {o['multi_car']} for multi-car crashes); race control showed "
+            f"a red around {o['with_race_control_red']} of them, and {o['without_race_control_red']} were reds race "
+            f"control never called ({o['time_based_without']} of them by time at a crash site). The data cannot see "
+            "barrier damage, debris or medical needs: do not claim red flag accuracy.")
 
 
 def pairs_text(pairs: dict[str, int]) -> str:
@@ -479,7 +525,9 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
         f"found and {summ['missed_kind']['no car collapse']} had none.",
         f"- Same first flag as race control: {summ['same_first_flag']} of {summ['matched']} "
         f"({pairs_text(summ['flag_pairs'])}).",
-        red_text(summ["red_check"]),
+        red_text(summ["red_check"], summ["our_reds"]),
+        f"- Our TRACK CLEARs while race control's track status showed its own SC, VSC or red: "
+        f"{summ['track_clears_under_neutral']}.",
         "", "| official flag | escalations | earlier | later | missed | median lead (s) |", "|---|---|---|---|---|---|"]
     for f in ESCALATIONS:
         b = summ["by_official_flag"][f]
@@ -496,7 +544,8 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
               f"- Extra, race control never escalated: {summ['extra']}, {summ['extra_per_hour']:.2f} per race hour "
               f"({c['official yellows only']} where race control kept yellows only, "
               f"{c['escalated incident, outside the match window']} near an escalated incident but outside its "
-              f"match window, {c['no official flag']} with no official flag). By flag: "
+              f"match window, {c['no official flag']} with no official flag, {c[RED_UNCALLED]} red flags race control "
+              "never called while its own SC or VSC was out). By flag: "
               + ", ".join(f"{FLAG_NAME[k]} {v}" for k, v in summ["extra_by_flag"].items()) + ".",
               f"- Race control engine resets (tick jumps over 2 s): {summ['engine_resets']}.", "",
               "## Flag choice: VSC or SC", "",

@@ -5,8 +5,8 @@
   "status": {
     "earlier": 27,
     "later": 2,
-    "already out": 1,
-    "missed": 21
+    "already out": 2,
+    "missed": 20
   },
   "matched": 29,
   "median_lead_s": 20.0,
@@ -44,34 +44,35 @@
       "official": 3,
       "earlier": 1,
       "later": 0,
-      "already out": 0,
-      "missed": 2,
+      "already out": 1,
+      "missed": 1,
       "median_lead_s": 7.2
     }
   },
   "missed_kind": {
     "car collapse seen": 7,
-    "no car collapse": 14
+    "no car collapse": 13
   },
-  "our_escalations": 74,
+  "our_escalations": 73,
   "our_by_category": {
     "matched": 29,
-    "during an official neutralisation": 21,
+    "during an official neutralisation": 8,
     "official yellows only": 20,
     "escalated incident, outside the match window": 0,
-    "no official flag": 4
+    "no official flag": 4,
+    "red while race control kept its SC or VSC": 12
   },
-  "extra": 24,
-  "extra_per_hour": 0.77,
+  "extra": 36,
+  "extra_per_hour": 1.15,
   "extra_by_flag": {
     "VSC": 6,
     "SC": 14,
-    "RED": 4
+    "RED": 16
   },
   "our_by_flag": {
     "VSC": 17,
     "SC": 33,
-    "RED": 24
+    "RED": 23
   },
   "red_check": {
     "both": 3,
@@ -79,6 +80,15 @@
     "ours_only": 13,
     "median_lead_s": 51.4
   },
+  "our_reds": {
+    "total": 23,
+    "time_based": 15,
+    "multi_car": 8,
+    "with_race_control_red": 5,
+    "without_race_control_red": 18,
+    "time_based_without": 11
+  },
+  "track_clears_under_neutral": 0,
   "engine_resets": 0,
   "stopped_lateral_offset": {
     "stopped_car_rows": 616792,

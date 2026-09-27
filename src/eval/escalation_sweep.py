@@ -2,7 +2,8 @@
 training races (the holdouts are never loaded here). Every value reruns the whole
 scorecard (src.eval.escalation) with the setting overridden inside the worker
 processes only; src/racecontrol/engine.py itself is never edited. In-sample by
-construction: pick a value before the freeze and let the holdout run test it.
+construction: the A7 holdout run tested the engine frozen before the 26 Sept race control
+changes, and those changes have no out-of-sample test.
 
 Run: python -m src.eval.escalation_sweep SC_STOPPED_HOLD_S 3 5 8 10
      python -m src.eval.escalation_sweep SC_STOPPED_HOLD_S 3 5 --out /tmp/sweep
@@ -18,7 +19,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.eval.escalation import CHARTS, ESCALATIONS, race_scorecard, summarise
+from src.eval.escalation import CHARTS, ESCALATIONS, RED_UNCALLED, race_scorecard, summarise
 from src.replay.engine import available_races
 
 
@@ -42,15 +43,20 @@ def row(name: str, value: float, summ: dict) -> dict:
             **{f"our_{f.lower()}": v for f, v in summ["our_by_flag"].items() if f in ESCALATIONS},
             "red_both": summ["red_check"]["both"], "red_race_control_only": summ["red_check"]["race_control_only"],
             "red_ours_only": summ["red_check"]["ours_only"], "red_median_lead_s": summ["red_check"]["median_lead_s"],
+            "our_reds": summ["our_reds"]["total"], "our_reds_uncalled": summ["our_reds"]["without_race_control_red"],
             "extra": summ["extra"], "extra_per_hour": summ["extra_per_hour"],
-            "extra_yellows_only": c["official yellows only"], "extra_no_official_flag": c["no official flag"]}
+            "extra_yellows_only": c["official yellows only"], "extra_no_official_flag": c["no official flag"],
+            "extra_outside_window": c["escalated incident, outside the match window"],
+            "extra_red_uncalled": c[RED_UNCALLED], "track_clears_under_neutral": summ["track_clears_under_neutral"]}
 
 
 def report(df: pd.DataFrame, name: str, hours: float) -> str:
     lines = [f"# Escalation scorecard vs {name} (training races)", "",
              f"Replay of historical FastF1 data, {len(available_races())} training races, {hours:.1f} race hours. "
              f"Each row reruns python -m src.eval.escalation with src.racecontrol.engine.{name} set to that value "
-             "(in the worker processes only). In-sample: choose before the freeze, the holdout run tests the choice.",
+             "(in the worker processes only). In-sample. The A7 holdout run tested the engine frozen before the 26 Sept "
+             "race control changes; those changes were checked on replays of the holdout, so they have no out-of-sample "
+             "test.",
              "", "| " + " | ".join(df.columns) + " |", "|" + "---|" * len(df.columns)]
     lines += ["| " + " | ".join("" if pd.isna(v) else f"{v:g}" if isinstance(v, float) else str(v) for v in r) + " |"
               for r in df.itertuples(index=False)]

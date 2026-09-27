@@ -3,7 +3,7 @@ race,t_incident,t_official,official_flag,official_top,sectors,status,lead_s,our_
 2023_Australian,4390.18,4402.18,SC,RED,9,earlier,10.43,4391.75,SC,SC,,23,IMPACT STOPPED,car 23 stopped for 3.0 s after an impact,4560.18,4508.75
 2023_Australian,6454.18,6454.18,VSC,VSC,track-wide,missed,,,,,car collapse seen,63,STOPPED,car 63 collapsed 31 s before the first official message; we showed double yellow but did not escalate,,
 2023_Australian,9389.18,9450.18,SC,SC,4,earlier,37.68,9412.5,VSC,VSC,,20,STOPPED,"car 20 stopped for 10.0 s, no impact detected",,
-2023_Australian,9605.18,9605.18,RED,RED,track-wide,missed,,,,,no car collapse,,,car already slow or stopped before the window (re-flag of an earlier stoppage),9605.18,
+2023_Australian,9605.18,9605.18,RED,RED,track-wide,already out,,9412.5,VSC,,,,,"our VSC out since 193 s before, cause sector 6",9605.18,
 2023_Australian,10752.18,10764.18,RED,RED,2 4,earlier,7.18,10757.0,RED,RED,,,,multi-car incident,10764.18,10757.0
 2023_Mexico_City,4084.92,4084.92,VSC,VSC,track-wide,missed,,,,,no car collapse,,,"field not racing (SC, VSC, restart or procession)",,
 2023_Mexico_City,6483.92,6503.92,SC,RED,9 10,earlier,19.67,6484.25,SC,SC,,20,IMPACT STOPPED,car 20 stopped for 3.0 s after an impact,6652.92,6601.25
