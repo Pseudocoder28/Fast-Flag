@@ -1200,6 +1200,13 @@
           "confidence": 0.85,
           "reason": "car 23 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 121.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 23 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 9"
         }
       ],
       "official_messages": [
@@ -1249,7 +1256,12 @@
           "on_onset_car": true,
           "cars_by_then": 6
         },
-        "our_escalation": null,
+        "our_escalation": {
+          "t_after_onset": 29.5,
+          "flag": "VSC",
+          "reason": "car 63 stopped for 10.0 s, no impact detected",
+          "cars_by_then": 14
+        },
         "official_yellow": null,
         "cars_by_official_yellow": null,
         "official_escalation": {
@@ -2246,6 +2258,20 @@
           "confidence": 0.7,
           "reason": "car 63 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 20"
+        },
+        {
+          "t_after_onset": 11.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 63 stopped, rolled on from sector 20",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 1"
+        },
+        {
+          "t_after_onset": 29.5,
+          "flag": "VSC",
+          "confidence": 0.7,
+          "reason": "car 63 stopped for 10.0 s, no impact detected",
+          "message": "VIRTUAL SAFETY CAR DEPLOYED"
         }
       ],
       "official_messages": [
@@ -2255,7 +2281,7 @@
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
         }
       ],
-      "summary": "2023 Australian, RUS (car 63) at 6422.8 s: each second of delay here averaged 0.23 cars (14 cars passed at racing speed in the 60 s after onset); our first alert +9.0 s; official VSC +31.4 s (14 cars by then).",
+      "summary": "2023 Australian, RUS (car 63) at 6422.8 s: each second of delay here averaged 0.23 cars (14 cars passed at racing speed in the 60 s after onset); our first alert +9.0 s; our VSC +29.5 s (14 cars by then); official VSC +31.4 s (14 cars by then).",
       "png": "delay_cost_2023_Australian_car63_6422.png"
     },
     {
@@ -4315,6 +4341,13 @@
           "confidence": 0.85,
           "reason": "car 20 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 121.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 20 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
         }
       ],
       "official_messages": [
@@ -5346,6 +5379,13 @@
           "confidence": 0.85,
           "reason": "car 22 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 3"
+        },
+        {
+          "t_after_onset": 14.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 22 stopped, rolled on from sector 3",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 4"
         }
       ],
       "official_messages": [
@@ -6380,6 +6420,20 @@
           "confidence": 0.85,
           "reason": "car 18 stopped for 10.0 s, no impact detected",
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 15.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 18 stopped, rolled on from sector 14",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 15"
+        },
+        {
+          "t_after_onset": 23.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 18 stopped, rolled on from sector 15",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 16"
         }
       ],
       "official_messages": [
@@ -7467,6 +7521,41 @@
           "confidence": 0.95,
           "reason": "car 55 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 13.25,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 55 stopped, rolled on from sector 7",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
+        },
+        {
+          "t_after_onset": 20.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 55 stopped, rolled on from sector 8",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 9"
+        },
+        {
+          "t_after_onset": 23.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 55 stopped, rolled on from sector 9",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
+        },
+        {
+          "t_after_onset": 42.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 18 stopped, rolled on from sector 7",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
+        },
+        {
+          "t_after_onset": 47.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 18 stopped, rolled on from sector 8",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 9"
         }
       ],
       "official_messages": [
@@ -8426,7 +8515,15 @@
         ]
       },
       "detections": [],
-      "recommendations": [],
+      "recommendations": [
+        {
+          "t_after_onset": -9.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 18 stopped, rolled on from sector 9",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
+        }
+      ],
       "official_messages": [
         {
           "t_after_onset": 61.52,
@@ -9427,6 +9524,13 @@
           "confidence": 0.85,
           "reason": "car 20 stopped for 10.0 s, no impact detected",
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 19.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 20 stopped, rolled on from sector 17",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 18"
         }
       ],
       "official_messages": [
@@ -10432,6 +10536,20 @@
           "confidence": 0.85,
           "reason": "car 2 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
+        },
+        {
+          "t_after_onset": 18.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 2 stopped, rolled on from sector 8",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 9"
+        },
+        {
+          "t_after_onset": 21.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 2 stopped, rolled on from sector 9",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
         }
       ],
       "official_messages": [
@@ -13483,6 +13601,34 @@
           "confidence": 0.7,
           "reason": "car 22 stopped for 10.0 s, no impact detected",
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 32.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 22 stopped, rolled on from sector 7",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
+        },
+        {
+          "t_after_onset": 37.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 22 stopped, rolled on from sector 8",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 9"
+        },
+        {
+          "t_after_onset": 42.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 22 stopped, rolled on from sector 9",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
+        },
+        {
+          "t_after_onset": 50.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 22 stopped, rolled on from sector 10",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 11"
         }
       ],
       "official_messages": [
@@ -15505,6 +15651,13 @@
           "confidence": 0.95,
           "reason": "car 2 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 121.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 2 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 4"
         }
       ],
       "official_messages": [
@@ -17626,7 +17779,7 @@
         },
         "our_escalation": {
           "t_after_onset": 5.25,
-          "flag": "RED",
+          "flag": "SC",
           "reason": "multi-car incident",
           "cars_by_then": 0
         },
@@ -18616,10 +18769,17 @@
         },
         {
           "t_after_onset": 5.25,
-          "flag": "RED",
+          "flag": "SC",
           "confidence": 0.95,
           "reason": "multi-car incident",
-          "message": "RED FLAG"
+          "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 125.25,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 23 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 6"
         }
       ],
       "official_messages": [
@@ -18644,7 +18804,7 @@
           "message": "SAFETY CAR DEPLOYED"
         }
       ],
-      "summary": "2024 Canadian, SAI (car 55) at 5062.5 s: each second of delay here averaged 0.03 cars (2 cars passed at racing speed in the 60 s after onset); our first alert +3.0 s; our RED +5.2 s (0 cars by then); official yellow +1.5 s (0 cars by then); official SC +30.5 s (1 car by then).",
+      "summary": "2024 Canadian, SAI (car 55) at 5062.5 s: each second of delay here averaged 0.03 cars (2 cars passed at racing speed in the 60 s after onset); our first alert +3.0 s; our SC +5.2 s (0 cars by then); official yellow +1.5 s (0 cars by then); official SC +30.5 s (1 car by then).",
       "png": "delay_cost_2024_Canadian_car55_5062.png"
     },
     {
@@ -19655,6 +19815,13 @@
           "confidence": 0.95,
           "reason": "car 22 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 17.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 22 stopped, rolled on from sector 9",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
         }
       ],
       "official_messages": [
@@ -20697,12 +20864,7 @@
           "on_onset_car": true,
           "cars_by_then": 1
         },
-        "our_escalation": {
-          "t_after_onset": 7.0,
-          "flag": "SC",
-          "reason": "car 27 stopped for 3.0 s after an impact",
-          "cars_by_then": 3
-        },
+        "our_escalation": null,
         "official_yellow": 2.31,
         "cars_by_official_yellow": 2,
         "official_escalation": {
@@ -21645,11 +21807,11 @@
           "message": "DOUBLE YELLOW IN TRACK SECTOR 11"
         },
         {
-          "t_after_onset": 7.0,
-          "flag": "SC",
+          "t_after_onset": 124.0,
+          "flag": "DOUBLE_YELLOW",
           "confidence": 0.85,
-          "reason": "car 27 stopped for 3.0 s after an impact",
-          "message": "SAFETY CAR DEPLOYED"
+          "reason": "car 27 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 11"
         }
       ],
       "official_messages": [
@@ -21669,7 +21831,7 @@
           "message": "SAFETY CAR DEPLOYED"
         }
       ],
-      "summary": "2024 Qatar, HUL (car 27) at 7177.5 s: each second of delay here averaged 0.05 cars (3 cars passed at racing speed in the 60 s after onset); our first alert +0.8 s; our SC +7.0 s (3 cars by then); official yellow +2.3 s (2 cars by then); official VSC +3.3 s (3 cars by then).",
+      "summary": "2024 Qatar, HUL (car 27) at 7177.5 s: each second of delay here averaged 0.05 cars (3 cars passed at racing speed in the 60 s after onset); our first alert +0.8 s; official yellow +2.3 s (2 cars by then); official VSC +3.3 s (3 cars by then).",
       "png": "delay_cost_2024_Qatar_car27_7177.png"
     },
     {
@@ -30520,6 +30682,13 @@
           "confidence": 0.95,
           "reason": "car 14 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 122.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 14 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 9"
         }
       ],
       "official_messages": [
@@ -31682,9 +31851,9 @@
           "cars_by_then": 0
         },
         "our_escalation": {
-          "t_after_onset": 131.25,
+          "t_after_onset": 124.75,
           "flag": "SC",
-          "reason": "car 30 stopped for 3.0 s after an impact",
+          "reason": "car 5 stopped for 3.0 s after an impact",
           "cars_by_then": 4
         },
         "official_yellow": 119.63,
@@ -31968,7 +32137,7 @@
           "pct_of_own_normal": 76.7
         }
       ],
-      "passes_until_s": 132.25,
+      "passes_until_s": 125.75,
       "passes_without_reference": 0,
       "trace": {
         "t_after_onset": [
@@ -32771,6 +32940,20 @@
           "message": "DOUBLE YELLOW IN TRACK SECTOR 18"
         },
         {
+          "t_after_onset": 123.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 5 stopped, rolled on from sector 18",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 19"
+        },
+        {
+          "t_after_onset": 124.75,
+          "flag": "SC",
+          "confidence": 0.95,
+          "reason": "car 5 stopped for 3.0 s after an impact",
+          "message": "SAFETY CAR DEPLOYED"
+        },
+        {
           "t_after_onset": 127.25,
           "flag": "YELLOW",
           "confidence": 0.9,
@@ -32783,13 +32966,6 @@
           "confidence": 0.95,
           "reason": "car 30 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 2"
-        },
-        {
-          "t_after_onset": 131.25,
-          "flag": "SC",
-          "confidence": 0.95,
-          "reason": "car 30 stopped for 3.0 s after an impact",
-          "message": "SAFETY CAR DEPLOYED"
         }
       ],
       "official_messages": [
@@ -32824,7 +33000,7 @@
           "message": "DOUBLE YELLOW IN TRACK SECTOR 19"
         }
       ],
-      "summary": "2025 Australian, LAW (car 30) at 9074.8 s: each second of delay here averaged 0.03 cars (2 cars passed at racing speed in the 60 s after onset); our first alert +2.0 s; our SC +131.2 s (4 cars by then); official yellow +119.6 s (4 cars by then); no official escalation.",
+      "summary": "2025 Australian, LAW (car 30) at 9074.8 s: each second of delay here averaged 0.03 cars (2 cars passed at racing speed in the 60 s after onset); our first alert +2.0 s; our SC +124.8 s (4 cars by then); official yellow +119.6 s (4 cars by then); no official escalation.",
       "png": "delay_cost_2025_Australian_car30_9074.png"
     },
     {
@@ -33787,6 +33963,13 @@
           "confidence": 0.95,
           "reason": "car 43 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 8.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 43 stopped, rolled on from sector 7",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
         }
       ],
       "official_messages": [
@@ -34765,6 +34948,13 @@
           "confidence": 0.95,
           "reason": "car 6 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 122.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 6 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
         }
       ],
       "official_messages": [
@@ -36721,7 +36911,7 @@
         },
         "our_escalation": {
           "t_after_onset": 0.75,
-          "flag": "RED",
+          "flag": "SC",
           "reason": "multi-car incident",
           "cars_by_then": 0
         },
@@ -37692,10 +37882,17 @@
         },
         {
           "t_after_onset": 0.75,
-          "flag": "RED",
+          "flag": "SC",
           "confidence": 0.95,
           "reason": "multi-car incident",
-          "message": "RED FLAG"
+          "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 14.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 31 stopped, rolled on from sector 7",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
         }
       ],
       "official_messages": [
@@ -37705,7 +37902,7 @@
           "message": "YELLOW IN TRACK SECTOR 7"
         }
       ],
-      "summary": "2025 British, BEA (car 87) at 8379.5 s: each second of delay here averaged 0.08 cars (5 cars passed at racing speed in the 60 s after onset); our first alert +0.5 s; our RED +0.8 s (0 cars by then); official yellow +0.9 s (0 cars by then); no official escalation.",
+      "summary": "2025 British, BEA (car 87) at 8379.5 s: each second of delay here averaged 0.08 cars (5 cars passed at racing speed in the 60 s after onset); our first alert +0.5 s; our SC +0.8 s (0 cars by then); official yellow +0.9 s (0 cars by then); no official escalation.",
       "png": "delay_cost_2025_British_car87_8379.png"
     },
     {
@@ -38712,7 +38909,12 @@
           "on_onset_car": true,
           "cars_by_then": 0
         },
-        "our_escalation": null,
+        "our_escalation": {
+          "t_after_onset": 12.25,
+          "flag": "VSC",
+          "reason": "car 44 stopped for 10.0 s, no impact detected",
+          "cars_by_then": 3
+        },
         "official_yellow": 2.49,
         "cars_by_official_yellow": 0,
         "official_escalation": {
@@ -39701,6 +39903,20 @@
           "confidence": 0.7,
           "reason": "car 44 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 5"
+        },
+        {
+          "t_after_onset": 3.25,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 44 stopped, rolled on from sector 5",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 6"
+        },
+        {
+          "t_after_onset": 12.25,
+          "flag": "VSC",
+          "confidence": 0.7,
+          "reason": "car 44 stopped for 10.0 s, no impact detected",
+          "message": "VIRTUAL SAFETY CAR DEPLOYED"
         }
       ],
       "official_messages": [
@@ -39735,7 +39951,7 @@
           "message": "DOUBLE YELLOW IN TRACK SECTOR 5"
         }
       ],
-      "summary": "2025 Dutch, HAM (car 44) at 5097.5 s: each second of delay here averaged 0.08 cars (5 cars passed at racing speed in the 60 s after onset); our first alert +2.2 s; official yellow +2.5 s (0 cars by then); official SC +17.5 s (5 cars by then).",
+      "summary": "2025 Dutch, HAM (car 44) at 5097.5 s: each second of delay here averaged 0.08 cars (5 cars passed at racing speed in the 60 s after onset); our first alert +2.2 s; our VSC +12.2 s (3 cars by then); official yellow +2.5 s (0 cars by then); official SC +17.5 s (5 cars by then).",
       "png": "delay_cost_2025_Dutch_car44_5097.png"
     },
     {
@@ -40839,7 +41055,12 @@
           "on_onset_car": true,
           "cars_by_then": 3
         },
-        "our_escalation": null,
+        "our_escalation": {
+          "t_after_onset": 24.0,
+          "flag": "VSC",
+          "reason": "car 87 stopped for 10.0 s, no impact detected",
+          "cars_by_then": 5
+        },
         "official_yellow": null,
         "cars_by_official_yellow": null,
         "official_escalation": {
@@ -41788,6 +42009,27 @@
           "confidence": 0.7,
           "reason": "car 87 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 6"
+        },
+        {
+          "t_after_onset": 3.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 87 stopped, rolled on from sector 6",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 7"
+        },
+        {
+          "t_after_onset": 24.0,
+          "flag": "VSC",
+          "confidence": 0.7,
+          "reason": "car 87 stopped for 10.0 s, no impact detected",
+          "message": "VIRTUAL SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 35.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 87 stopped, rolled on from sector 7",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
         }
       ],
       "official_messages": [
@@ -41797,7 +42039,7 @@
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
         }
       ],
-      "summary": "2025 Miami, BEA (car 87) at 6050.0 s: each second of delay here averaged 0.13 cars (8 cars passed at racing speed in the 60 s after onset); our first alert +2.5 s; official VSC +48.2 s (7 cars by then).",
+      "summary": "2025 Miami, BEA (car 87) at 6050.0 s: each second of delay here averaged 0.13 cars (8 cars passed at racing speed in the 60 s after onset); our first alert +2.5 s; our VSC +24.0 s (5 cars by then); official VSC +48.2 s (7 cars by then).",
       "png": "delay_cost_2025_Miami_car87_6050.png"
     },
     {
@@ -48095,6 +48337,13 @@
           "confidence": 0.95,
           "reason": "car 3 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 121.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 3 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 14"
         }
       ],
       "official_messages": [
@@ -55531,11 +55780,18 @@
           "message": "VIRTUAL SAFETY CAR DEPLOYED"
         },
         {
-          "t_after_onset": 96.0,
-          "flag": "YELLOW",
-          "confidence": 0.6,
-          "reason": "car 6 spin signature",
-          "message": "YELLOW IN TRACK SECTOR 7"
+          "t_after_onset": 91.25,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 6 stopped, rolled on from sector 16",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 17"
+        },
+        {
+          "t_after_onset": 95.5,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 6 stopped, rolled on from sector 17",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 7"
         }
       ],
       "official_messages": [
@@ -56583,6 +56839,20 @@
           "confidence": 0.85,
           "reason": "multi-car incident",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 24.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 30 stopped, rolled on from sector 18",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 19"
+        },
+        {
+          "t_after_onset": 122.75,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.7,
+          "reason": "car 10 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 18"
         }
       ],
       "official_messages": [
@@ -60471,6 +60741,13 @@
           "confidence": 0.85,
           "reason": "car 55 stopped (on track)",
           "message": "DOUBLE YELLOW IN TRACK SECTOR 10"
+        },
+        {
+          "t_after_onset": 12.25,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.85,
+          "reason": "car 55 stopped, rolled on from sector 10",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 11"
         }
       ],
       "official_messages": [
@@ -62547,6 +62824,13 @@
           "confidence": 0.95,
           "reason": "car 18 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 122.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 18 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 20"
         }
       ],
       "official_messages": [
@@ -63645,6 +63929,13 @@
           "confidence": 0.95,
           "reason": "car 33 stopped for 3.0 s after an impact",
           "message": "SAFETY CAR DEPLOYED"
+        },
+        {
+          "t_after_onset": 122.0,
+          "flag": "DOUBLE_YELLOW",
+          "confidence": 0.95,
+          "reason": "car 33 still at its crash site 120 s after it stopped: recovery taking long, race control may need a red flag (advisory, flag unchanged)",
+          "message": "DOUBLE YELLOW IN TRACK SECTOR 21"
         }
       ],
       "official_messages": [
