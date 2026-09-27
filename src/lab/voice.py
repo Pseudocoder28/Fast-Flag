@@ -10,6 +10,12 @@ about lead time, not even when race control re-issues the flag later. Every
 phrase comes from a template: flag, car numbers, detection type and sector.
 Nothing here decides anything, it only reads out the rec envelopes it receives.
 
+It connects with ?catchup=1 and never speaks the past: what arrives before the first tick
+after a (re)connect, and what the server replays from before the tick of a seek (the
+catch-up: every flag already out), only sets the levels, so after a seek the voice knows
+which flags are out and speaks only new calls. A rec re-sent with "recovery taking long"
+(the race control engine's long-recovery advisory) keeps its flag and is never a new call.
+
 Speech uses macOS `say` in a non-blocking subprocess. A higher flag level
 interrupts the current phrase, everything else waits for the current phrase and
 for a 2 s gap. On a non-Mac (or with --print, an extra option for checking the
@@ -33,7 +39,8 @@ from typing import Protocol
 
 from src.ingest.sectors import sector_matches
 
-URL = "ws://localhost:8000/stream"
+URL = "ws://localhost:8000/stream?catchup=1"
+ADVISORY = "recovery taking long"   # src/racecontrol/engine.py: a flag re-sent as an advisory, not a new call
 VOICE = "Daniel"
 RESET_JUMP_S = 2.0            # same rule as the race control engine and the dashboard
 MIN_GAP_S = 2.0               # at most one non-interrupting call every 2 s
@@ -84,6 +91,11 @@ def confirm_phrase(flag: str, lead_s: float) -> str:
     return f"Race control confirms {FLAG_WORDS[flag]}, {lead_s:.1f} seconds after Fast Flag."
 
 
+def with_catchup(url: str) -> str:
+    """Ask the server for the flags already out (hub catch-up), unless the url already says."""
+    return url if "catchup=" in url else url + ("&" if "?" in url else "?") + "catchup=1"
+
+
 def clean_car(drv: object) -> str:
     """Car numbers only ever reach `say` as plain alphanumerics (it honours [[...]] commands)."""
     return "".join(ch for ch in str(drv) if ch.isalnum())[:8]
@@ -127,6 +139,7 @@ class Narrator:
 
     def reset(self) -> None:
         self.t: float | None = None
+        self.quiet_before: float | None = None    # catch-up: envelopes stamped before this tick are the past
         self.detections: dict[str, dict] = {}
         self.level: dict[Scope, int] = {}                          # scope -> current rank
         self.open: set[Scope] = set()                              # scopes with an open episode
@@ -152,17 +165,34 @@ class Narrator:
         if not isinstance(env, dict) or not isinstance(env.get("data"), dict):
             return []
         try:
+            kind = str(env.get("kind"))
             handler = {"tick": self.on_tick, "detection": self.on_detection, "rec": self.on_rec,
-                       "official": self.on_official}.get(str(env.get("kind")))
-            return handler(env["data"]) if handler else []
+                       "official": self.on_official}.get(kind)
+            if handler is None:
+                return []
+            past = kind != "tick" and self.is_past(env["data"])
+            utts = handler(env["data"])
+            return [] if past else utts          # the past only sets the levels
         except Exception as exc:       # noqa: BLE001  a malformed envelope never kills the voice
             log(f"voice: skipped {env.get('kind')} envelope ({exc!r})")
             return []
+
+    def is_past(self, data: dict) -> bool:
+        """Catch-up, not news: before the first tick after a (re)connect, or stamped before the
+        tick of a seek while the server replays what came before it (until the next tick)."""
+        if self.t is None:
+            return True
+        return self.quiet_before is not None and float(data.get("t", self.quiet_before)) < self.quiet_before
 
     def on_tick(self, tick: dict) -> list[Utterance]:
         t = float(tick["t"])
         if self.t is not None and abs(t - self.t) > RESET_JUMP_S:     # a seek or loop, back or forward
             self.reset()
+            self.quiet_before = t               # the server's catch-up of this seek follows this tick
+        elif self.t is None:
+            self.quiet_before = t               # first tick after a (re)connect: same
+        else:
+            self.quiet_before = None            # the next tick: live again
         self.t = t
         for car in tick.get("cars", []):
             self.max_sector = max(self.max_sector, int(car["msector"]))
@@ -183,7 +213,10 @@ class Narrator:
         scope: Scope = TRACK if flag in GLOBAL_FLAGS else msector
         if rank <= self.level.get(scope, 0):
             return []
+        advisory = ADVISORY in str(rec.get("reason", ""))
         self.raise_scope(scope, t, rank)
+        if advisory:
+            return []                             # the flag is out (we missed its call), not a new call
         keys = {str(scope)}
         if scope == TRACK:
             self.note_raise(msector, t, rank)     # the cause sector is escalated by us too
@@ -438,6 +471,7 @@ async def run_stream(url: str, narrator: Narrator, speaker: Speaker) -> None:
         try:
             async with websockets.connect(url, max_size=MAX_MESSAGE_BYTES) as ws:
                 log(f"voice: connected to {url}")
+                narrator.reset()                  # the catch-up replays everything since the last seek: never twice
                 backoff = BACKOFF_START_S
                 async for raw in ws:
                     try:
@@ -467,7 +501,7 @@ def main() -> None:
     speaker = Speaker(backend)
     log(f"voice: {'printing' if speaker.instant else 'speaking with ' + a.voice}")
     try:
-        asyncio.run(run(a.url, speaker))
+        asyncio.run(run(with_catchup(a.url), speaker))
     except KeyboardInterrupt:
         log("voice: shutting down")
     finally:
