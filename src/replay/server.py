@@ -99,13 +99,16 @@ class LiveReplay:
         self.install(self.prepare(race))
 
     def seek(self, t: float) -> None:
-        jump = abs(t - self.engine.clock) > RESET_JUMP_S
-        if jump:
-            self.hub.reset()              # the pages and race control wipe their state too
         self.epoch += 1
         self.engine.seek(t)
-        if jump and self.timeline is not None:
-            self.pending = self.history()
+        times = self.race.times
+        new_t = float(times[min(self.engine.k, len(times) - 1)]) if len(times) else t
+        # the pages' rule, tick time against tick time: the server pushes the history exactly
+        # when the pages wipe their state
+        if abs(new_t - self.tick_t) > RESET_JUMP_S:
+            self.hub.reset()              # the pages and race control wipe their state too
+            if self.timeline is not None:
+                self.pending = self.history()
 
     def history(self) -> list[dict]:
         """Everything the pages had by now in a continuous run: official messages, detections

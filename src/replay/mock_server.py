@@ -83,13 +83,12 @@ class Replay:
 
     def seek(self, t: float) -> None:
         t = min(max(t, self.t0), self.t1)
-        jump = abs(t - self.sim_t) > RESET_JUMP_S
-        if jump:
-            self.hub.reset()              # the pages and race control wipe their state too
         self.sim_t = t
         self.cursor = bisect.bisect_left(self.times, self.sim_t)
         self.epoch += 1
-        if jump:
+        nxt = next((e[0] for e in self.events[self.cursor:] if e[2]["kind"] == "tick"), t)
+        if abs(nxt - self.tick_t) > RESET_JUMP_S:   # the pages' rule: tick time against tick time
+            self.hub.reset()              # the pages and race control wipe their state too
             self.pending = self.history()
 
     def history(self) -> list[dict]:
