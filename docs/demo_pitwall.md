@@ -1,13 +1,13 @@
 # Demo run sheet: the pit wall segment (about 60 s)
 
-A drop-in section for the main demo script (Ishaan owns the script; this is the pit wall part, next to the lab segment in `docs/lab/DEMO.md`). It replays yesterday's race (Saturday 26 Sept), the 2026 Azerbaijan GP holdout, on the dashboard: Alex Albon (car 23) crashes on lap 30 and our race control recommends the Safety Car while the official race control feed is still green. Rehearsed at 1440x900 following this sheet, last on 27 Sept with the final race control engine (PR #20): our SC at 12.7 s wall time, strip +8.3 s at 17.7 s and +23.3 s at 21.8 s.
+A drop-in section for the main demo script (Ishaan owns the script; this is the pit wall part, next to the lab segment in `docs/lab/DEMO.md`). It replays yesterday's race (Saturday 26 Sept), the 2026 Azerbaijan GP holdout, on the dashboard: Alex Albon (car 23) crashes on lap 30 and our race control recommends the Safety Car while the official race control feed is still green. Rehearsed at 1440x900 following this sheet, last on 27 Sept on main with PRs #22 and #23: our SC at 12.8 s wall time, strip +8.3 s at 17.7 s and +23.3 s at 21.8 s, no red flag call on this race.
 
 Run it on Naman's Mac: the holdout data (`data/holdout/2026_Azerbaijan*`) is only there.
 
 ## Honesty lines (say them, word for word)
 
 - "This is a replay of historical FastF1 data from yesterday's Azerbaijan Grand Prix. Our models never saw this race: the numbers on our slides come from one run on it, after the code was frozen."
-- If asked: the race control rules shown live were refined after that frozen run (how flags clear, a red flag call for a car still at its crash site) and checked on replays of this race. The early calls in this segment are the same in both.
+- If asked: the race control rules shown live were refined after that frozen run (how flags clear, when a red flag is called, an advisory when recovery takes long) and checked on replays of this race. The early calls in this segment are the same in both.
 - Say "earlier than the race control feed". Never say "earlier than the marshals": marshals wave local flags before any race control message.
 - Car colours (risk heat) are an honest prediction here, because the model never saw this race. On the 20 training races the risk model trained on the very race, so red cars there are memory, not prediction: never present them as a prediction (the fallback below uses the mock, whose risk values come from the leave-one-race-out model).
 - Numbers on slides come only from `docs/charts/NUMBERS.md`. The leads in this segment are read off the screen, from the live replay.
@@ -55,14 +55,14 @@ Slide to follow, numbers from `docs/charts/NUMBERS.md` (Holdout section): on thi
 
 ## Do not show
 
-- Do not let it run on after race control's Safety Car. About 2 minutes of replay after Albon stops (t about 6761) we recommend RED (confidence 0.70, "car 23 still stopped at its crash site 120 s after it stopped"); race control kept the Safety Car. That is a recommendation race control did not follow, so it needs explaining, not showing.
+- If it runs on past race control's Safety Car: about 2 minutes of replay after Albon stops (t about 6761) the feed shows an advisory on sector 7, "recovery taking long, race control may need a red flag (advisory, flag unchanged)". Our flag stays the Safety Car; it is not a red flag call. Fine to show, but the story ends at race control's Safety Car.
 
 - The Turn 1 restart pile-up (t about 7478). We recommend RED within 1 s; race control chose a double yellow and then a Safety Car 65 s later. It is a real disagreement, not a clean lead, and invites a debate on stage.
 
 ## If something goes wrong
 
 - Nothing moves: the replay is paused. Click Play.
-- "Fast Flag recommends WAITING": the page was reloaded after the cue. Send the cue command again.
+- Reloading the page or coming back from the overlay keeps the flags, the feed and the lead strip (the page catches up from the last seek). "Fast Flag recommends WAITING" only shows before the first connection: wait a second, or send the cue command again.
 - Something looks slow or choppy: open http://localhost:8000/?debug, which shows the frame rate in the corner.
 - Server or race control crashed: Ctrl+C both, start them again, cue again (about 15 s).
 - Anything else: switch to the backup video.

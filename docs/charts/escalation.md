@@ -2,7 +2,8 @@
 
 Replay of historical FastF1 data: 20 training races, 31.2 race hours. Our side is the race control engine (src/racecontrol) fed by the production detector settings with an ANOMALY model trained on the other training races. Definitions: src/eval/escalation.py.
 
-In-sample: the detector settings were tuned and the race control rules were set on these races. The A7 holdout run tested the engine frozen before the race control changes of 26 and 27 Sept;
+In-sample: the detector settings were tuned and the race control rules were set on these races.
+The A7 holdout run tested the engine frozen before the race control changes of 26 and 27 Sept;
 those changes were checked on replays of the holdout, so they have no out-of-sample test.
 
 Counterfactual: assumes race control acted on our recommendation at once. Race control also has marshal reports and CCTV, and picks VSC or SC by recovery work we cannot see. Claim earlier than the race control feed, never earlier than the marshals.
@@ -11,8 +12,8 @@ Counterfactual: assumes race control acted on our recommendation at once. Race c
 
 - We recommended a VSC, SC or red for 29 of 51 (57%): 27 earlier than race control, 2 later. Median lead 20.0 s (middle half 9.1 to 33.9 s).
 - Already out (our flag was up before, no new recommendation): 2. Missed: 20, of which 7 had a car collapse our onset rule found and 13 had none.
-- Same first flag as race control: 22 of 29 (official Red flag and ours Red flag: 1; official Safety car and ours Red flag: 2; official Safety car and ours Safety car: 13; official Safety car and ours VSC: 3; official VSC and ours Safety car: 2; official VSC and ours VSC: 8).
-- Red flags: race control showed a red in 5 of its escalated incidents and we recommended red in 3 of them, median 51 s earlier. In all we sent 23 red flags (15 by time at a crash site, 8 for multi-car crashes); race control showed a red around 5 of them, and 18 were reds race control never called (11 of them by time at a crash site). The data cannot see barrier damage, debris or medical needs: do not claim red flag accuracy.
+- Same first flag as race control: 23 of 29 (official Red flag and ours Safety car: 1; official Safety car and ours Safety car: 15; official Safety car and ours VSC: 3; official VSC and ours Safety car: 2; official VSC and ours VSC: 8).
+- Red flags: race control showed a red in 5 of its escalated incidents and we recommended red in 2 of them, median 64 s earlier. In all we sent 3 red flags (3 late in the race); race control showed a red around 2 of them and never called 1. The data cannot see barrier damage, debris or medical needs: do not claim red flag accuracy.
 - Our TRACK CLEARs while race control's track status showed its own SC, VSC or red: 0.
 
 | official flag | escalations | earlier | later | missed | median lead (s) |
@@ -46,16 +47,16 @@ Missed official escalations:
 | 2026_Dutch | 10659.2 | VSC | track-wide | car collapse seen | car 23 collapsed 99 s before the first official message; we made no recommendation |
 | 2026_Italian | 3613.8 | SC | 14 15 16 | no car collapse | no car collapsed below 50% (debris, weather, or a car that went off and kept going) |
 
-## Our escalations: 73
+## Our escalations: 59
 
-- Matched an official escalation: 29. During an official neutralisation (not extra): 8.
-- Extra, race control never escalated: 36, 1.15 per race hour (20 where race control kept yellows only, 0 near an escalated incident but outside its match window, 4 with no official flag, 12 red flags race control never called while its own SC or VSC was out). By flag: VSC 6, Safety car 14, Red flag 16.
+- Matched an official escalation: 31. During an official neutralisation (not extra): 4.
+- Extra, race control never escalated: 24, 0.77 per race hour (19 where race control kept yellows only, 0 near an escalated incident but outside its match window, 4 with no official flag, 1 red flag race control never called while its own SC or VSC was out). By flag: VSC 6, Safety car 17, Red flag 1.
 - Race control engine resets (tick jumps over 2 s): 0.
 
 ## Flag choice: VSC or SC
 
-- Our first flag matched race control's in 22 of 29 matched escalations (official Red flag and ours Red flag: 1; official Safety car and ours Red flag: 2; official Safety car and ours Safety car: 13; official Safety car and ours VSC: 3; official VSC and ours Safety car: 2; official VSC and ours VSC: 8).
-- Our 73 recommendations by flag: VSC 17, Safety car 33, Red flag 23.
+- Our first flag matched race control's in 23 of 29 matched escalations (official Red flag and ours Safety car: 1; official Safety car and ours Safety car: 15; official Safety car and ours VSC: 3; official VSC and ours Safety car: 2; official VSC and ours VSC: 8).
+- Our 59 recommendations by flag: VSC 17, Safety car 39, Red flag 3.
 - The lateral offset cannot choose between them. FastF1 positions of stopped cars sit on the racing line, even for retired cars parked in run-off: of 616,792 stopped-car rows (below 5 km/h, outside the pit lane), 99.97% are within 1 m of it and 118 are more than 8 m away (short episodes: 2026_Italian car 16, 2026_Miami car 6).
 - An impact separates them better. On the 26 official escalations with an onset car, 8 of 13 SC or red followed an IMPACT or MULTI detection involving the car and 10 of 13 VSC did not: "SC after an impact, VSC otherwise" separates race control's VSCs from its SCs and reds correctly 18 times, "always SC" 13 times. This check does not tell SC from red; exact agreement is the first line. In-sample, and a small sample.
 
@@ -64,24 +65,24 @@ Missed official escalations:
 | race | race hours | official escalations | earlier | later | missed | our escalations | extra |
 |---|---|---|---|---|---|---|---|
 | 2023_Australian | 1.46 | 6 | 4 | 0 | 1 | 6 | 0 |
-| 2023_Mexico_City | 1.68 | 2 | 1 | 0 | 1 | 4 | 1 |
-| 2023_Monaco | 1.82 | 0 | 0 | 0 | 0 | 6 | 6 |
-| 2024_Canadian | 1.77 | 2 | 2 | 0 | 0 | 6 | 4 |
-| 2024_Mexico_City | 1.68 | 1 | 1 | 0 | 0 | 2 | 1 |
-| 2024_Qatar | 1.51 | 3 | 1 | 1 | 1 | 5 | 2 |
+| 2023_Mexico_City | 1.68 | 2 | 1 | 0 | 1 | 3 | 1 |
+| 2023_Monaco | 1.82 | 0 | 0 | 0 | 0 | 5 | 5 |
+| 2024_Canadian | 1.77 | 2 | 2 | 0 | 0 | 5 | 3 |
+| 2024_Mexico_City | 1.68 | 1 | 1 | 0 | 0 | 1 | 0 |
+| 2024_Qatar | 1.51 | 3 | 1 | 1 | 1 | 4 | 1 |
 | 2024_São_Paulo | 1.69 | 4 | 2 | 0 | 2 | 3 | 1 |
-| 2025_Australian | 1.68 | 3 | 3 | 0 | 0 | 8 | 5 |
-| 2025_Azerbaijan | 1.56 | 1 | 1 | 0 | 0 | 3 | 2 |
-| 2025_Belgian | 1.41 | 0 | 0 | 0 | 0 | 2 | 1 |
-| 2025_British | 1.62 | 4 | 2 | 0 | 2 | 5 | 3 |
+| 2025_Australian | 1.68 | 3 | 3 | 0 | 0 | 5 | 2 |
+| 2025_Azerbaijan | 1.56 | 1 | 1 | 0 | 0 | 2 | 1 |
+| 2025_Belgian | 1.41 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 2025_British | 1.62 | 4 | 2 | 0 | 2 | 4 | 2 |
 | 2025_Dutch | 1.64 | 4 | 1 | 0 | 3 | 1 | 0 |
 | 2025_Miami | 1.48 | 3 | 1 | 1 | 1 | 2 | 0 |
 | 2026_Australian | 1.39 | 3 | 2 | 0 | 1 | 2 | 0 |
-| 2026_Belgian | 1.41 | 3 | 1 | 0 | 2 | 2 | 1 |
+| 2026_Belgian | 1.41 | 3 | 1 | 0 | 2 | 1 | 0 |
 | 2026_British | 1.46 | 4 | 2 | 0 | 1 | 4 | 2 |
 | 2026_Canadian | 1.47 | 3 | 0 | 0 | 3 | 1 | 1 |
 | 2026_Dutch | 1.61 | 2 | 1 | 0 | 1 | 3 | 2 |
-| 2026_Italian | 1.32 | 2 | 1 | 0 | 1 | 5 | 2 |
-| 2026_Miami | 1.56 | 1 | 1 | 0 | 0 | 3 | 2 |
+| 2026_Italian | 1.32 | 2 | 1 | 0 | 1 | 4 | 2 |
+| 2026_Miami | 1.56 | 1 | 1 | 0 | 0 | 2 | 1 |
 
 Chart: escalation.png. Every official escalation: escalation_official.csv. Every recommendation of ours: escalation_ours.csv.

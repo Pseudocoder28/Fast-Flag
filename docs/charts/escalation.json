@@ -14,11 +14,10 @@
     9.1,
     33.9
   ],
-  "same_first_flag": 22,
+  "same_first_flag": 23,
   "flag_pairs": {
-    "RED->RED": 1,
-    "SC->RED": 2,
-    "SC->SC": 13,
+    "RED->SC": 1,
+    "SC->SC": 15,
     "SC->VSC": 3,
     "VSC->SC": 2,
     "VSC->VSC": 8
@@ -53,40 +52,40 @@
     "car collapse seen": 7,
     "no car collapse": 13
   },
-  "our_escalations": 73,
+  "our_escalations": 59,
   "our_by_category": {
-    "matched": 29,
-    "during an official neutralisation": 8,
-    "official yellows only": 20,
+    "matched": 31,
+    "during an official neutralisation": 4,
+    "official yellows only": 19,
     "escalated incident, outside the match window": 0,
     "no official flag": 4,
-    "red while race control kept its SC or VSC": 12
+    "red while race control kept its SC or VSC": 1
   },
-  "extra": 36,
-  "extra_per_hour": 1.15,
+  "extra": 24,
+  "extra_per_hour": 0.77,
   "extra_by_flag": {
     "VSC": 6,
-    "SC": 14,
-    "RED": 16
+    "SC": 17,
+    "RED": 1
   },
   "our_by_flag": {
     "VSC": 17,
-    "SC": 33,
-    "RED": 23
+    "SC": 39,
+    "RED": 3
   },
   "red_check": {
-    "both": 3,
-    "race_control_only": 2,
-    "ours_only": 13,
-    "median_lead_s": 51.4
+    "both": 2,
+    "race_control_only": 3,
+    "median_lead_s": 64.1
   },
   "our_reds": {
-    "total": 23,
-    "time_based": 15,
-    "multi_car": 8,
-    "with_race_control_red": 5,
-    "without_race_control_red": 18,
-    "time_based_without": 11
+    "total": 3,
+    "late_race": 3,
+    "time_based": 0,
+    "multi_car": 0,
+    "with_race_control_red": 2,
+    "without_race_control_red": 1,
+    "time_based_without": 0
   },
   "track_clears_under_neutral": 0,
   "engine_resets": 0,

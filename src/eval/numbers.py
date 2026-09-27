@@ -243,8 +243,8 @@ def escalation() -> list[str]:
             f"- Escalations race control never made: {e['extra']} in {e['race_hours']:.1f} race hours = "
             f"{e['extra_per_hour']:.2f} per race hour ({c['official yellows only']} where race control kept yellows "
             f"only, {c['escalated incident, outside the match window']} near an official escalation but outside its "
-            f"match window, {c['no official flag']} with no official flag, {c.get(RED_UNCALLED, 0)} red flags race "
-            "control never called while its own SC or VSC was out).",
+            f"match window, {c['no official flag']} with no official flag, {c.get(RED_UNCALLED, 0)} red "
+            f"flag{'' if c.get(RED_UNCALLED, 0) == 1 else 's'} race control never called while its own SC or VSC was out).",
             f"- Flag choice: same first flag as race control in {e['same_first_flag']} of {e['matched']}; our "
             f"{len(ours)} recommendations by flag: {by_ours}. FastF1 puts stopped cars on the racing line, so the "
             f"lateral offset cannot tell VSC from SC; an impact can: \"SC after an impact, VSC otherwise\" separates "
@@ -255,23 +255,19 @@ def escalation() -> list[str]:
             f"{e.get('track_clears_under_neutral', 'n/a')}.",
             "- Race control changed after the holdout run (26 and 27 Sept): our SC or VSC stays out while race control's own "
             "SC, VSC or red is out, a crashed car still at its crash site keeps its sector flagged until race control's "
-            "track status is green, and a crashed car still at its crash site after 2 minutes gets a red flag that "
-            "never blocks another incident's escalation (PROJECT_BRIEF 6.5). These changes were checked on replays of "
-            "the 2026 Azerbaijan holdout, so they have no out-of-sample test; the holdout section below is from the "
-            "engine frozen before them.",
+            "track status is green, and our red flag comes only late in the race: our SC or VSC out for an incident "
+            "that is still there, with 2 to 4 laps left (the race length comes from the lap length, before the race), "
+            "so the race can restart and finish racing. A crashed car still at its crash site after 2 minutes only "
+            "gets an advisory, and a multi-car crash alone calls the SC (PROJECT_BRIEF 6.5, docs/lab/red_flag.md). The "
+            "red never blocks another incident's escalation. The first changes were checked on replays of the 2026 "
+            "Azerbaijan holdout, so they have no out-of-sample test; the late-race red was tuned on the training races, "
+            "with 2021 Azerbaijan as a check. The holdout section below is from the engine frozen before them.",
             ""]
 
 
 def red_line(r: dict | None, o: dict | None) -> list[str]:
-    if not r or not o:
-        return []
-    lead = "" if r["median_lead_s"] is None else f", median {r['median_lead_s']:.0f} s earlier"
-    return [f"- Red flags: race control showed a red in {r['both'] + r['race_control_only']} of its escalated "
-            f"incidents and we recommended red in {r['both']} of them{lead}. In all we sent {o['total']} red flags "
-            f"({o['time_based']} by time at a crash site, {o['multi_car']} for multi-car crashes); {o['with_race_control_red']} "
-            f"had a race control red around them and {o['without_race_control_red']} did not ({o['time_based_without']} "
-            "of those by time at a crash site). Do not claim red flag accuracy: the data cannot see barrier damage, "
-            "debris or medical needs."]
+    from src.eval.escalation import red_text
+    return [red_text(r, o)] if r and o else []
 
 
 def lab_delay_cost() -> list[str]:
