@@ -70,5 +70,20 @@ def test_a_page_that_opens_late_gets_what_it_missed() -> None:
             rc.send_json({"kind": "rec", "data": {"id": "rec-a", "t": 4500.0}})
             assert rc.receive_json()["data"]["id"] == "rec-a"
             with c.websocket_connect("/stream?catchup=1") as page:
-                assert page.receive_json()["data"]["id"] == "rec-a"
-                assert page.receive_json()["kind"] == "tick"
+                got = [page.receive_json()]
+                while got[-1]["kind"] != "tick":
+                    got.append(page.receive_json())
+                assert {e["kind"] for e in got[:-1]} >= {"detection", "rec"}       # the fixtures before 4500 ...
+                assert any(e["data"].get("id") == "rec-a" for e in got)            # ... and rec-a, the tick last
+
+
+def test_a_seek_sends_the_tick_then_the_history_to_pages_only() -> None:
+    with TestClient(create_app(no_recs=True, autoplay=False)) as c:
+        with c.websocket_connect("/stream?catchup=1") as page, c.websocket_connect("/stream") as rc:
+            c.post("/replay", json={"speed": 0, "seek_t": 4500.0})
+            assert page.receive_json()["kind"] == "tick"                           # the page resets on it ...
+            env = page.receive_json()
+            assert env["kind"] == "detection" and env["data"]["t"] < 4500.0       # ... then gets the past
+            assert rc.receive_json()["kind"] == "tick"                             # race control: live only
+            out = c.get("/cars").json()
+            assert set(out) >= {"t", "out", "cars", "field_stop_t"} and out["cars"]
