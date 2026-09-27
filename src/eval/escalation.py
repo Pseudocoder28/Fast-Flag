@@ -529,14 +529,19 @@ def pct(a: int, b: int) -> str:
     return f"{a / b:.0%}" if b else "n/a"
 
 
-def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: list[dict]) -> str:
+def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: list[dict],
+                 head: list[str] | None = None, name: str = "escalation") -> str:
+    """The markdown report. head: title and scope lines (the training races by default);
+    name: the stem of the chart and csv files it points to."""
     st, c, so, ir = summ["status"], summ["our_by_category"], summ["stopped_lateral_offset"], summ["impact_signal"]
-    lines = [
+    head = head or [
         "# Escalation scorecard (training races)", "",
         f"Replay of historical FastF1 data: {summ['races']} training races, {summ['race_hours']:.1f} race hours. "
         "Our side is the race control engine (src/racecontrol) fed by the production detector settings with an "
         "ANOMALY model trained on the other training races. Definitions: src/eval/escalation.py.", "",
-        IN_SAMPLE, "", COUNTERFACTUAL, "",
+        IN_SAMPLE]
+    lines = [
+        *head, "", COUNTERFACTUAL, "",
         f"## Official escalations: {summ['official_escalations']}", "",
         f"- We recommended a VSC, SC or red for {summ['matched']} of {summ['official_escalations']} "
         f"({pct(summ['matched'], summ['official_escalations'])}): {st['earlier']} earlier than race control, "
@@ -595,8 +600,8 @@ def write_report(off: pd.DataFrame, ours: pd.DataFrame, summ: dict, results: lis
         lines.append(f"| {res['race']} | {res['hours']:.2f} | {len(o)} | {(o['status'] == 'earlier').sum()} | "
                      f"{(o['status'] == 'later').sum()} | {(o['status'] == 'missed').sum()} | {len(u)} | "
                      f"{u['category'].isin(EXTRA).sum()} |")
-    lines += ["", "Chart: escalation.png. Every official escalation: escalation_official.csv. Every recommendation "
-              "of ours: escalation_ours.csv.", ""]
+    lines += ["", f"Chart: {name}.png. Every official escalation: {name}_official.csv. Every recommendation "
+              f"of ours: {name}_ours.csv.", ""]
     return "\n".join(lines)
 
 
