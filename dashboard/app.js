@@ -20,6 +20,9 @@ const MATCH_AFTER_S = 10;      // ... to 10 s after it (PROJECT_BRIEF.md 6.7)
 const TL_WINDOW_S = 90;        // the timeline shows the last 90 s of replay time
 const INCIDENT_GAP_S = 60;     // official flags further apart than this are separate incidents
 const JUMP_BEFORE_S = 30;
+const ESCALATION_LOOKBACK_S = 120;   // an official VSC, SC or red belongs to the incident whose first
+                                     // official flag came up to this long before it (as the escalation
+                                     // scorecard counts it: Verstappen, 2021 Baku, SC 69 s after the yellow)
 
 // open the page with ?debug to see frame rate, display lag and message rate on the map
 const DEBUG = new URLSearchParams(location.search).has("debug");
@@ -506,6 +509,7 @@ function resetForJump() {
   ourEvents = [];
   officialSeen = [];
   renderLeadSummary();
+  lastSpeed = 1;                // Play after a seek (a cue) starts at 1x, not at the last speed used
   checkRace();                  // POST /replay can also load another race
 }
 
@@ -563,12 +567,26 @@ function nearSector(a, b) {
   return d <= 1 || (nSectors > 0 && d === nSectors - 1);
 }
 
+function incidentStart(off) {
+  // an official track-wide flag: the time of the first official sector flag of its incident,
+  // at most ESCALATION_LOOKBACK_S earlier (only flags already received, so still causal)
+  let start = off.t;
+  for (const o of officialSeen) {
+    if (o.t >= off.t) break;
+    if (!o.trackWide && off.t - o.t <= ESCALATION_LOOKBACK_S) { start = o.t; break; }
+  }
+  return start;
+}
+
 function matchFor(off) {
   // our first rec for an official flag, as the eval matches them (PROJECT_BRIEF.md 6.7):
   // from MATCH_BEFORE_S before to MATCH_AFTER_S after it, track-wide with track-wide,
-  // sector flags with a sector flag in the same or an adjacent sector
+  // sector flags with a sector flag in the same or an adjacent sector. For a track-wide
+  // flag the window opens MATCH_BEFORE_S before its incident's first official flag, as
+  // the escalation scorecard does, so a call that came far ahead of race control counts
+  const from = (off.trackWide ? incidentStart(off) : off.t) - MATCH_BEFORE_S;
   for (const r of ourEvents) {
-    if (r.t < off.t - MATCH_BEFORE_S) continue;
+    if (r.t < from) continue;
     if (r.t > off.t + MATCH_AFTER_S) break;
     if (off.trackWide ? r.trackWide : !r.trackWide && nearSector(r.msector, off.msector)) return r;
   }
