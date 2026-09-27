@@ -30,9 +30,11 @@ Pure logic, no I/O. Clearing and hysteresis follow PROJECT_BRIEF.md Section 6.5:
   reacted to it. If race control never reacts, it is released after PARKED_CAR_S as
   before. So we never recommend green while race control still neutralises a crash:
   lifting a neutralisation is race control's call, only raising one is ours.
-- Red flag by time at the crash site: a crashed car still stopped at its crash site
-  RED_CRASH_SITE_S after it stopped, once race control has reacted to the crash, calls
-  for a red flag (recovery under the Safety Car is not happening quickly).
+- No red flag by time at a crash site. A 120 s rule was tried on 26 Sept and removed: the
+  data cannot tell a crash race control handles under the Safety Car from one that needs
+  a red flag (barrier damage, debris, medical), so it recommended red for 13 training-race
+  crashes race control did not red-flag, and a red that stays out blocks the next incident's
+  escalation. The pit wall shows a crash-site clock instead, as advice (dashboard/app.js).
 - A jump of more than RESET_JUMP_S in tick time, back or forward (seek or loop),
   wipes all flag state.
 """
@@ -61,8 +63,6 @@ PARKED_MOVE_M = 3.0        # a car that stays within this distance of one spot .
 PARKED_CAR_S = 180.0       # ... for this long counts as recovered (about recovery time)
 CRASH_SITE_MOVE_M = 20.0   # a crashed car this far from where it stopped was driven or craned away
 OFFICIAL_GREEN_S = 20.0    # race control's track status green this long after it reacted: incident over
-RED_CRASH_SITE_S = 120.0   # a crashed car still at its crash site this long after stopping: red flag
-RED_CRASH_SITE_CONF = 0.7  # a judgement call, not a physical signal: lower confidence
 MIN_HOLD_S = 2.0
 SECTOR_CLEAR_AFTER_S = 5.0
 GLOBAL_MIN_HOLD_S = 60.0
@@ -440,14 +440,11 @@ class RaceControl:
 
                 elapsed = self.t - stop.since_t
                 impact = self._impact_since(drv, stop.first_t - IMPACT_BEFORE_STOP_S)
-                site = self.crash_sites.get(drv)
                 if impact and elapsed >= SC_STOPPED_HOLD_S and not stop.crash_site_done:
                     ax, ay = car["anchor"]
-                    site = self.crash_sites[drv] = CrashSite(msector, stop.first_t, ax, ay)
+                    self.crash_sites[drv] = CrashSite(msector, stop.first_t, ax, ay)
                     stop.crash_site_done = True
-                if site is not None and site.reacted and self.t - site.stop_t >= RED_CRASH_SITE_S:
-                    calls.append((GLOBAL_RANK["RED"], "RED", msector, drv, stop, self.t - site.stop_t, "site"))
-                elif impact and elapsed >= SC_STOPPED_HOLD_S:
+                if impact and elapsed >= SC_STOPPED_HOLD_S:
                     calls.append((GLOBAL_RANK["SC"], "SC", msector, drv, stop, elapsed, impact))
                 elif not impact and elapsed >= VSC_STOPPED_HOLD_S:
                     calls.append((GLOBAL_RANK["VSC"], "VSC", msector, drv, stop, elapsed, impact))
@@ -460,10 +457,7 @@ class RaceControl:
             conf = min(MAX_CONF, stop.severity)
             if self.risk.get(drv, {}).get("risk_30s", 0.0) >= RISK_SC_SUPPORT:
                 conf = min(MAX_CONF, conf + RISK_CONF_BOOST)
-            if impact == "site":
-                conf = RED_CRASH_SITE_CONF
-                reason = f"car {drv} still stopped at its crash site {elapsed:.0f} s after it stopped"
-            elif impact:
+            if impact:
                 reason = f"car {drv} stopped for {elapsed:.1f} s after an impact"
             else:
                 reason = f"car {drv} stopped for {elapsed:.1f} s, no impact detected"

@@ -16,7 +16,6 @@ from src.racecontrol.engine import (
     MIN_HOLD_S,
     OFFICIAL_GREEN_S,
     PARKED_CAR_S,
-    RED_CRASH_SITE_S,
     RESET_JUMP_S,
     SC_STOPPED_HOLD_S,
     SECTOR_CLEAR_AFTER_S,
@@ -716,7 +715,7 @@ def test_all_recs_match_contract_shape() -> None:
         assert isinstance(r["msector"], int)
 
 
-# --- crash sites: held until race control is green, red flag by time at the site --------
+# --- crash sites: held until race control is green, never a red flag by time -------------
 
 
 def crash_scene() -> tuple[RaceControl, list[dict]]:
@@ -735,26 +734,38 @@ def test_crash_site_holds_sc_past_parked_until_race_control_is_green() -> None:
     sc_from_20 = lambda t: "4" if t >= 20.0 else "1"      # race control: SC from t=20
     recs += tick_until(rc, 10.0, 400.0, stopped_33(), track_status=sc_from_20)
     flags = [(r["t"], r["flag"]) for r in recs if r["flag"] in ("SC", "RED", "CLEAR")]
-    assert flags[0] == (10.0 + SC_STOPPED_HOLD_S, "SC")
-    red = [r for r in recs if r["flag"] == "RED"]
-    assert len(red) == 1 and red[0]["t"] == 10.0 + RED_CRASH_SITE_S and "crash site" in red[0]["reason"]
-    assert not any(r["flag"] == "CLEAR" for r in recs)     # parked for 390 s, but race control is not green
+    assert flags == [(10.0 + SC_STOPPED_HOLD_S, "SC")]      # no red by time, no clear while parked
     after = tick_until(rc, 400.0, 480.0, stopped_33(), track_status="1")
     track_clear = [r for r in after if r["message"] == "TRACK CLEAR"]
     assert len(track_clear) == 1 and track_clear[0]["t"] >= 400.0 + OFFICIAL_GREEN_S
     assert "race control" in track_clear[0]["reason"]
+    assert not any(r["flag"] == "RED" for r in after)
 
 
 def test_crash_site_released_when_the_car_is_moved_away() -> None:
     rc, recs = crash_scene()
     craned = lambda t: stopped_33(100.0 if t < 60.0 else 100.0 + CRASH_SITE_MOVE_M + 10.0)(t)
-    recs += tick_until(rc, 10.0, 200.0, craned, track_status="4")
-    assert not any(r["flag"] == "RED" for r in recs)        # moved at t=60: no longer a crash site
+    recs += tick_until(rc, 10.0, 300.0, craned, track_status="4")
+    clear = [r for r in recs if r["message"] == "TRACK CLEAR"]
+    # moved at t=60: no longer a crash site, so the parked rule applies from there (60 + 180 s),
+    # even though race control is still under its Safety Car
+    assert clear and 60.0 + PARKED_CAR_S <= clear[0]["t"] <= 60.0 + PARKED_CAR_S + 15.0
+    assert "race control" not in clear[0]["reason"]
 
 
-def test_no_red_while_race_control_has_not_reacted() -> None:
+def test_crash_site_released_as_before_when_race_control_never_reacts() -> None:
     rc, recs = crash_scene()
     recs += tick_until(rc, 10.0, 260.0, stopped_33(), track_status="1")
     assert not any(r["flag"] == "RED" for r in recs)
     clear = [r for r in recs if r["message"] == "TRACK CLEAR"]
-    assert clear and clear[0]["t"] >= 10.0 + PARKED_CAR_S  # never reacted: released as before
+    assert clear and clear[0]["t"] >= 10.0 + PARKED_CAR_S
+
+
+def test_a_new_incident_escalates_above_a_held_crash_site() -> None:
+    """A crash site holds our SC; a pile-up elsewhere still escalates to RED (MULTI)."""
+    rc, recs = crash_scene()
+    recs += tick_until(rc, 10.0, 200.0, stopped_33(), track_status="4")
+    multi = {"id": "det-m", "t": 200.0, "drivers": ["44", "55"], "msector": 2, "type": "MULTI",
+             "severity": 0.97, "evidence": "test"}
+    red = [r for r in rc.on_detection(multi) if r["flag"] == "RED"]
+    assert len(red) == 1 and red[0]["t"] == 200.0
