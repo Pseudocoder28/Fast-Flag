@@ -253,7 +253,7 @@ def escalation() -> list[str]:
             *red_line(e.get("red_check"), e.get("our_reds")),
             f"- Our TRACK CLEARs while race control's track status showed its own SC, VSC or red: "
             f"{e.get('track_clears_under_neutral', 'n/a')}.",
-            "- Race control changed after the holdout run (26 Sept): our SC or VSC stays out while race control's own "
+            "- Race control changed after the holdout run (26 and 27 Sept): our SC or VSC stays out while race control's own "
             "SC, VSC or red is out, a crashed car still at its crash site keeps its sector flagged until race control's "
             "track status is green, and a crashed car still at its crash site after 2 minutes gets a red flag that "
             "never blocks another incident's escalation (PROJECT_BRIEF 6.5). These changes were checked on replays of "
@@ -344,7 +344,7 @@ def holdout() -> list[str]:
                            f"{w3['cars_passing'] if w3['cars_passing'] is not None else 'n/a'} cars")
         out.append("")
     return out + ["The holdout numbers above come from the frozen engine. Race control changed after the freeze "
-                  "(26 Sept) and those changes were checked on replays of 2026 Azerbaijan, so the current engine has "
+                  "(26 and 27 Sept) and those changes were checked on replays of 2026 Azerbaijan, so the current engine has "
                   "no out-of-sample test.", ""]
 
 
@@ -354,7 +354,7 @@ def holdout_line() -> str:
         return ("- Training data: 20 races from 2023 to 2026. Holdout races (2026 Azerbaijan, 2026 Madrid): no numbers "
                 "until A7, after the code freeze.")
     return (f"- Training data: 20 races from 2023 to 2026. Holdout: {', '.join(ran)}, run once after the code freeze "
-            "(last section); nothing was fitted or tuned on it. Race control changes made after the freeze (26 Sept) "
+            "(last section); nothing was fitted or tuned on it. Race control changes made after the freeze (26 and 27 Sept) "
             "were checked on replays of 2026 Azerbaijan, so they have no out-of-sample test.")
 
 

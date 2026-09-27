@@ -2,8 +2,8 @@
 training races (the holdouts are never loaded here). Every value reruns the whole
 scorecard (src.eval.escalation) with the setting overridden inside the worker
 processes only; src/racecontrol/engine.py itself is never edited. In-sample by
-construction: the A7 holdout run tested the engine frozen before the 26 Sept race control
-changes, and those changes have no out-of-sample test.
+construction: the A7 holdout run tested the engine frozen before the race control changes
+of 26 and 27 Sept, and those changes have no out-of-sample test.
 
 Run: python -m src.eval.escalation_sweep SC_STOPPED_HOLD_S 3 5 8 10
      python -m src.eval.escalation_sweep SC_STOPPED_HOLD_S 3 5 --out /tmp/sweep
@@ -54,8 +54,8 @@ def report(df: pd.DataFrame, name: str, hours: float) -> str:
     lines = [f"# Escalation scorecard vs {name} (training races)", "",
              f"Replay of historical FastF1 data, {len(available_races())} training races, {hours:.1f} race hours. "
              f"Each row reruns python -m src.eval.escalation with src.racecontrol.engine.{name} set to that value "
-             "(in the worker processes only). In-sample. The A7 holdout run tested the engine frozen before the 26 Sept "
-             "race control changes; those changes were checked on replays of the holdout, so they have no out-of-sample "
+             "(in the worker processes only). In-sample. The A7 holdout run tested the engine frozen before the race "
+             "control changes of 26 and 27 Sept; those changes were checked on replays of the holdout, so they have no out-of-sample "
              "test.",
              "", "| " + " | ".join(df.columns) + " |", "|" + "---|" * len(df.columns)]
     lines += ["| " + " | ".join("" if pd.isna(v) else f"{v:g}" if isinstance(v, float) else str(v) for v in r) + " |"

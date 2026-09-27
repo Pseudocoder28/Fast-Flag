@@ -2,7 +2,7 @@
 
 Replay of historical FastF1 data: 20 training races, 31.2 race hours. Our side is the race control engine (src/racecontrol) fed by the production detector settings with an ANOMALY model trained on the other training races. Definitions: src/eval/escalation.py.
 
-In-sample: the detector settings were tuned and the race control rules were set on these races. The A7 holdout run tested the engine frozen before the 26 Sept race control changes;
+In-sample: the detector settings were tuned and the race control rules were set on these races. The A7 holdout run tested the engine frozen before the race control changes of 26 and 27 Sept;
 those changes were checked on replays of the holdout, so they have no out-of-sample test.
 
 Counterfactual: assumes race control acted on our recommendation at once. Race control also has marshal reports and CCTV, and picks VSC or SC by recovery work we cannot see. Claim earlier than the race control feed, never earlier than the marshals.

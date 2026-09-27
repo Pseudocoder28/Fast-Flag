@@ -388,7 +388,7 @@ SEGMENTS = [("earlier", "Earlier than race control", BLUE, SURFACE),
             ("car collapse seen", "Missed: a car collapse we could see", GRAY_DARK, SURFACE),
             ("no car collapse", "Missed: no car collapse (re-flag, debris, weather, lap 1)", GRAY_LIGHT, INK)]
 IN_SAMPLE = ("In-sample: the detector settings were tuned and the race control rules were set on these races. The A7 "
-             "holdout run tested the engine frozen before the 26 Sept race control changes;\nthose changes were checked "
+             "holdout run tested the engine frozen before the race control changes of 26 and 27 Sept;\nthose changes were checked "
              "on replays of the holdout, so they have no out-of-sample test.")
 COUNTERFACTUAL = ("Counterfactual: assumes race control acted on our recommendation at once. Race control also has "
                   "marshal reports and CCTV, and picks VSC or SC by recovery work we cannot see. Claim earlier than "
