@@ -8,10 +8,12 @@ Run: python -m src.replay.server                          (2023_Australian, with
 Endpoints (identical to the mock server, plus GET /races):
   ws  /stream        envelopes {"kind": "tick|detection|risk|rec|official", "data": {...}}
                      clients may send {"kind": "rec", ...}: it is rebroadcast to everyone
+  ws  /stream?catchup=1   the same, after everything since the last seek (src.replay.hub),
+                     so a page opened mid-race shows the flags already out
   POST /replay       {"speed": 10, "seek_t": 4350.0, "race": "2024_Canadian"} (speed 0 pauses)
   GET /track         track map for the loaded race
   GET /official      all official events for the loaded race (dashboard only)
-  GET /status        race, replay time, speed, start and end time
+  GET /status        race, replay time, speed, start and end time, the cars in the race
   GET /races         races available to load
   /                  the dashboard/ folder
 
@@ -35,6 +37,7 @@ from fastapi.responses import HTMLResponse
 
 from src.ingest.holdout import is_holdout_id
 from src.replay.engine import Engine, Processor, RaceData, available_races
+from src.replay.hub import RESET_JUMP_S, Hub
 from src.replay.latency import LatencyTracker
 from src.replay.static import NoCacheStaticFiles
 
@@ -46,24 +49,6 @@ DEFAULT_RACE = "2023_Australian"
 
 def no_processors(race: RaceData) -> list[Processor]:
     return []
-
-
-class Hub:
-    """Connected WebSocket clients."""
-
-    def __init__(self) -> None:
-        self.clients: set[WebSocket] = set()
-
-    async def broadcast(self, env: dict) -> None:
-        msg = json.dumps(env, separators=(",", ":"))
-        dead = []
-        for ws in list(self.clients):
-            try:
-                await ws.send_text(msg)
-            except Exception:
-                dead.append(ws)
-        for ws in dead:
-            self.clients.discard(ws)
 
 
 class LiveReplay:
@@ -79,6 +64,12 @@ class LiveReplay:
     def load(self, race: RaceData) -> None:
         self.race = race
         self.engine = Engine(race, self.make_processors(race))
+        self.hub.reset()
+
+    def seek(self, t: float) -> None:
+        if abs(t - self.engine.clock) > RESET_JUMP_S:
+            self.hub.reset()              # the pages and race control wipe their state too
+        self.engine.seek(t)
 
     def switch(self, rid: str) -> None:
         if is_holdout_id(rid) and not self.allow_holdout:
@@ -117,7 +108,7 @@ class LiveReplay:
         e = self.engine
         return {"race": self.race.race, "t": round(e.clock, 2), "speed": self.speed,
                 "t_start": e.t_start, "t_end": e.t_end, "finished": e.finished,
-                "clients": len(self.hub.clients)}
+                "clients": len(self.hub.clients), "cars": self.race.cars}
 
 
 def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData], list[Processor]] = no_processors,
@@ -137,7 +128,11 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData
     @app.websocket("/stream")
     async def stream(ws: WebSocket) -> None:
         await ws.accept()
-        replay.hub.clients.add(ws)
+        try:
+            await replay.hub.join(ws, catchup=ws.query_params.get("catchup") == "1")
+        except Exception:
+            replay.hub.leave(ws)          # it went away during its catch-up
+            return
         try:
             while True:
                 env = json.loads(await ws.receive_text())
@@ -146,7 +141,7 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData
         except (WebSocketDisconnect, json.JSONDecodeError, RuntimeError):
             pass
         finally:
-            replay.hub.clients.discard(ws)
+            replay.hub.leave(ws)
 
     @app.post("/replay")
     async def control(body: dict) -> dict:
@@ -155,7 +150,7 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData
         if "speed" in body:
             replay.speed = float(body["speed"])
         if body.get("seek_t") is not None:
-            replay.engine.seek(float(body["seek_t"]))
+            replay.seek(float(body["seek_t"]))
         if replay.speed <= 0 and (body.get("seek_t") is not None or body.get("race")):
             await replay.preview()
         return replay.status()

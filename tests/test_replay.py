@@ -143,3 +143,22 @@ def test_every_processor_is_timed_per_stage() -> None:
     tr.maybe_report()
     assert tr.summary()["over_budget"] == 1 and tr.summary()["stages"]["detect"]["n"] == 2
     assert lines and "over 250 ms: 1" in lines[0]
+
+
+def test_a_page_that_opens_late_gets_what_it_missed_then_live() -> None:
+    with TestClient(create_app(synthetic_race(), autoplay=False)) as c:
+        with c.websocket_connect("/stream") as rc:
+            c.post("/replay", json={"speed": 0, "seek_t": T0 + 12})
+            assert rc.receive_json()["kind"] == "tick"
+            rc.send_json({"kind": "rec", "data": {"id": "rec-a", "t": T0 + 12}})
+            assert rc.receive_json()["data"]["id"] == "rec-a"
+            with c.websocket_connect("/stream?catchup=1") as page:
+                first, second = page.receive_json(), page.receive_json()
+                assert first["data"]["id"] == "rec-a" and second["kind"] == "tick"   # what it missed, the tick last
+            with c.websocket_connect("/stream") as live:                              # race control, the bridge: live only
+                rc.send_json({"kind": "rec", "data": {"id": "rec-b", "t": T0 + 12}})
+                assert live.receive_json()["data"]["id"] == "rec-b"
+            c.post("/replay", json={"seek_t": T0 + 25})                              # a seek: nothing from before it
+            with c.websocket_connect("/stream?catchup=1") as page:
+                env = page.receive_json()
+                assert env["kind"] == "tick" and env["data"]["t"] >= T0 + 25

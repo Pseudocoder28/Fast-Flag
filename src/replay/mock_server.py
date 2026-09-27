@@ -6,10 +6,12 @@ Run:  python -m src.replay.mock_server            (fixture recs included)
 Endpoints:
   ws  /stream        envelopes {"kind": "tick|detection|risk|rec|official", "data": {...}}
                      clients may send {"kind": "rec", ...}: it is rebroadcast to everyone
+  ws  /stream?catchup=1   the same, after everything since the last seek or loop
+                     (src.replay.hub), so a page opened mid-race shows the flags already out
   POST /replay       {"speed": 10, "seek_t": 4350.0, "race": "..."} (speed 0 pauses)
   GET /track         track map for the loaded race
   GET /official      all official events for the loaded race
-  GET /status        current replay time, speed, clients
+  GET /status        current replay time, speed, clients, the cars in the race
   GET /races         races available to load (the fixture race only)
   /                  the dashboard/ folder
 """
@@ -27,6 +29,7 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
+from src.replay.hub import RESET_JUMP_S, Hub
 from src.replay.static import NoCacheStaticFiles
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -66,10 +69,15 @@ class Replay:
         self.loop = loop
         self.track = json.loads((FIX / "track_sample.json").read_text(encoding="utf-8"))
         self.official = read_jsonl(FIX / "official_sample.jsonl")
-        self.clients: set[WebSocket] = set()
+        self.cars = sorted({str(c["drv"]) for _, _, env in self.events if env["kind"] == "tick"
+                            for c in env["data"]["cars"]}, key=lambda d: (not d.isdigit(), int(d) if d.isdigit() else 0, d))
+        self.hub = Hub()
 
     def seek(self, t: float) -> None:
-        self.sim_t = min(max(t, self.t0), self.t1)
+        t = min(max(t, self.t0), self.t1)
+        if abs(t - self.sim_t) > RESET_JUMP_S:
+            self.hub.reset()              # the pages and race control wipe their state too
+        self.sim_t = t
         self.cursor = bisect.bisect_left(self.times, self.sim_t)
 
     def due(self) -> list[dict]:
@@ -80,17 +88,6 @@ class Replay:
             self.cursor += 1
         return out
 
-    async def broadcast(self, env: dict) -> None:
-        msg = json.dumps(env, separators=(",", ":"))
-        dead = []
-        for ws in list(self.clients):
-            try:
-                await ws.send_text(msg)
-            except Exception:
-                dead.append(ws)
-        for ws in dead:
-            self.clients.discard(ws)
-
     async def run(self) -> None:
         while True:
             await asyncio.sleep(STEP_S)
@@ -98,7 +95,7 @@ class Replay:
                 continue
             self.sim_t += STEP_S * self.speed
             for env in self.due():
-                await self.broadcast(env)
+                await self.hub.broadcast(env)
             if self.cursor >= len(self.events) and self.loop:
                 await asyncio.sleep(LOOP_PAUSE_S)
                 self.seek(self.t0)
@@ -108,12 +105,12 @@ class Replay:
         once. The cursor does not move: playback sends it again when it resumes."""
         for _, _, env in self.events[self.cursor:]:
             if env["kind"] == "tick":
-                await self.broadcast(env)
+                await self.hub.broadcast(env)
                 return
 
     def status(self) -> dict:
         return {"race": self.track["race"], "t": round(self.sim_t, 2), "speed": self.speed,
-                "t_start": self.t0, "t_end": self.t1, "clients": len(self.clients)}
+                "t_start": self.t0, "t_end": self.t1, "clients": len(self.hub.clients), "cars": self.cars}
 
 
 def create_app(no_recs: bool = False, loop: bool = True, autoplay: bool = True) -> FastAPI:
@@ -132,16 +129,20 @@ def create_app(no_recs: bool = False, loop: bool = True, autoplay: bool = True) 
     @app.websocket("/stream")
     async def stream(ws: WebSocket) -> None:
         await ws.accept()
-        replay.clients.add(ws)
+        try:
+            await replay.hub.join(ws, catchup=ws.query_params.get("catchup") == "1")
+        except Exception:
+            replay.hub.leave(ws)          # it went away during its catch-up
+            return
         try:
             while True:
                 env = json.loads(await ws.receive_text())
                 if isinstance(env, dict) and env.get("kind") == "rec" and isinstance(env.get("data"), dict):
-                    await replay.broadcast({"kind": "rec", "data": env["data"]})
+                    await replay.hub.broadcast({"kind": "rec", "data": env["data"]})
         except (WebSocketDisconnect, json.JSONDecodeError, RuntimeError):
             pass
         finally:
-            replay.clients.discard(ws)
+            replay.hub.leave(ws)
 
     @app.post("/replay")
     async def control(body: dict) -> dict:

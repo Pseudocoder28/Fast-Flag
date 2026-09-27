@@ -13,6 +13,19 @@
       <a id="back" class="back" href="/" title="Back to the pit wall">&lsaquo; BACK TO RACE</a>
       <div id="wordmark" class="wordmark"><span class="fast">FAST</span><span class="flag">FLAG</span></div>
     </div>
+    <div id="controls" class="controls" role="group" aria-label="Replay controls">
+      <button type="button" class="ctl" data-seek="-30" title="Back 30 s (shift + left arrow)">&laquo; 30</button>
+      <button type="button" class="ctl" data-seek="-10" title="Back 10 s (left arrow)">&lsaquo; 10</button>
+      <button type="button" class="ctl play" id="play" title="Play or pause (space)">PAUSE</button>
+      <button type="button" class="ctl" data-seek="10" title="Forward 10 s (right arrow)">10 &rsaquo;</button>
+      <button type="button" class="ctl" data-seek="30" title="Forward 30 s (shift + right arrow)">30 &raquo;</button>
+      <span class="ctl-sep" aria-hidden="true"></span>
+      <button type="button" class="ctl" data-speed="1">1x</button>
+      <button type="button" class="ctl" data-speed="2">2x</button>
+      <button type="button" class="ctl" data-speed="4">4x</button>
+      <button type="button" class="ctl" data-speed="10">10x</button>
+      <button type="button" class="ctl" data-speed="50">50x</button>
+    </div>
     <div id="status"><span id="conn">connecting</span><span id="replay-t"></span></div>
   </header>
 
