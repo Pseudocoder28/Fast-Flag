@@ -265,6 +265,32 @@ def escalation() -> list[str]:
             ""]
 
 
+def check_races() -> list[str]:
+    path = CHARTS / "escalation_check.json"
+    out = ["## Check races: the escalation scorecard out of sample", ""]
+    if not path.exists():
+        return out + ["Not run yet: once, after the rules froze (python -m src.eval.check_races).", ""]
+    e = json.loads(path.read_text(encoding="utf-8"))
+    runs, st = e.get("runs", []), e["status"]
+    commit = str(runs[-1]["commit"])[:7] if runs else "?"
+    lead = "n/a" if e["median_lead_s"] is None else f"{e['median_lead_s']:.1f} s"
+    share = f" ({pct(e['matched'] / e['official_escalations'])})" if e["official_escalations"] else ""
+    return out + [
+        "Source: escalation_check.json, escalation_check.md and escalation_check.png (python -m src.eval.check_races). "
+        f"{e['races']} races never used for fitting or tuning: the next 20 in data/race_ranking.csv after the training "
+        f"races, the holdout skipped. Run {len(runs)} time(s), last on commit {commit}, with the production models. "
+        "Counterfactual: assumes race control acted on our recommendation at once.", "",
+        f"- {e['official_escalations']} official escalations. We recommended a VSC, SC or red for {e['matched']}{share}, "
+        f"{st['earlier']} of them earlier than the race control feed; median lead {lead}.",
+        f"- Missed {st['missed']}: {e['missed_kind']['car collapse seen']} with a car collapse we could see, "
+        f"{e['missed_kind']['no car collapse']} without one.",
+        f"- Escalations race control never made: {e['extra']} in {e['race_hours']:.1f} race hours = "
+        f"{e['extra_per_hour']:.2f} per race hour." if e["extra_per_hour"] is not None else "- Extras: n/a",
+        *red_line(e.get("red_check"), e.get("our_reds")),
+        f"- Our TRACK CLEARs while race control's track status showed its own SC, VSC or red: "
+        f"{e.get('track_clears_under_neutral', 'n/a')}.", ""]
+
+
 def red_line(r: dict | None, o: dict | None) -> list[str]:
     from src.eval.escalation import red_text
     return [red_text(r, o)] if r and o else []
@@ -364,7 +390,7 @@ def build() -> str:
             holdout_line(),
             "- Risk is a heat indicator, not an alarm. Case-study windows are counterfactuals.", ""]
     body = (ai_summary() + detection_loro() + detection_deployed() + latency_from_onset() + risk() + pipeline_speed()
-            + escalation() + case_studies() + lab_delay_cost())
+            + escalation() + check_races() + case_studies() + lab_delay_cost())
     return "\n".join(head + body + holdout())
 
 

@@ -57,7 +57,7 @@ def test_numbers_md_builds_from_the_committed_charts() -> None:
     text = build()
     assert "replay of historical FastF1 data" in text
     for section in ("## Where the AI is", "## Detection, headline", "## Latency from crash onset", "## Risk model", "## Case studies",
-                    "## Escalation scorecard", "## Holdout"):
+                    "## Escalation scorecard", "## Check races", "## Holdout"):
         assert section in text
 
 
@@ -137,3 +137,21 @@ def test_a_red_already_out_counts_like_an_escalation_already_out() -> None:
     assert red_out_since(changes, 95.0) is None       # a downgrade ended it
     assert red_out_since(changes, 120.0) == 100.0
     assert red_out_since(changes, 140.0) is None      # TRACK CLEAR
+
+
+def test_check_races_are_new_races_and_never_the_holdout() -> None:
+    from src.eval.check_races import CHECK_RACES
+    from src.ingest.holdout import is_holdout_id
+    from src.replay.engine import available_races
+    assert len(set(CHECK_RACES)) == len(CHECK_RACES) == 20
+    assert not any(is_holdout_id(r) for r in CHECK_RACES)
+    assert not set(CHECK_RACES) & set(available_races())       # never a training race
+    assert "2021_Azerbaijan" not in CHECK_RACES                  # the late red was checked on it
+
+
+def test_check_races_run_once_unless_a_reason_is_given() -> None:
+    from src.eval.check_races import refusal
+    assert refusal([], None) is None
+    ran = [{"at": "2026-09-27T03:00:00", "commit": "abcdef1234", "reason": None}]
+    assert "--rerun-reason" in refusal(ran, None)
+    assert refusal(ran, "a bug in the scorer") is None
