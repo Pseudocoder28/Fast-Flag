@@ -32,11 +32,11 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 
 from src.ingest.holdout import is_holdout_id
 from src.replay.engine import Engine, Processor, RaceData, available_races
 from src.replay.latency import LatencyTracker
+from src.replay.static import NoCacheStaticFiles
 
 ROOT = Path(__file__).resolve().parents[2]
 DASHBOARD = ROOT / "dashboard"
@@ -167,7 +167,7 @@ def create_app(race: RaceData | None = None, make_processors: Callable[[RaceData
         return replay.race.official
 
     if (DASHBOARD / "index.html").exists():
-        app.mount("/", StaticFiles(directory=DASHBOARD, html=True), name="dashboard")
+        app.mount("/", NoCacheStaticFiles(directory=DASHBOARD, html=True), name="dashboard")
     else:
         @app.get("/", response_class=HTMLResponse)
         async def placeholder() -> str:
