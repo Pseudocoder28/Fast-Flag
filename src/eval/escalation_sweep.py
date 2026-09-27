@@ -43,7 +43,7 @@ def row(name: str, value: float, summ: dict) -> dict:
             **{f"our_{f.lower()}": v for f, v in summ["our_by_flag"].items() if f in ESCALATIONS},
             "red_both": summ["red_check"]["both"], "red_race_control_only": summ["red_check"]["race_control_only"],
             "red_ours_only": summ["red_check"]["ours_only"], "red_median_lead_s": summ["red_check"]["median_lead_s"],
-            "our_reds": summ["our_reds"]["total"], "our_reds_uncalled": summ["our_reds"]["without_race_control_red"],
+            "our_reds_uncalled": summ["our_reds"]["without_race_control_red"],
             "extra": summ["extra"], "extra_per_hour": summ["extra_per_hour"],
             "extra_yellows_only": c["official yellows only"], "extra_no_official_flag": c["no official flag"],
             "extra_outside_window": c["escalated incident, outside the match window"],
