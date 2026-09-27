@@ -229,6 +229,7 @@ def test_malformed_input_never_raises() -> None:
                 '{"kind": "rec", "data": {"id": "x", "t": 1, "msector": 9, "flag": "YELLOW", "confidence": 1, '
                 '"reason": "", "message": "", "source_detections": ["missing-det"]}}'):
         n.on_raw(raw)      # must not raise
+    n.on_envelope(tick(1.5))    # live from here: before the first tick is catch-up, never spoken
     assert n.on_raw('{"kind": "rec", "data": {"t": 2, "msector": 9, "flag": "DOUBLE_YELLOW", "message": "",'
                     ' "source_detections": []}}')[0].text == "Double yellow. Sector 9."
 
@@ -403,3 +404,51 @@ def test_forward_seek_resets_like_the_engine() -> None:
 def test_reconnect_waits_at_most_5_s() -> None:
     from src.lab.voice import BACKOFF_CAP_S
     assert BACKOFF_CAP_S == 5.0, "a server started after the voice is picked up within 5 s"
+
+
+def advisory(t: float, msector: int) -> dict:
+    env = rec(t, "DOUBLE_YELLOW", msector, [])
+    env["data"]["reason"] = ("car 18 still at its crash site 120 s after it stopped: recovery taking long, "
+                             "race control may need a red flag (advisory, flag unchanged)")
+    return env
+
+
+def test_seek_catchup_is_silent_and_only_new_calls_speak() -> None:
+    """Live test on 2021 Azerbaijan: after a seek past Stroll's crash, the voice reset and then
+    announced the long-recovery advisory as a fresh double yellow. The server now sends the tick
+    of the seek, then (with ?catchup=1) everything from before it: that only sets the levels."""
+    n = Narrator()
+    live = [tick(5262.0, 20), det("a", 5275.25, ["18"], 20, "IMPACT"), rec(5275.25, "YELLOW", 20, ["a"])]
+    assert [u.text for env in live for u in n.on_envelope(env)] == ["Yellow flag. Car 18, impact, sector 20."]
+    seek = [tick(5396.0, 20),                                  # the tick of the seek comes first ...
+            det("a", 5275.25, ["18"], 20, "IMPACT"), rec(5275.25, "YELLOW", 20, ["a"]),
+            rec(5276.25, "DOUBLE_YELLOW", 20, ["a"]), rec(5279.25, "SC", 20, ["a"]),
+            official(5277.99, "DOUBLE_YELLOW", 21), official(5311.99, "SC", None)]   # ... then the catch-up
+    assert [u for env in seek for u in n.on_envelope(env)] == []
+    assert n.level == {20: 2, "track": 4}, "the catch-up restores the flags already out"
+    later = [tick(5396.25, 20), advisory(5396.25, 20), tick(5396.5, 20),
+             rec(5396.5, "RED", 20, [])]                       # a new call after the catch-up still speaks
+    assert [u.text for env in later for u in n.on_envelope(env)] == ["Red flag. Car 18, impact, sector 20."]
+
+
+def test_before_the_first_tick_is_catchup() -> None:
+    """The first hub catch-up comes before any tick: flags already out, never spoken."""
+    envs = [det("a", 5275.25, ["18"], 20, "IMPACT"), rec(5279.25, "SC", 20, ["a"]), tick(5300.0, 20),
+            official(5311.99, "SC", None)]
+    assert [u.text for u in narrate(envs)] == ["Race control confirms Safety Car, 32.7 seconds after Fast Flag."]
+
+
+def test_recovery_advisory_is_never_a_new_call() -> None:
+    """Even with no catch-up (an old server), the advisory only sets the level."""
+    n = Narrator()
+    envs = [tick(5390.0, 20), tick(5390.25, 20), advisory(5396.25, 20)]
+    assert [u for env in envs for u in n.on_envelope(env)] == []
+    assert n.level == {20: 2}
+
+
+def test_voice_asks_for_the_catchup() -> None:
+    from src.lab.voice import URL, with_catchup
+    assert URL.endswith("/stream?catchup=1")
+    assert with_catchup("ws://10.0.0.5:8000/stream") == "ws://10.0.0.5:8000/stream?catchup=1"
+    assert with_catchup("ws://h/stream?x=1") == "ws://h/stream?x=1&catchup=1"
+    assert with_catchup("ws://h/stream?catchup=0") == "ws://h/stream?catchup=0"
