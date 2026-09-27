@@ -75,6 +75,8 @@ At about 13 s wall time, speed it up so the room does not wait 30 s:
 
 Pause: `curl -s -X POST localhost:8000/replay -H 'content-type: application/json' -d '{"speed": 0}'`
 
+If the replay keeps running: at 5396.25 (2 minutes after the crash) the double-yellow banner's reason changes to "recovery taking long, race control may need a red flag (advisory, flag unchanged)". That is not a red flag, and the voice stays silent. Race control never red-flagged this crash, and neither do we. If asked, say: "We only call a red where the data can support it: late in the race. A long recovery mid-race is an advisory, because the reasons for a red (barrier damage, gravel, debris) aren't visible in car data."
+
 Close on the slide with `docs/lab/delay_cost_2021_Azerbaijan_car18_5274.png`, or the steward card `docs/lab/cards/card_2021_Azerbaijan_car18_5274.png`:
 
 > "This is the cost of a delay: cars past a crash at racing speed, for every second a flag waits. Across 62 crashes in our training races, each second of delay averaged about 0.12 cars. It's a counterfactual: we count what cars actually did, not how they would have reacted to an earlier flag."
@@ -103,6 +105,7 @@ Car 33, lap 46, onset 7278.25 s, again a tyre failure on the straight. Cue with 
 - Race control's Safety Car comes at 7366.99: "Race control confirms Safety Car, 83.7 seconds after Fast Flag." The clock freezes at 83.7 s. In the live test it showed 12 cars exposed.
 - Say: "83.7 seconds between our Safety Car call and race control's. Watch the counter: every one of those cars went past the wreck at racing speed."
 - Don't say a car count for this clip. NUMBERS.md says 11 cars from our call, and the slides use that number. The overlay showed 12 because its live speed reference differs, as explained in the table above. A spoken 12 next to a slide saying 11 would look like an error.
+- Keep it running for the red flag. At 7400.25 the double-yellow banner gets the "recovery taking long" advisory. At 7420.75 (lap 48, about 4 laps left) we call **RED**: "SC out for a live incident with about 4 laps left: a red flag lets the race restart and finish racing, not behind the SC." The voice says "Red flag. Car 33, stopped, sector 21." Race control's real red came at 7562.99, **142 s later**. Say: "With four laps left, we recommend the red flag so the race can finish racing, not behind the Safety Car. Race control made the same call 142 seconds later."
 
 ## If something goes wrong
 
